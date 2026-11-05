@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사이팜 괴산농장 - 메인 컨트롤러</title>
-    <!-- Lucide 아이콘 라이브러리 (로그아웃 버튼 등 필요 시 사용) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * { box-sizing: border-box; }
@@ -19,10 +18,10 @@
         .btn-login:hover { background: #1b5e20; }
         
         /* 2. 로그인 후 대시보드 화면 */
-        #main-content { display: none; width: 100%; max-width: 900px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        #main-content { display: none; width: 100%; max-width: 900px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-height: 95vh; overflow-y: auto; }
         
-        /* 상단 헤더 */
-        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
+        /* 상단 헤더 고정 (Sticky Header) */
+        .top-header { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
         .header-logo { height: 50px; width: auto; }
         .header-center { text-align: center; }
         .header-title { font-size: 18px; font-weight: bold; color: #333; margin: 0; }
@@ -31,22 +30,37 @@
         /* 상단 우측 미니 아이콘 바 */
         .top-nav-icons { display: flex; gap: 8px; align-items: center; }
         .top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; transition: transform 0.2s; }
-        .top-nav-btn:hover { transform: scale(1.1); }
+        .top-nav-btn:hover:not(:disabled) { transform: scale(1.1); }
+        .top-nav-btn:disabled { opacity: 0.3; cursor: default; }
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
         /* 메인 녹색 배경 영역 */
-        .main-hero { background-color: #2D6A3F; padding: 40px 20px 30px 20px; text-align: center; color: white; }
-        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 25px; } 
-        .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 25px auto; }
-        .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 35px; }
+        .main-hero { background-color: #2D6A3F; padding: 30px 20px 40px 20px; text-align: center; color: white; min-height: 500px; }
+
+        /* 비활성화 스타일 (메뉴 카드) */
+        .menu-card.active-disabled { opacity: 0.4; cursor: default; pointer-events: none; }
 
         /* 하단 6개 메뉴 아이콘 그리드 */
         .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; }
         .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
-        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
+        .menu-card:hover:not(.active-disabled) { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
         .menu-icon-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; }
         .menu-label { font-size: 13px; font-weight: bold; color: #333; }
+
+        /* 공통 구분선 및 로고 */
+        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 25px; } 
+        .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 25px auto; }
+        .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 35px; }
+
+        /* 기상예보 전용 스타일 */
+        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-top: 15px; backdrop-filter: blur(5px); }
+        .weather-title { font-size: 22px; font-weight: bold; margin-bottom: 15px; }
+        .weather-table-wrapper { overflow-x: auto; margin-top: 15px; }
+        .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 650px; }
+        .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+        .weather-table th { background: rgba(0, 0, 0, 0.2); font-weight: bold; }
+        .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
 
         /* 반응형 모바일 대응 */
         @media (max-width: 600px) {
@@ -73,7 +87,7 @@
 
     <!-- [2. 로그인 성공 시 나타나는 메인 컨트롤러 화면] -->
     <div id="main-content">
-        <!-- 상단 헤더 -->
+        <!-- 상단 고정 헤더 -->
         <header class="top-header">
             <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
             <div class="header-center">
@@ -82,58 +96,29 @@
             </div>
             <!-- 상단 우측 미니 커스텀 아이콘 바 (6개) -->
             <div class="top-nav-icons">
-                <button class="top-nav-btn" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
-                <button class="top-nav-btn" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
-                <button class="top-nav-btn" onclick="openMenu('농장현황')" title="농장현황"><img src="icon3-now.png" alt="농장현황"></button>
-                <button class="top-nav-btn" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
-                <button class="top-nav-btn" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
-                <button class="top-nav-btn" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
+                <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
+                <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
+                <button class="top-nav-btn" id="nav-btn-농장현황" onclick="openMenu('농장현황')" title="농장현황"><img src="icon3-now.png" alt="농장현황"></button>
+                <button class="top-nav-btn" id="nav-btn-농장관리" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
+                <button class="top-nav-btn" id="nav-btn-자동설정" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
+                <button class="top-nav-btn" id="nav-btn-판넬연결" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
                 <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="20"></i></button>
             </div>
         </header>
 
-        <!-- 메인 녹색 히어로 영역 -->
-        <main class="main-hero">
-            <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">
-            <div class="hero-divider"></div>
-            <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>
-
-            <!-- 하단 6개 커스텀 아이콘 메뉴 카드 -->
-            <div class="menu-grid">
-                <div class="menu-card" onclick="openMenu('HOME')">
-                    <img src="icon1-home.png" alt="HOME" class="menu-icon-img">
-                    <span class="menu-label">HOME</span>
-                </div>
-                <div class="menu-card" onclick="openMenu('기상예보')">
-                    <img src="icon2-wt.png" alt="기상예보" class="menu-icon-img">
-                    <span class="menu-label">기상예보</span>
-                </div>
-                <div class="menu-card" onclick="openMenu('농장현황')">
-                    <img src="icon3-now.png" alt="농장현황" class="menu-icon-img">
-                    <span class="menu-label">농장현황</span>
-                </div>
-                <div class="menu-card" onclick="openMenu('농장관리')">
-                    <img src="icon4-man.png" alt="농장관리" class="menu-icon-img">
-                    <span class="menu-label">농장관리</span>
-                </div>
-                <div class="menu-card" onclick="openMenu('자동설정')">
-                    <img src="icon-set.png" alt="자동설정" class="menu-icon-img">
-                    <span class="menu-label">자동설정</span>
-                </div>
-                <div class="menu-card" onclick="openMenu('판넬연결')">
-                    <img src="icon5-auto.png" alt="판넬연결" class="menu-icon-img">
-                    <span class="menu-label">판넬연결</span>
-                </div>
+        <!-- 동적 교체 영역 (메인 녹색 배경) -->
+        <main class="main-hero" id="main-hero-area">
+            <div id="content-area">
+                <!-- 기본 HOME 콘텐츠가 JavaScript에 의해 동적으로 로드됩니다 -->
             </div>
         </main>
     </div>
 
     <script>
-        // 로그인 정보 설정
         const CORRECT_ID = "saiifarm";
         const CORRECT_PW = "saioi4252";
+        let currentMenu = "HOME";
 
-        // 로그인 검증 함수
         function checkLogin() {
             const inputId = document.getElementById('username').value.trim();
             const inputPw = document.getElementById('password').value;
@@ -153,7 +138,8 @@
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
             startClock();
-            lucide.createIcons(); // 아이콘 렌더링
+            openMenu('HOME'); // 초기 접속 시 HOME 세팅
+            lucide.createIcons();
         }
 
         function logout() {
@@ -161,12 +147,176 @@
             location.reload();
         }
 
-        // 메뉴 클릭 시 동작 함수
-        function openMenu(menuName) {
-            alert(menuName + " 페이지로 이동합니다.");
+        // 메뉴 버튼 비활성화 상태 업데이트 함수
+        function updateNavigationState(menuName) {
+            currentMenu = menuName;
+            const menus = ['HOME', '기상예보', '농장현황', '농장관리', '자동설정', '판넬연결'];
+
+            menus.forEach(name => {
+                const topBtn = document.getElementById(`nav-btn-${name}`);
+                const cardBtn = document.getElementById(`card-btn-${name}`);
+
+                const isActive = (name === menuName);
+
+                if (topBtn) topBtn.disabled = isActive;
+                if (cardBtn) {
+                    if (isActive) cardBtn.classList.add('active-disabled');
+                    else cardBtn.classList.remove('active-disabled');
+                }
+            });
         }
 
-        // 실시간 날짜 및 시계 업데이트
+        // 공통 하단 6개 메뉴 카드 HTML 생성기
+        function renderMenuGridHTML() {
+            return `
+                <div class="menu-grid">
+                    <div class="menu-card" id="card-btn-HOME" onclick="openMenu('HOME')">
+                        <img src="icon1-home.png" alt="HOME" class="menu-icon-img">
+                        <span class="menu-label">HOME</span>
+                    </div>
+                    <div class="menu-card" id="card-btn-기상예보" onclick="openMenu('기상예보')">
+                        <img src="icon2-wt.png" alt="기상예보" class="menu-icon-img">
+                        <span class="menu-label">기상예보</span>
+                    </div>
+                    <div class="menu-card" id="card-btn-농장현황" onclick="openMenu('농장현황')">
+                        <img src="icon3-now.png" alt="농장현황" class="menu-icon-img">
+                        <span class="menu-label">농장현황</span>
+                    </div>
+                    <div class="menu-card" id="card-btn-농장관리" onclick="openMenu('농장관리')">
+                        <img src="icon4-man.png" alt="농장관리" class="menu-icon-img">
+                        <span class="menu-label">농장관리</span>
+                    </div>
+                    <div class="menu-card" id="card-btn-자동설정" onclick="openMenu('자동설정')">
+                        <img src="icon-set.png" alt="자동설정" class="menu-icon-img">
+                        <span class="menu-label">자동설정</span>
+                    </div>
+                    <div class="menu-card" id="card-btn-판넬연결" onclick="openMenu('판넬연결')">
+                        <img src="icon5-auto.png" alt="판넬연결" class="menu-icon-img">
+                        <span class="menu-label">판넬연결</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 라우팅 / 메뉴 전환 처리 함수
+        function openMenu(menuName) {
+            const container = document.getElementById('content-area');
+
+            if (menuName === 'HOME') {
+                container.innerHTML = `
+                    <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">
+                    <div class="hero-divider"></div>
+                    <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>
+                    ${renderMenuGridHTML()}
+                `;
+            } else if (menuName === '기상예보') {
+                container.innerHTML = `
+                    <h2 class="weather-title">🌤️ 충북 괴산군 칠성면 기상예보</h2>
+                    <div class="hero-divider"></div>
+                    <div id="weather-data-container" class="weather-container">
+                        <p>기상청 단기예보 RSS 데이터를 불러오는 중입니다...</p>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        ${renderMenuGridHTML()}
+                    </div>
+                `;
+                fetchKMAWeather(); // RSS 수신 호출
+            } else {
+                container.innerHTML = `
+                    <h2>📌 ${menuName}</h2>
+                    <div class="hero-divider"></div>
+                    <p style="margin-bottom: 30px;">해당 화면 기능 개발 중입니다.</p>
+                    ${renderMenuGridHTML()}
+                `;
+            }
+
+            updateNavigationState(menuName);
+            updateClockDisplay();
+        }
+
+        // 실시간 기상청 RSS 수신 및 파싱 함수 (충북 괴산군 칠성면: 4376033000)
+        function fetchKMAWeather() {
+            const targetUrl = 'https://www.kma.go.kr/wid/queryDFSRSS.jsp?zone=4376033000';
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+            fetch(proxyUrl)
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('네트워크 응답 오류');
+                })
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const dataNodes = xmlDoc.getElementsByTagName("data");
+
+                    if (dataNodes.length === 0) {
+                        document.getElementById('weather-data-container').innerHTML = "<p>기상 예보 데이터를 찾을 수 없습니다.</p>";
+                        return;
+                    }
+
+                    let tableRows = '';
+                    const dayMap = { "0": "오늘", "1": "내일", "2": "모레" };
+
+                    for (let i = 0; i < dataNodes.length; i++) {
+                        const node = dataNodes[i];
+                        const hour = node.getElementsByTagName("hour")[0]?.textContent || "";
+                        const day = node.getElementsByTagName("day")[0]?.textContent || "0";
+                        const temp = node.getElementsByTagName("temp")[0]?.textContent || "";
+                        const wfKor = node.getElementsByTagName("wfKor")[0]?.textContent || "";
+                        const pop = node.getElementsByTagName("pop")[0]?.textContent || "0";
+                        const reh = node.getElementsByTagName("reh")[0]?.textContent || "0";
+                        const wsr = node.getElementsByTagName("wsr")[0]?.textContent || "0";
+
+                        tableRows += `
+                            <tr>
+                                <td><span class="weather-badge">${dayMap[day] || "글피"} ${hour}시</span></td>
+                                <td><b>${wfKor}</b></td>
+                                <td>${temp} ℃</td>
+                                <td>🌧️ ${pop}%</td>
+                                <td>💧 ${reh}%</td>
+                                <td>💨 ${parseFloat(wsr).toFixed(1)} m/s</td>
+                            </tr>
+                        `;
+                    }
+
+                    document.getElementById('weather-data-container').innerHTML = `
+                        <div class="weather-table-wrapper">
+                            <table class="weather-table">
+                                <thead>
+                                    <tr>
+                                        <th>시간</th>
+                                        <th>날씨</th>
+                                        <th>기온</th>
+                                        <th>강수확률</th>
+                                        <th>습도</th>
+                                        <th>풍속</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error("RSS 수신 오류:", error);
+                    document.getElementById('weather-data-container').innerHTML = `
+                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>CORS 서비스 응답 문제일 수 있으니 잠시 후 다시 시도해 주세요.</p>
+                    `;
+                });
+        }
+
+        // 실시간 시계 업데이트
+        let currentTimeString = { top: '', hero: '' };
+
+        function updateClockDisplay() {
+            const topTimeEl = document.getElementById('top-time');
+            const heroTimeEl = document.getElementById('hero-full-time');
+            if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
+            if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
+        }
+
         function startClock() {
             function update() {
                 const now = new Date();
@@ -177,14 +327,15 @@
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
 
-                document.getElementById('top-time').innerText = `${hours}시 ${minutes}분 ${seconds}초`;
-                document.getElementById('hero-full-time').innerText = `${year}년 ${month}월 ${date}일 ${hours}시 ${minutes}분 ${seconds}초`;
+                currentTimeString.top = `${hours}시 ${minutes}분 ${seconds}초`;
+                currentTimeString.hero = `${year}년 ${month}월 ${date}일 ${hours}시 ${minutes}분 ${seconds}초`;
+
+                updateClockDisplay();
             }
             update();
             setInterval(update, 1000);
         }
 
-        // 페이지 로드 시 기존 로그인 세션 체크
         window.onload = function() {
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 showMain();
