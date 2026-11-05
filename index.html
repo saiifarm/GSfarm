@@ -9,7 +9,7 @@
         input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
         button { width: 100%; padding: 10px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         button:hover { background: #1b5e20; }
-        #main-content { display: none; } /* 로그인 전에는 숨김 */
+        #main-content { display: none; padding: 20px; }
     </style>
 </head>
 <body>
@@ -17,43 +17,38 @@
     <!-- 1. 로그인 화면 -->
     <div id="login-section" class="login-box">
         <h2>🌱 농장 관리 접속</h2>
-        <input type="text" id="username" placeholder="아이디">
-        <input type="password" id="password" placeholder="비밀번호">
+        <input type="text" id="username" placeholder="아이디" autofocus>
+        <input type="password" id="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter') checkLogin()">
         <button onclick="checkLogin()">로그인</button>
-        <p id="error-msg" style="color:red; font-size:13px; display:none;">아이디 또는 비밀번호가 틀렸습니다.</p>
+        <p id="error-msg" style="color:red; font-size:13px; display:none; margin-top:10px;">아이디 또는 비밀번호가 틀렸습니다.</p>
     </div>
 
     <!-- 2. 로그인 성공 시 나타날 농장 관리 메인 화면 -->
     <div id="main-content">
         <h1>Welcome! 괴산 칠성면 농장 관리 시스템</h1>
         <p>여기에 날씨, 제어 시스템, 센서 데이터를 배치합니다.</p>
-        <button onclick="logout()">로그아웃</button>
+        <button onclick="logout()" style="width: auto; padding: 8px 15px; background: #d32f2f;">로그아웃</button>
     </div>
 
     <script>
-        // 지정할 ID와 PW (보안을 위해 PW는 SHA-256 해시로 저장)
-        const ADMIN_ID = "admin"; 
-        // 예시 비밀번호: "farm1234" 의 SHA-256 해시값
-        const ADMIN_PW_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; 
+        // 사용할 아이디와 비밀번호를 여기에 직접 설정하세요.
+        const CORRECT_ID = "admin";
+        const CORRECT_PW = "farm1234";
 
-        // 비밀번호를 암호화 변환하는 함수
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        function checkLogin() {
+            const inputId = document.getElementById('username').value.trim();
+            const inputPw = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
 
-        async function checkLogin() {
-            const id = document.getElementById('username').value;
-            const pw = document.getElementById('password').value;
-            const pwHash = await sha256(pw);
-
-            if (id === ADMIN_ID && pwHash === ADMIN_PW_HASH) {
+            if (inputId === CORRECT_ID && inputPw === CORRECT_PW) {
+                // 로그인 성공 시 세션 저장
                 sessionStorage.setItem('isLoggedIn', 'true');
                 showMain();
             } else {
-                document.getElementById('error-msg').style.display = 'block';
+                // 실패 시 에러 문구 표시
+                errorMsg.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
             }
         }
 
@@ -67,10 +62,12 @@
             location.reload();
         }
 
-        // 페이지 로드 시 기존 로그인 세션 체크
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
-            showMain();
-        }
+        // 페이지 로드 시 기존 로그인 세션 체크 (새로고침해도 유지)
+        window.onload = function() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showMain();
+            }
+        };
     </script>
 </body>
 </html>
