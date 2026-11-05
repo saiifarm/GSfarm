@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사이팜 괴산농장 - 메인 컨트롤러</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- MQTT.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 10px; }
@@ -37,74 +35,78 @@
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (HOME용) */
-        .main-hero { background-color: #2D6A3F; padding: 20px; text-align: center; color: white; height: 560px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-        #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        /* 메인 녹색 배경 영역 (참고 이미지 색상 #bce0d0 계열 및 꽉 찬 레이아웃) */
+        .main-hero { background-color: #bce0d0; padding: 15px 18px; text-align: center; color: #333; height: 575px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; overflow: hidden; }
+        #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; overflow: hidden; }
 
         /* 하단 6개 메뉴 아이콘 그리드 (HOME 화면용) */
-        .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
+        .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; }
         .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
         .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
         .menu-icon-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; }
         .menu-label { font-size: 13px; font-weight: bold; color: #333; }
 
-        /* 공통 구분선 및 로고 */
-        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 20px; } 
-        .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 20px auto; }
-        .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
+        /* 공통 로고 */
+        .hero-logo { width: 100%; max-width: 320px; height: auto; margin-bottom: 10px; } 
+        .hero-divider { height: 4px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 15px auto; }
+        .hero-date-clock { font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; color: #222; }
 
-        /* ---------------- 기상예보 스타일 ---------------- */
-        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 10px; }
-        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; color: white; }
-        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 10px; }
-        .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 15px; }
-        .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; table-layout: fixed; }
-        .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
-        .weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
+        /* [농장현황 페이지 스타일 - 참고 이미지 완벽 일치] */
+        .status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+        
+        /* 상단 날씨/온도 요약 바 */
+        .status-top-bar { background: #ffffff; border-radius: 12px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .status-weather-box { display: flex; align-items: center; gap: 15px; }
+        .status-weather-icon { font-size: 32px; }
+        .status-weather-text { text-align: left; }
+        .status-rain-status { font-size: 20px; font-weight: 800; line-height: 1.2; }
+        .status-rain-amount { font-size: 15px; font-weight: bold; color: #444; }
+        
+        .status-summary-temps { display: flex; align-items: center; gap: 20px; }
+        .summary-temp-item { display: flex; align-items: center; gap: 6px; font-size: 22px; font-weight: bold; }
+        .summary-temp-item img, .summary-temp-item span.icon { font-size: 26px; }
+
+        /* 본문 2분할 그리드 */
+        .status-body-grid { display: flex; gap: 12px; width: 100%; height: calc(100% - 75px); }
+        .status-column { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+
+        /* 구역 카드박스 */
+        .zone-card { background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.06); display: flex; flex-direction: column; }
+        .zone-header { background: #e5b365; color: #fff; font-size: 14px; font-weight: bold; padding: 5px 10px; text-align: center; letter-spacing: 0.5px; }
+        .zone-header.house-title { background: #5ba39b; }
+
+        /* 센서 테이블 스타일 */
+        .sensor-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .sensor-table th, .sensor-table td { padding: 5px 8px; border-bottom: 1px solid #eaeaea; text-align: center; }
+        .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
+        
+        /* 라벨 색상 (참고 이미지 기준 파스텔 톤) */
+        .lbl-sun { background: #ffd54f; color: #333; font-weight: bold; width: 28%; }
+        .lbl-temp { background: #ef5350; color: #fff; font-weight: bold; width: 28%; }
+        .lbl-hum { background: #4fc3f7; color: #fff; font-weight: bold; width: 28%; }
+        .lbl-soil { background: #e0e0e0; color: #333; font-weight: bold; width: 28%; }
+        
+        .val-cell { background: #f9f9f9; color: #111; font-weight: 600; text-align: left; padding-left: 12px; }
+
+        /* 하우스 섹션 내부 서브 아이템 (HOUSE 1, 2, 삽목장) */
+        .house-item { display: flex; border-bottom: 1px solid #ddd; }
+        .house-item:last-child { border-bottom: none; }
+        .house-name { width: 28%; background: #00897b; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 4px; text-align: center; }
+        .house-sensors { flex: 1; display: flex; flex-direction: column; }
+
+        /* 야간(18시~06시) 행 배경 구분 스타일 */
         .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
-        /* ---------------- 농장현황 (Farm Status) 페이지 스타일 ---------------- */
-        .farm-status-wrapper { background-color: #b2dfdb; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px 15px; overflow-y: auto; }
-        .status-top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.6); border-radius: 10px; padding: 8px 15px; margin-bottom: 10px; }
-        .status-weather-info { display: flex; align-items: center; gap: 12px; text-align: left; }
-        .status-weather-icon { font-size: 32px; }
-        .status-rain-txt { font-size: 18px; font-weight: bold; margin: 0; }
-        .status-rain-sub { font-size: 15px; color: #333; margin: 0; }
-        .status-header-temps { display: flex; align-items: center; gap: 20px; font-weight: bold; font-size: 22px; }
-        .temp-group { display: flex; align-items: center; gap: 5px; }
-        
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; }
-        .status-section-box { background: rgba(255, 255, 255, 0.3); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .section-title { font-size: 15px; font-weight: bold; color: #333; text-align: center; margin: 0; letter-spacing: 1px; }
-        
-        /* Farm 카드들 */
-        .farm-card { background: #deb887; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .farm-card-header { background: #d2a679; font-weight: bold; font-size: 14px; color: #222; padding: 4px 10px; text-align: left; }
-        .farm-row { display: flex; border-top: 1px solid rgba(0,0,0,0.08); font-size: 13px; align-items: center; }
-        .farm-label { width: 35%; padding: 5px 8px; font-weight: bold; text-align: center; }
-        .farm-val { width: 65%; padding: 5px 8px; text-align: left; background: rgba(255,255,255,0.5); font-weight: bold; }
-        
-        /* 색상 배지 */
-        .bg-yellow { background-color: #ffd54f !important; color: #000; }
-        .bg-red { background-color: #ef5350 !important; color: #fff; }
-        .bg-blue { background-color: #4fc3f7 !important; color: #000; }
-        .bg-gray { background-color: #e0e0e0 !important; color: #333; }
-        .bg-teal { background-color: #26a69a !important; color: #fff; }
-
-        /* House 서브 카드들 */
-        .house-sub-card { display: flex; background: white; border-radius: 6px; overflow: hidden; margin-bottom: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .house-name { width: 35%; background: #00897b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; text-align: center; padding: 4px; }
-        .house-data-col { width: 65%; display: flex; flex-direction: column; }
-        .house-data-row { display: flex; border-bottom: 1px solid #eee; font-size: 12px; }
-        .house-data-row:last-child { border-bottom: none; }
-        .house-lbl { width: 35%; padding: 4px 6px; text-align: center; font-weight: bold; }
-        .house-val { width: 65%; padding: 4px 6px; text-align: left; font-weight: bold; background: #fafafa; }
-
+        /* 반응형 모바일 대응 */
         @media (max-width: 600px) {
             .top-header { flex-direction: column; text-align: center; }
-            .status-grid { grid-template-columns: 1fr; }
-            .farm-status-wrapper { height: auto; }
+            .hero-date-clock { font-size: 18px; }
+            .menu-card { width: 80px; height: 80px; }
+            .menu-icon-img { width: 30px; height: 30px; }
+            .menu-label { font-size: 11px; }
+            .status-top-bar { padding: 8px 12px; }
+            .status-rain-status { font-size: 16px; }
+            .summary-temp-item { font-size: 17px; }
         }
     </style>
 </head>
@@ -123,14 +125,14 @@
 
     <!-- [2. 로그인 성공 시 나타나는 메인 컨트롤러 화면] -->
     <div id="main-content">
-        <!-- 상단 헤더 -->
+        <!-- 상단 고정 헤더 -->
         <header class="top-header">
             <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
             <div class="header-center">
                 <div class="header-title">괴산농장 Main Controller V2.0</div>
                 <div class="header-clock" id="top-time">00시 00분 00초</div>
             </div>
-            <!-- 상단 우측 미니 커스텀 아이콘 바 (6개) -->
+            <!-- 상단 우측 미니 커스텀 아이콘 바 (6개) + 상단 요약 온도 표시 -->
             <div class="top-nav-icons">
                 <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
                 <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
@@ -145,103 +147,133 @@
         <!-- 동적 교체 영역 (메인 녹색 배경) -->
         <main class="main-hero" id="main-hero-area">
             <div id="content-area">
-                <!-- 기본 HOME 콘텐츠 -->
+                <!-- 기본 HOME 콘텐츠가 JavaScript에 의해 동적으로 로드됩니다 -->
             </div>
         </main>
     </div>
 
+    <!-- MQTT 클라이언트 라이브러리 로드 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     <script>
         const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
         let currentMenu = 'HOME';
 
-        // 센서 데이터 전역 상태저장소 (MQTT 메시지 수신용)
-        let farmData = {
-            farmA: { light: 0, temp: 0, tempMax: 0, tempMin: 0, hum: 0, humMax: 0, humMin: 0, rain: "0", rainAmount: 0, soil: 0 },
-            farmB: { temp: 0, tempMax: 0, tempMin: 0, hum: 0, humMax: 0, humMin: 0 },
-            house1: { temp: 0, tempMax: 0, tempMin: 0, hum: 0, humMax: 0, humMin: 0 },
-            house2: { temp: 0, tempMax: 0, tempMin: 0, hum: 0, humMax: 0, humMin: 0 },
-            house3: { temp: 0, tempMax: 0, tempMin: 0, hum: 0, humMax: 0, humMin: 0, soil: 0 }
+        // 센서 데이터 저장 객체
+        let sensorData = {
+            farm_a: { sun: '-', temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', rain: '0', rainAmount: '0', soil: '-' },
+            farm_b: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
+            house1: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
+            house2: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
+            house3: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', soil: '-' }
         };
 
-        // MQTT 브로커 연결 (broker.mqtt-dashboard.com WebSocket)
         let mqttClient = null;
+
+        // MQTT 브로커 연결 및 구독 설정
         function initMQTT() {
             if (mqttClient) return;
-            try {
-                mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt'); // 혹은 ws://broker.mqtt-dashboard.com:8000/mqtt
-                
-                mqttClient.on('connect', function () {
-                    console.log('MQTT 브로커 연결 성공');
-                    mqttClient.subscribe('saiifarm24/farm_o1');
-                    mqttClient.subscribe('saiifarm24/farm_o2');
-                    mqttClient.subscribe('saiifarm24/house1');
-                    mqttClient.subscribe('saiifarm24/house2');
-                    mqttClient.subscribe('saiifarm24/house3');
-                });
+            const clientId = "client_" + Math.random().toString(16).substring(2, 9);
+            mqttClient = new Paho.MQTT.Client("broker.mqtt-dashboard.com", 8000, "/mqtt", clientId);
 
-                mqttClient.on('message', function (topic, payload) {
-                    try {
-                        var msgStr = payload.toString();
-                        var parts = msgStr.includes(',') ? msgStr.split(',') : [msgStr];
-                        
-                        if (topic === 'saiifarm24/farm_o1') {
-                            farmData.farmA = {
-                                light: parts[1] || 0,
-                                temp: parseFloat(parts[2] || 0).toFixed(2),
-                                tempMax: parseFloat(parts[3] || 0).toFixed(2),
-                                tempMin: parseFloat(parts[4] || 0).toFixed(2),
-                                hum: parseFloat(parts[5] || 0).toFixed(2),
-                                humMax: parseFloat(parts[6] || 0).toFixed(2),
-                                humMin: parseFloat(parts[7] || 0).toFixed(2),
-                                rain: parts[8] || "0",
-                                rainAmount: parseFloat(parts[9] || 0).toFixed(2),
-                                soil: parseFloat(parts[10] || 0).toFixed(2)
-                            };
-                        } else if (topic === 'saiifarm24/farm_o2') {
-                            farmData.farmB = parseHousePayload(parts);
-                        } else if (topic === 'saiifarm24/house1') {
-                            farmData.house1 = parseHousePayload(parts);
-                        } else if (topic === 'saiifarm24/house2') {
-                            farmData.house2 = parseHousePayload(parts);
-                        } else if (topic === 'saiifarm24/house3') {
-                            var parsed = parseHousePayload(parts);
-                            parsed.soil = parseFloat(parts[7] || 0).toFixed(2);
-                            farmData.house3 = parsed;
-                        }
-
-                        // 만약 현재 화면이 농장현황이라면 실시간 UI 갱신
-                        if (currentMenu === '농장현황') {
-                            updateFarmStatusUI();
-                        }
-                        updateHeaderTemps();
-                    } catch (e) {
-                        console.error('MQTT 파싱 오류:', e);
-                    }
-                });
-            } catch (err) {
-                console.error('MQTT 초기화 오류:', err);
-            }
-        }
-
-        function parseHousePayload(parts) {
-            return {
-                temp: parseFloat(parts[1] || 0).toFixed(2),
-                tempMax: parseFloat(parts[2] || 0).toFixed(2),
-                tempMin: parseFloat(parts[3] || 0).toFixed(2),
-                hum: parseFloat(parts[4] || 0).toFixed(2),
-                humMax: parseFloat(parts[5] || 0).toFixed(2),
-                humMin: parseFloat(parts[6] || 0).toFixed(2)
+            mqttClient.onConnectionLost = function(responseObject) {
+                console.warn("MQTT 연결 끊김:", responseObject.errorMessage);
+                setTimeout(initMQTT, 5000);
             };
+
+            mqttClient.onMessageArrived = function(message) {
+                try {
+                    const topic = message.destinationName;
+                    const payload = message.payloadString;
+                    const parts = payload.split(',');
+
+                    if (topic === "saiifarm24/farm_o1" && parts.length >= 11) {
+                        sensorData.farm_a = {
+                            sun: parts[1].trim(),
+                            temp: parts[2].trim(),
+                            tempMax: parts[3].trim(),
+                            tempMin: parts[4].trim(),
+                            hum: parts[5].trim(),
+                            humMax: parts[6].trim(),
+                            humMin: parts[7].trim(),
+                            rain: parts[8].trim(),
+                            rainAmount: parts[9].trim(),
+                            soil: parts[10].trim()
+                        };
+                    } else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
+                        sensorData.farm_b = {
+                            temp: parts[1].trim(),
+                            tempMax: parts[2].trim(),
+                            tempMin: parts[3].trim(),
+                            hum: parts[4].trim(),
+                            humMax: parts[5].trim(),
+                            humMin: parts[6].trim()
+                        };
+                    } else if (topic === "saiifarm24/house1" && parts.length >= 7) {
+                        sensorData.house1 = {
+                            temp: parts[1].trim(),
+                            tempMax: parts[2].trim(),
+                            tempMin: parts[3].trim(),
+                            hum: parts[4].trim(),
+                            humMax: parts[5].trim(),
+                            humMin: parts[6].trim()
+                        };
+                    } else if (topic === "saiifarm24/house2" && parts.length >= 7) {
+                        sensorData.house2 = {
+                            temp: parts[1].trim(),
+                            tempMax: parts[2].trim(),
+                            tempMin: parts[3].trim(),
+                            hum: parts[4].trim(),
+                            humMax: parts[5].trim(),
+                            humMin: parts[6].trim()
+                        };
+                    } else if (topic === "saiifarm24/house3" && parts.length >= 8) {
+                        sensorData.house3 = {
+                            temp: parts[1].trim(),
+                            tempMax: parts[2].trim(),
+                            tempMin: parts[3].trim(),
+                            hum: parts[4].trim(),
+                            humMax: parts[5].trim(),
+                            humMin: parts[6].trim(),
+                            soil: parts[7].trim()
+                        };
+                    }
+
+                    // 현재 농장현황 화면일 경우 실시간 DOM 갱신
+                    if (currentMenu === '농장현황') {
+                        updateStatusDOM();
+                    }
+                    updateTopHeaderTemp();
+                } catch (e) {
+                    console.error("MQTT 메시지 파싱 오류:", e);
+                }
+            };
+
+            mqttClient.connect({
+                onSuccess: function() {
+                    console.log("MQTT 연결 성공");
+                    mqttClient.subscribe("saiifarm24/farm_o1");
+                    mqttClient.subscribe("saiifarm24/farm_o2");
+                    mqttClient.subscribe("saiifarm24/house1");
+                    mqttClient.subscribe("saiifarm24/house2");
+                    mqttClient.subscribe("saiifarm24/house3");
+                },
+                onFailure: function(message) {
+                    console.error("MQTT 연결 실패:", message.errorMessage);
+                    setTimeout(initMQTT, 5000);
+                },
+                useSSL: false
+            });
         }
 
-        function updateHeaderTemps() {
-            var topTemp = document.getElementById('header-farm-temp');
-            var topH = document.getElementById('header-house1-temp');
-            if (topTemp) topTemp.innerText = farmData.farmA.temp + " 'C";
-            if (topH) topH.innerText = farmData.house1.temp + " 'C";
+        // 상단 헤더 우측 온도계 및 H 옆 온도 갱신
+        function updateTopHeaderTemp() {
+            const tempFarmA = document.getElementById('header-farm-temp');
+            const tempHouse1 = document.getElementById('header-house1-temp');
+            if (tempFarmA && sensorData.farm_a.temp !== '-') tempFarmA.innerText = sensorData.farm_a.temp + " 'C";
+            if (tempHouse1 && sensorData.house1.temp !== '-') tempHouse1.innerText = sensorData.house1.temp + " 'C";
         }
 
-        // 로그인 검증
+        // 서버(Cloudflare Worker)를 통한 안전한 로그인 검증
         function checkLogin() {
             const inputId = document.getElementById('username').value.trim();
             const inputPw = document.getElementById('password').value;
@@ -297,6 +329,7 @@
         function updateNavigationState(menuName) {
             currentMenu = menuName;
             var menus = ['HOME', '기상예보', '농장현황', '농장관리', '자동설정', '판넬연결'];
+
             menus.forEach(function(name) {
                 var topBtn = document.getElementById('nav-btn-' + name);
                 var isActive = (name === menuName);
@@ -306,6 +339,9 @@
 
         function renderMenuGridHTML() {
             return '\
+                <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">\
+                <div class="hero-divider"></div>\
+                <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>\
                 <div class="menu-grid">\
                     <div class="menu-card" onclick="openMenu(\'HOME\')">\
                         <img src="icon1-home.png" alt="HOME" class="menu-icon-img">\
@@ -337,159 +373,99 @@
 
         function openMenu(menuName) {
             var container = document.getElementById('content-area');
-            var heroArea = document.getElementById('main-hero-area');
 
-            // 농장현황일 때 배경색 변경 (#b2dfdb 테마), HOME일 때 기본 녹색 (#2D6A3F)
-            if (menuName === '농장현황') {
-                heroArea.style.backgroundColor = '#b2dfdb';
-                container.innerHTML = getFarmStatusHTML();
-                updateFarmStatusUI();
-            } else {
-                heroArea.style.backgroundColor = '#2D6A3F';
-                if (menuName === 'HOME') {
-                    container.innerHTML = '\
-                        <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">\
-                        <div class="hero-divider"></div>\
-                        <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>\
-                        ' + renderMenuGridHTML() + '\
-                    ';
-                } else if (menuName === '기상예보') {
-                    container.innerHTML = '\
-                        <div class="weather-wrapper">\
-                            <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
-                            <div id="weather-data-container" class="weather-container">\
-                                <p style="color: #fff; padding: 20px; text-align: center;">기상청 단기예보 데이터를 불러오는 중입니다...</p>\
-                            </div>\
+            if (menuName === 'HOME') {
+                container.innerHTML = renderMenuGridHTML();
+            } else if (menuName === '기상예보') {
+                container.innerHTML = '\
+                    <div class="weather-wrapper">\
+                        <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
+                        <div id="weather-data-container" class="weather-container">\
+                            <p style="color: #333; padding: 20px; text-align: center;">기상청 단기예보 데이터를 불러오는 중입니다...</p>\
                         </div>\
-                    ';
-                    fetchKMAWeather();
-                } else {
-                    container.innerHTML = '\
-                        <h2 style="color:#fff;">📌 ' + menuName + '</h2>\
-                        <div class="hero-divider" style="width: 100%;"></div>\
-                        <p style="margin-top: 20px; color:#fff;">해당 화면 기능 개발 중입니다.</p>\
-                    ';
-                }
+                    </div>\
+                ';
+                fetchKMAWeather();
+            } else if (menuName === '농장현황') {
+                renderStatusPageHTML();
+            } else {
+                container.innerHTML = '\
+                    <h2 style="color:#222;">📌 ' + menuName + '</h2>\
+                    <div class="hero-divider" style="width: 100%;"></div>\
+                    <p style="margin-top: 20px; color:#333;">해당 화면 기능 개발 중입니다.</p>\
+                ';
             }
 
             updateNavigationState(menuName);
-            updateClockDisplay();
         }
 
-        function getFarmStatusHTML() {
-            return '\
-                <div class="farm-status-wrapper">\
-                    <!-- 상단 요약바 -->\
+        // 농장현황 페이지 HTML 구조 렌더링
+        function renderStatusPageHTML() {
+            var container = document.getElementById('content-area');
+            container.innerHTML = '\
+                <div class="status-wrapper">\
                     <div class="status-top-bar">\
-                        <div class="status-weather-info">\
-                            <span class="status-weather-icon" id="top-weather-icon">⛅</span>\
-                            <div>\
-                                <p class="status-rain-txt" id="top-rain-status">비 안옴</p>\
-                                <p class="status-rain-sub">강수 <span id="top-rain-amount">0.00</span>mm</p>\
+                        <div class="status-weather-box">\
+                            <div class="status-weather-icon">⛅</div>\
+                            <div class="status-weather-text">\
+                                <div id="status-rain-text" class="status-rain-status" style="color: #9e9e9e;">비 안옴</div>\
+                                <div class="status-rain-amount">강수 <span id="status-rain-val">0.00</span>mm</div>\
                             </div>\
                         </div>\
-                        <div class="status-header-temps">\
-                            <div class="temp-group">\
-                                <span>🌡️</span>\
-                                <span id="header-farm-temp">9.40 \'C</span>\
-                            </div>\
-                            <div class="temp-group" style="color: #00897b;">\
-                                <span>H</span>\
-                                <span id="header-house1-temp">10.1 \'C</span>\
-                            </div>\
+                        <div class="status-summary-temps">\
+                            <div class="summary-temp-item">🌡️ <span id="header-farm-temp" style="color:#d32f2f;">--.- \'C</span></div>\
+                            <div class="summary-temp-item"><span style="color:#00897b; font-weight:800;">H</span> <span id="header-house1-temp" style="color:#d32f2f;">--.- \'C</span></div>\
                         </div>\
                     </div>\
-                    \
-                    <!-- 메인 2분할 그리드 -->\
-                    <div class="status-grid">\
-                        <!-- 왼쪽: OUTDOOR FARM (FARM A, FARM B) -->\
-                        <div class="status-section-box">\
-                            <h3 class="section-title">OUTDOOR FARM</h3>\
-                            \
-                            <!-- FARM A -->\
-                            <div class="farm-card">\
-                                <div class="farm-card-header">FARM A</div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-yellow">태양광</div>\
-                                    <div class="farm-val" id="fa-light">0 lx</div>\
-                                </div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-red">기온</div>\
-                                    <div class="farm-val" id="fa-temp">9.40 \'C <span style="font-size:11px; font-weight:normal;" id="fa-temp-sub">(상18.50/하8.00)</span></div>\
-                                </div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-blue">습도</div>\
-                                    <div class="farm-val" id="fa-hum">100.00 % <span style="font-size:11px; font-weight:normal;" id="fa-hum-sub">(상100.00/하90.0)</span></div>\
-                                </div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-gray">토양습도</div>\
-                                    <div class="farm-val" id="fa-soil">47.09 %</div>\
-                                </div>\
+                    <div class="status-body-grid">\
+                        <div class="status-column">\
+                            <div class="zone-card">\
+                                <div class="zone-header">OUTDOOR FARM</div>\
+                                <table class="sensor-table">\
+                                    <tr><th colspan="2" style="background:#e5c185; text-align:left; font-weight:bold; padding:4px 8px;">FARM A</th></tr>\
+                                    <tr><td class="lbl-sun">태양광</td><td class="val-cell"><span id="st-fa-sun">-</span> lx</td></tr>\
+                                    <tr><td class="lbl-temp">기온</td><td class="val-cell"><span id="st-fa-temp">-</span> \'C (상<span id="st-fa-tmax">-</span>/하<span id="st-fa-tmin">-</span>)</td></tr>\
+                                    <tr><td class="lbl-hum">습도</td><td class="val-cell"><span id="st-fa-hum">-</span> % (상<span id="st-fa-hmax">-</span>/하<span id="st-fa-hmin">-</span>)</td></tr>\
+                                    <tr><td class="lbl-soil">토양습도</td><td class="val-cell"><span id="st-fa-soil">-</span> %</td></tr>\
+                                </table>\
                             </div>\
-                            \
-                            <!-- FARM B -->\
-                            <div class="farm-card">\
-                                <div class="farm-card-header">FARM B</div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-red">기온</div>\
-                                    <div class="farm-val" id="fb-temp">9.5 \'C <span style="font-size:11px; font-weight:normal;" id="fb-temp-sub">(상9.5/하8.4)</span></div>\
-                                </div>\
-                                <div class="farm-row">\
-                                    <div class="farm-label bg-blue">습도</div>\
-                                    <div class="farm-val" id="fb-hum">100.0 % <span style="font-size:11px; font-weight:normal;" id="fb-hum-sub">(상100.0/하100.0)</span></div>\
-                                </div>\
+                            <div class="zone-card" style="flex-grow:1;">\
+                                <table class="sensor-table">\
+                                    <tr><th colspan="2" style="background:#e5c185; text-align:left; font-weight:bold; padding:4px 8px;">FARM B</th></tr>\
+                                    <tr><td class="lbl-temp">기온</td><td class="val-cell"><span id="st-fb-temp">-</span> \'C (상<span id="st-fb-tmax">-</span>/하<span id="st-fb-tmin">-</span>)</td></tr>\
+                                    <tr><td class="lbl-hum">습도</td><td class="val-cell"><span id="st-fb-hum">-</span> % (상<span id="st-fb-hmax">-</span>/하<span id="st-fb-hmin">-</span>)</td></tr>\
+                                </table>\
                             </div>\
                         </div>\
-                        \
-                        <!-- 오른쪽: HOUSE (HOUSE 1, HOUSE 2, 삽목장) -->\
-                        <div class="status-section-box">\
-                            <h3 class="section-title">HOUSE</h3>\
-                            \
-                            <!-- HOUSE 1 -->\
-                            <div class="house-sub-card">\
-                                <div class="house-name">HOUSE 1</div>\
-                                <div class="house-data-col">\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-red">기온</div>\
-                                        <div class="house-val" id="h1-temp">10.1 \'C <span style="font-size:10px;" id="h1-temp-sub">(상10.1/하9.8)</span></div>\
-                                    </div>\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-blue">습도</div>\
-                                        <div class="house-val" id="h1-hum">100.0 % <span style="font-size:10px;" id="h1-hum-sub">(상100.0/하100.0)</span></div>\
+                        <div class="status-column">\
+                            <div class="zone-card" style="height:100%;">\
+                                <div class="zone-header house-title">HOUSE</div>\
+                                <div class="house-item">\
+                                    <div class="house-name">HOUSE 1</div>\
+                                    <div class="house-sensors">\
+                                        <table class="sensor-table" style="border:none;">\
+                                            <tr><td class="lbl-temp">기온</td><td class="val-cell"><span id="st-h1-temp">-</span> \'C (상<span id="st-h1-tmax">-</span>/하<span id="st-h1-tmin">-</span>)</td></tr>\
+                                            <tr><td class="lbl-hum">습도</td><td class="val-cell"><span id="st-h1-hum">-</span> % (상<span id="st-h1-hmax">-</span>/하<span id="st-h1-hmin">-</span>)</td></tr>\
+                                        </table>\
                                     </div>\
                                 </div>\
-                            </div>\
-                            \
-                            <!-- HOUSE 2 -->\
-                            <div class="house-sub-card">\
-                                <div class="house-name">HOUSE 2</div>\
-                                <div class="house-data-col">\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-red">기온</div>\
-                                        <div class="house-val" id="h2-temp">10.3 \'C <span style="font-size:10px;" id="h2-temp-sub">(상10.3/하10.0)</span></div>\
-                                    </div>\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-blue">습도</div>\
-                                        <div class="house-val" id="h2-hum">100.0 % <span style="font-size:10px;" id="h2-hum-sub">(상100.0/하99.8)</span></div>\
+                                <div class="house-item">\
+                                    <div class="house-name">HOUSE 2</div>\
+                                    <div class="house-sensors">\
+                                        <table class="sensor-table" style="border:none;">\
+                                            <tr><td class="lbl-temp">기온</td><td class="val-cell"><span id="st-h2-temp">-</span> \'C (상<span id="st-h2-tmax">-</span>/하<span id="st-h2-tmin">-</span>)</td></tr>\
+                                            <tr><td class="lbl-hum">습도</td><td class="val-cell"><span id="st-h2-hum">-</span> % (상<span id="st-h2-hmax">-</span>/하<span id="st-h2-hmin">-</span>)</td></tr>\
+                                        </table>\
                                     </div>\
                                 </div>\
-                            </div>\
-                            \
-                            <!-- 삽목장 -->\
-                            <div class="house-sub-card">\
-                                <div class="house-name">삽목장</div>\
-                                <div class="house-data-col">\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-red">기온</div>\
-                                        <div class="house-val" id="h3-temp">9.6 \'C <span style="font-size:10px;" id="h3-temp-sub">(상20.3/하8.9)</span></div>\
-                                    </div>\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-blue">습도</div>\
-                                        <div class="house-val" id="h3-hum">100.0 % <span style="font-size:10px;" id="h3-hum-sub">(상100.0/하100.0)</span></div>\
-                                    </div>\
-                                    <div class="house-data-row">\
-                                        <div class="house-lbl bg-gray">토양습도</div>\
-                                        <div class="house-val" id="h3-soil">0.0 %</div>\
+                                <div class="house-item">\
+                                    <div class="house-name">삽목장</div>\
+                                    <div class="house-sensors">\
+                                        <table class="sensor-table" style="border:none;">\
+                                            <tr><td class="lbl-temp">기온</td><td class="val-cell"><span id="st-h3-temp">-</span> \'C (상<span id="st-h3-tmax">-</span>/하<span id="st-h3-tmin">-</span>)</td></tr>\
+                                            <tr><td class="lbl-hum">습도</td><td class="val-cell"><span id="st-h3-hum">-</span> % (상<span id="st-h3-hmax">-</span>/하<span id="st-h3-hmin">-</span>)</td></tr>\
+                                            <tr><td class="lbl-soil">토양습도</td><td class="val-cell"><span id="st-h3-soil">-</span> %</td></tr>\
+                                        </table>\
                                     </div>\
                                 </div>\
                             </div>\
@@ -497,61 +473,73 @@
                     </div>\
                 </div>\
             ';
+            updateStatusDOM();
+            updateTopHeaderTemp();
         }
 
-        function updateFarmStatusUI() {
-            // 상단 강우 상태
-            var rainTxt = document.getElementById('top-rain-status');
-            var rainAmt = document.getElementById('top-rain-amount');
-            var weatherIcon = document.getElementById('top-weather-icon');
-            if (rainTxt && rainAmt) {
-                if (farmData.farmA.rain === "1") {
-                    rainTxt.innerText = "비가 옵니다.";
-                    rainTxt.style.color = "#1e88e5";
-                    if(weatherIcon) weatherIcon.innerText = "🌧️";
+        // 실시간 수신된 센서 데이터를 화면에 반영
+        function updateStatusDOM() {
+            // FARM A
+            document.getElementById('st-fa-sun').innerText = sensorData.farm_a.sun;
+            document.getElementById('st-fa-temp').innerText = sensorData.farm_a.temp;
+            document.getElementById('st-fa-tmax').innerText = sensorData.farm_a.tempMax;
+            document.getElementById('st-fa-tmin').innerText = sensorData.farm_a.tempMin;
+            document.getElementById('st-fa-hum').innerText = sensorData.farm_a.hum;
+            document.getElementById('st-fa-hmax').innerText = sensorData.farm_a.humMax;
+            document.getElementById('st-fa-hmin').innerText = sensorData.farm_a.humMin;
+            document.getElementById('st-fa-soil').innerText = sensorData.farm_a.soil;
+
+            // 강우 여부 및 강수량 반영
+            const rainText = document.getElementById('status-rain-text');
+            const rainVal = document.getElementById('status-rain-val');
+            if (rainVal) rainVal.innerText = sensorData.farm_a.rainAmount;
+            if (rainText) {
+                if (sensorData.farm_a.rain === "1") {
+                    rainText.innerText = "비가 옵니다.";
+                    rainText.style.color = "#1e88e5"; // 파란색
                 } else {
-                    rainTxt.innerText = "비 안옴";
-                    rainTxt.style.color = "#757575";
-                    if(weatherIcon) weatherIcon.innerText = "⛅";
+                    rainText.innerText = "비 안옴";
+                    rainText.style.color = "#9e9e9e"; // 밝은 회색
                 }
-                rainAmt.innerText = farmData.farmA.rainAmount;
             }
 
-            // FARM A
-            safeSet('fa-light', farmData.farmA.light + ' lx');
-            safeSet('fa-temp', farmData.farmA.temp + " 'C <span style='font-size:11px; font-weight:normal;'>(상" + farmData.farmA.tempMax + "/하" + farmData.farmA.tempMin + ")</span>");
-            safeSet('fa-hum', farmData.farmA.hum + " % <span style='font-size:11px; font-weight:normal;'>(상" + farmData.farmA.humMax + "/하" + farmData.farmA.humMin + ")</span>");
-            safeSet('fa-soil', farmData.farmA.soil + ' %');
-
             // FARM B
-            safeSet('fb-temp', farmData.farmB.temp + " 'C <span style='font-size:11px; font-weight:normal;'>(상" + farmData.farmB.tempMax + "/하" + farmData.farmB.tempMin + ")</span>");
-            safeSet('fb-hum', farmData.farmB.hum + " % <span style='font-size:11px; font-weight:normal;'>(상" + farmData.farmB.humMax + "/하" + farmData.farmB.humMin + ")</span>");
+            document.getElementById('st-fb-temp').innerText = sensorData.farm_b.temp;
+            document.getElementById('st-fb-tmax').innerText = sensorData.farm_b.tempMax;
+            document.getElementById('st-fb-tmin').innerText = sensorData.farm_b.tempMin;
+            document.getElementById('st-fb-hum').innerText = sensorData.farm_b.hum;
+            document.getElementById('st-fb-hmax').innerText = sensorData.farm_b.humMax;
+            document.getElementById('st-fb-hmin').innerText = sensorData.farm_b.humMin;
 
             // HOUSE 1
-            safeSet('h1-temp', farmData.house1.temp + " 'C <span style='font-size:10px;'>(상" + farmData.house1.tempMax + "/하" + farmData.house1.tempMin + ")</span>");
-            safeSet('h1-hum', farmData.house1.hum + " % <span style='font-size:10px;'>(상" + farmData.house1.humMax + "/하" + farmData.house1.humMin + ")</span>");
+            document.getElementById('st-h1-temp').innerText = sensorData.house1.temp;
+            document.getElementById('st-h1-tmax').innerText = sensorData.house1.tempMax;
+            document.getElementById('st-h1-tmin').innerText = sensorData.house1.tempMin;
+            document.getElementById('st-h1-hum').innerText = sensorData.house1.hum;
+            document.getElementById('st-h1-hmax').innerText = sensorData.house1.humMax;
+            document.getElementById('st-h1-hmin').innerText = sensorData.house1.humMin;
 
             // HOUSE 2
-            safeSet('h2-temp', farmData.house2.temp + " 'C <span style='font-size:10px;'>(상" + farmData.house2.tempMax + "/하" + farmData.house2.tempMin + ")</span>");
-            safeSet('h2-hum', farmData.house2.hum + " % <span style='font-size:10px;'>(상" + farmData.house2.humMax + "/하" + farmData.house2.humMin + ")</span>");
+            document.getElementById('st-h2-temp').innerText = sensorData.house2.temp;
+            document.getElementById('st-h2-tmax').innerText = sensorData.house2.tempMax;
+            document.getElementById('st-h2-tmin').innerText = sensorData.house2.tempMin;
+            document.getElementById('st-h2-hum').innerText = sensorData.house2.hum;
+            document.getElementById('st-h2-hmax').innerText = sensorData.house2.humMax;
+            document.getElementById('st-h2-hmin').innerText = sensorData.house2.humMin;
 
-            // 삽목장 (HOUSE 3)
-            safeSet('h3-temp', farmData.house3.temp + " 'C <span style='font-size:10px;'>(상" + farmData.house3.tempMax + "/하" + farmData.house3.tempMin + ")</span>");
-            safeSet('h3-hum', farmData.house3.hum + " % <span style='font-size:10px;'>(상" + farmData.house3.humMax + "/하" + farmData.house3.humMin + ")</span>");
-            safeSet('h3-soil', farmData.house3.soil + ' %');
-
-            updateHeaderTemps();
+            // 삽목장 (House 3)
+            document.getElementById('st-h3-temp').innerText = sensorData.house3.temp;
+            document.getElementById('st-h3-tmax').innerText = sensorData.house3.tempMax;
+            document.getElementById('st-h3-tmin').innerText = sensorData.house3.tempMin;
+            document.getElementById('st-h3-hum').innerText = sensorData.house3.hum;
+            document.getElementById('st-h3-hmax').innerText = sensorData.house3.humMax;
+            document.getElementById('st-h3-hmin').innerText = sensorData.house3.humMin;
+            document.getElementById('st-h3-soil').innerText = sensorData.house3.soil;
         }
 
-        function safeSet(id, html) {
-            var el = document.getElementById(id);
-            if (el) el.innerHTML = html;
-        }
-
-        // 기상청 예보 페치 함수 (기존 유지)
+        // 기상예보 가져오기
         function fetchKMAWeather() {
             var weatherContainer = document.getElementById('weather-data-container');
-            if (!weatherContainer) return;
 
             fetch(WORKER_URL + '/api/weather')
                 .then(function(response) {
@@ -560,7 +548,7 @@
                 })
                 .then(function(jsonData) {
                     if (jsonData.success !== true || !Array.isArray(jsonData.items) || jsonData.items.length === 0) {
-                        weatherContainer.innerHTML = '<p style="color: #fff; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
+                        weatherContainer.innerHTML = '<p style="color: #333; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
                         return;
                     }
 
@@ -600,15 +588,10 @@
                         var rowClass = isNight ? 'class="night-row"' : '';
 
                         var dayLabel = '';
-                        if (dateStr === todayDateStr) {
-                            dayLabel = '오늘';
-                        } else if (dateStr === tomorrowDateStr) {
-                            dayLabel = '내일';
-                        } else if (dateStr === afterTomorrowDateStr) {
-                            dayLabel = '모레';
-                        } else {
-                            return; 
-                        }
+                        if (dateStr === todayDateStr) { dayLabel = '오늘'; }
+                        else if (dateStr === tomorrowDateStr) { dayLabel = '내일'; }
+                        else if (dateStr === afterTomorrowDateStr) { dayLabel = '모레'; }
+                        else { return; }
 
                         var temp = d.TMP || '-'; 
                         var pop = d.POP || '0';  
@@ -665,7 +648,7 @@
                 })
                 .catch(function(error) {
                     console.error('데이터 수신 오류:', error);
-                    weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>';
+                    weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.</p>';
                 });
         }
 
