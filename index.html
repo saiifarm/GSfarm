@@ -92,4 +92,273 @@
             <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
             <div class="header-center">
                 <div class="header-title">괴산농장 Main Controller V2.0</div>
-                <div class="header-clock" id="top-time">00시
+                <div class="header-clock" id="top-time">00시 00분 00초</div>
+            </div>
+            <!-- 상단 우측 미니 커스텀 아이콘 바 (6개) -->
+            <div class="top-nav-icons">
+                <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
+                <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
+                <button class="top-nav-btn" id="nav-btn-농장현황" onclick="openMenu('농장현황')" title="농장현황"><img src="icon3-now.png" alt="농장현황"></button>
+                <button class="top-nav-btn" id="nav-btn-농장관리" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
+                <button class="top-nav-btn" id="nav-btn-자동설정" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
+                <button class="top-nav-btn" id="nav-btn-판넬연결" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
+                <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="20"></i></button>
+            </div>
+        </header>
+
+        <!-- 동적 교체 영역 (메인 녹색 배경) -->
+        <main class="main-hero" id="main-hero-area">
+            <div id="content-area">
+                <!-- 기본 HOME 콘텐츠가 JavaScript에 의해 동적으로 로드됩니다 -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const WORKER_URL = "https://sf-gs-weather.definezero.workers.dev";
+        let currentMenu = "HOME";
+
+        // 서버(Cloudflare Worker)를 통한 안전한 로그인 검증
+        function checkLogin() {
+            const inputId = document.getElementById('username').value.trim();
+            const inputPw = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            if (!inputId || !inputPw) {
+                errorMsg.innerText = "아이디와 비밀번호를 입력해주세요.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Worker 서버로 로그인 요청 전송
+            fetch(WORKER_URL + '/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: inputId, password: inputPw })
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    return { status: response.status, body: data };
+                });
+            })
+            .then(function(res) {
+                if (res.status === 200 && res.body.success) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    showMain();
+                } else {
+                    errorMsg.innerText = res.body.message || "아이디 또는 비밀번호가 틀렸습니다.";
+                    errorMsg.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            })
+            .catch(function(error) {
+                console.error("로그인 통신 오류:", error);
+                errorMsg.innerText = "서버 통신 중 오류가 발생했습니다.";
+                errorMsg.style.display = 'block';
+            });
+        }
+
+        function showMain() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            startClock();
+            openMenu('HOME');
+            lucide.createIcons();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        function updateNavigationState(menuName) {
+            currentMenu = menuName;
+            var menus = ['HOME', '기상예보', '농장현황', '농장관리', '자동설정', '판넬연결'];
+
+            menus.forEach(function(name) {
+                var topBtn = document.getElementById('nav-btn-' + name);
+                var cardBtn = document.getElementById('card-btn-' + name);
+                var isActive = (name === menuName);
+
+                if (topBtn) topBtn.disabled = isActive;
+                if (cardBtn) {
+                    if (isActive) cardBtn.classList.add('active-disabled');
+                    else cardBtn.classList.remove('active-disabled');
+                }
+            });
+        }
+
+        function renderMenuGridHTML() {
+            return '\
+                <div class="menu-grid">\
+                    <div class="menu-card" id="card-btn-HOME" onclick="openMenu(\'HOME\')">\
+                        <img src="icon1-home.png" alt="HOME" class="menu-icon-img">\
+                        <span class="menu-label">HOME</span>\
+                    </div>\
+                    <div class="menu-card" id="card-btn-기상예보" onclick="openMenu(\'기상예보\')">\
+                        <img src="icon2-wt.png" alt="기상예보" class="menu-icon-img">\
+                        <span class="menu-label">기상예보</span>\
+                    </div>\
+                    <div class="menu-card" id="card-btn-농장현황" onclick="openMenu(\'농장현황\')">\
+                        <img src="icon3-now.png" alt="농장현황" class="menu-icon-img">\
+                        <span class="menu-label">농장현황</span>\
+                    </div>\
+                    <div class="menu-card" id="card-btn-농장관리" onclick="openMenu(\'농장관리\')">\
+                        <img src="icon4-man.png" alt="농장관리" class="menu-icon-img">\
+                        <span class="menu-label">농장관리</span>\
+                    </div>\
+                    <div class="menu-card" id="card-btn-자동설정" onclick="openMenu(\'자동설정\')">\
+                        <img src="icon-set.png" alt="자동설정" class="menu-icon-img">\
+                        <span class="menu-label">자동설정</span>\
+                    </div>\
+                    <div class="menu-card" id="card-btn-판넬연결" onclick="openMenu(\'판넬연결\')">\
+                        <img src="icon5-auto.png" alt="판넬연결" class="menu-icon-img">\
+                        <span class="menu-label">판넬연결</span>\
+                    </div>\
+                </div>\
+            ';
+        }
+
+        function openMenu(menuName) {
+            var container = document.getElementById('content-area');
+
+            if (menuName === 'HOME') {
+                container.innerHTML = '\
+                    <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">\
+                    <div class="hero-divider"></div>\
+                    <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>\
+                    ' + renderMenuGridHTML() + '\
+                ';
+            } else if (menuName === '기상예보') {
+                container.innerHTML = '\
+                    <h2 class="weather-title">🌤️ 충북 괴산군 칠성면 기상예보</h2>\
+                    <div class="hero-divider"></div>\
+                    <div id="weather-data-container" class="weather-container">\
+                        <p>기상청 단기예보 데이터를 불러오는 중입니다...</p>\
+                    </div>\
+                    <div style="margin-top: 30px;">\
+                        ' + renderMenuGridHTML() + '\
+                    </div>\
+                ';
+                fetchKMAWeather();
+            } else {
+                container.innerHTML = '\
+                    <h2>📌 ' + menuName + '</h2>\
+                    <div class="hero-divider"></div>\
+                    <p style="margin-bottom: 30px;">해당 화면 기능 개발 중입니다.</p>\
+                    ' + renderMenuGridHTML() + '\
+                ';
+            }
+
+            updateNavigationState(menuName);
+            updateClockDisplay();
+        }
+
+        function fetchKMAWeather() {
+            fetch(WORKER_URL)
+                .then(function(response) {
+                    if (response.ok) return response.text();
+                    throw new Error('네트워크 응답 오류');
+                })
+                .then(function(xmlText) {
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                    var dataNodes = xmlDoc.getElementsByTagName("data");
+
+                    if (dataNodes.length === 0) {
+                        document.getElementById('weather-data-container').innerHTML = "<p>기상 예보 데이터를 찾을 수 없습니다.</p>";
+                        return;
+                    }
+
+                    var tableRows = '';
+                    var dayMap = { "0": "오늘", "1": "내일", "2": "모레" };
+
+                    for (var i = 0; i < dataNodes.length; i++) {
+                        var node = dataNodes[i];
+                        var hour = node.getElementsByTagName("hour")[0] ? node.getElementsByTagName("hour")[0].textContent : "";
+                        var day = node.getElementsByTagName("day")[0] ? node.getElementsByTagName("day")[0].textContent : "0";
+                        var temp = node.getElementsByTagName("temp")[0] ? node.getElementsByTagName("temp")[0].textContent : "";
+                        var wfKor = node.getElementsByTagName("wfKor")[0] ? node.getElementsByTagName("wfKor")[0].textContent : "";
+                        var pop = node.getElementsByTagName("pop")[0] ? node.getElementsByTagName("pop")[0].textContent : "0";
+                        var reh = node.getElementsByTagName("reh")[0] ? node.getElementsByTagName("reh")[0].textContent : "0";
+                        var wsr = node.getElementsByTagName("wsr")[0] ? node.getElementsByTagName("wsr")[0].textContent : "0";
+
+                        tableRows += '\
+                            <tr>\
+                                <td><span class="weather-badge">' + (dayMap[day] || "글피") + ' ' + hour + '시</span></td>\
+                                <td><b>' + wfKor + '</b></td>\
+                                <td>' + temp + ' ℃</td>\
+                                <td>🌧️ ' + pop + '%</td>\
+                                <td>💧 ' + reh + '%</td>\
+                                <td>💨 ' + parseFloat(wsr).toFixed(1) + ' m/s</td>\
+                            </tr>\
+                        ';
+                    }
+
+                    document.getElementById('weather-data-container').innerHTML = '\
+                        <div class="weather-table-wrapper">\
+                            <table class="weather-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th>시간</th>\
+                                        <th>날씨</th>\
+                                        <th>기온</th>\
+                                        <th>강수확률</th>\
+                                        <th>습도</th>\
+                                        <th>풍속</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    ' + tableRows + '\
+                                </tbody>\
+                            </table>\
+                        </div>\
+                    ';
+                })
+                .catch(function(error) {
+                    console.error("RSS 수신 오류:", error);
+                    document.getElementById('weather-data-container').innerHTML = '\
+                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태를 확인해 주세요.</p>\
+                    `; // Fixed block end
+                });
+        }
+
+        var currentTimeString = { top: '', hero: '' };
+
+        function updateClockDisplay() {
+            var topTimeEl = document.getElementById('top-time');
+            var heroTimeEl = document.getElementById('hero-full-time');
+            if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
+            if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
+        }
+
+        function startClock() {
+            function update() {
+                var now = new Date();
+                var year = now.getFullYear();
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var date = String(now.getDate()).padStart(2, '0');
+                var hours = String(now.getHours()).padStart(2, '0');
+                var minutes = String(now.getMinutes()).padStart(2, '0');
+                var seconds = String(now.getSeconds()).padStart(2, '0');
+
+                currentTimeString.top = hours + '시 ' + minutes + '분 ' + seconds + '초';
+                currentTimeString.hero = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
+
+                updateClockDisplay();
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        window.onload = function() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showMain();
+            } else {
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+</html>
