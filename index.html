@@ -35,11 +35,11 @@
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (하단 여백을 넉넉히 주어 경계선 침범 방지) */
-        .main-hero { background-color: #2D6A3F; padding: 20px 20px 35px 20px; text-align: center; color: white; height: 550px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
-        #content-area { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        /* 메인 녹색 배경 영역 (전체 박스 높이 고정 및 내부 여백 확보) */
+        .main-hero { background-color: #2D6A3F; padding: 25px 20px; text-align: center; color: white; height: 550px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 
-        /* 하단 6개 메뉴 아이콘 그리드 */
+        /* 하단 6개 메뉴 아이콘 그리드 (HOME 화면용) */
         .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
         .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
         .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
@@ -51,14 +51,18 @@
         .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 25px auto; }
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
-        /* 기상예보 전용 상단 완전 고정 제목 (글씨 25px, 여백 2/3 수준 단축) */
-        .weather-sticky-title { position: sticky; top: 0; z-index: 20; background-color: #2D6A3F; width: 100%; padding: 4px 0 10px 0; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; }
-        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; width: 100%; backdrop-filter: blur(5px); margin-top: 5px; }
-        .weather-table-wrapper { overflow-x: auto; }
+        /* 기상예보 전용 레이아웃 (상단 고정 타이틀 + 내부 스크롤 표) */
+        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; }
+        
+        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); }
+        .weather-table-wrapper { width: 100%; overflow-y: auto; flex-grow: 1; }
+        
         .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; }
         .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
-        /* 표 헤더 고정 위치를 타이틀 높이 아래로 정확히 설정하여 겹침 방지 */
-        .weather-table th { background: rgba(0, 0, 0, 0.35); font-weight: bold; position: sticky; top: 41px; z-index: 10; }
+        
+        /* 표 헤더 완전 상단 고정 */
+        .weather-table th { background: rgba(0, 0, 0, 0.4); font-weight: bold; position: sticky; top: 0; z-index: 10; }
         .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
 
         /* 야간(18시~06시) 행 배경 구분 스타일 */
@@ -68,8 +72,7 @@
         @media (max-width: 600px) {
             .top-header { flex-direction: column; text-align: center; }
             .hero-date-clock { font-size: 18px; }
-            .weather-sticky-title { font-size: 20px; top: 0; }
-            .weather-table th { top: 35px; }
+            .weather-sticky-title { font-size: 20px; }
             .menu-card { width: 80px; height: 80px; }
             .menu-icon-img { width: 30px; height: 30px; }
             .menu-label { font-size: 11px; }
@@ -231,9 +234,11 @@
                 ';
             } else if (menuName === '기상예보') {
                 container.innerHTML = '\
-                    <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
-                    <div id="weather-data-container" class="weather-container">\
-                        <p>기상청 단기예보 데이터를 불러오는 중입니다...</p>\
+                    <div class="weather-wrapper">\
+                        <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
+                        <div id="weather-data-container" class="weather-container">\
+                            <p style="color: #fff;">기상청 단기예보 데이터를 불러오는 중입니다...</p>\
+                        </div>\
                     </div>\
                 ';
                 fetchKMAWeather();
@@ -263,7 +268,7 @@
                         !Array.isArray(jsonData.items) ||
                         jsonData.items.length === 0
                     ) {
-                        weatherContainer.innerHTML = '<p>기상 예보 데이터를 확인할 수 없습니다.</p>';
+                        weatherContainer.innerHTML = '<p style="color: #fff;">기상 예보 데이터를 확인할 수 없습니다.</p>';
                         return;
                     }
 
@@ -285,7 +290,6 @@
                     
                     var now = new Date();
                     
-                    // 기준 날짜 문자열 (오늘 YYYYMMDD)
                     var todayDateStr = String(now.getFullYear()) + 
                                        String(now.getMonth() + 1).padStart(2, '0') + 
                                        String(now.getDate()).padStart(2, '0');
@@ -313,11 +317,9 @@
                         var hourNum = parseInt(timeStr.substring(0, 2), 10);
                         var hourDisplay = timeStr.substring(0, 2) + '시';
 
-                        // 18시 ~ 06시 사이 야간 확인 (18시 이상 또는 06시 미만)
                         var isNight = (hourNum >= 18 || hourNum < 6);
                         var rowClass = isNight ? 'class="night-row"' : '';
 
-                        // 오늘 / 내일 / 모레 매칭
                         var dayLabel = '';
                         if (dateStr === todayDateStr) {
                             dayLabel = '오늘';
@@ -392,14 +394,7 @@
 
         var currentTimeString = { top: '', hero: '' };
 
-        function updateClockDisplay() {
-            var topTimeEl = document.getElementById('top-time');
-            var heroTimeEl = document.getElementById('hero-full-time');
-            if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
-            if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
-        }
-
-        function startClock() {
+        (function startClock() {
             function update() {
                 var now = new Date();
                 var year = now.getFullYear();
@@ -412,11 +407,14 @@
                 currentTimeString.top = hours + '시 ' + minutes + '분 ' + seconds + '초';
                 currentTimeString.hero = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
 
-                updateClockDisplay();
+                var topTimeEl = document.getElementById('top-time');
+                var heroTimeEl = document.getElementById('hero-full-time');
+                if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
+                if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
             }
             update();
             setInterval(update, 1000);
-        }
+        })();
 
         window.onload = function() {
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
