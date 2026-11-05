@@ -20,7 +20,7 @@
         /* 2. 로그인 후 대시보드 화면 */
         #main-content { display: none; width: 100%; max-width: 900px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-height: 95vh; overflow-y: auto; }
         
-        /* 상단 고정 헤더 (Sticky Header) */
+        /* 상단 헤더 고정 (Sticky Header) */
         .top-header { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
         .header-logo { height: 50px; width: auto; }
         .header-center { text-align: center; }
@@ -82,7 +82,7 @@
         <input type="text" id="username" placeholder="아이디" autofocus>
         <input type="password" id="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter') checkLogin()">
         <button class="btn-login" onclick="checkLogin()">로그인</button>
-        <p id="error-msg" style="color:red; font-size:13px; display:none; margin-top:10px;">아이디 또는 비밀번호가 틀렸습니다.</p>
+        <p id="error-msg" style="color:red; font-size:13px; display:none; margin-top:10px;"></p>
     </div>
 
     <!-- [2. 로그인 성공 시 나타나는 메인 컨트롤러 화면] -->
@@ -115,23 +115,44 @@
     </div>
 
     <script>
-        const CORRECT_ID = "saiifarm";
-        const CORRECT_PW = "saioi4252";
+        const WORKER_URL = "https://sf-gs-weather.definezero.workers.dev";
         let currentMenu = "HOME";
 
+        // 서버(Cloudflare Worker)를 통한 안전한 로그인 검증
         function checkLogin() {
             const inputId = document.getElementById('username').value.trim();
             const inputPw = document.getElementById('password').value;
             const errorMsg = document.getElementById('error-msg');
 
-            if (inputId === CORRECT_ID && inputPw === CORRECT_PW) {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                showMain();
-            } else {
+            if (!inputId || !inputPw) {
+                errorMsg.innerText = "아이디와 비밀번호를 입력해주세요.";
                 errorMsg.style.display = 'block';
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
+                return;
             }
+
+            // Worker 서버로 로그인 요청 전송
+            fetch(`${WORKER_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: inputId, password: inputPw })
+            })
+            .then(response => response.json().then(data => ({ status: response.status, body: data })))
+            .then(res => {
+                if (res.status === 200 && res.body.success) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    showMain();
+                } else {
+                    errorMsg.innerText = res.body.message || "아이디 또는 비밀번호가 틀렸습니다.";
+                    errorMsg.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            })
+            .catch(error => {
+                console.error("로그인 통신 오류:", error);
+                errorMsg.innerText = "서버 통신 중 오류가 발생했습니다.";
+                errorMsg.style.display = 'block';
+            });
         }
 
         function showMain() {
@@ -236,9 +257,7 @@
 
         // Cloudflare Worker를 통한 실시간 기상청 RSS 수신 및 파싱 함수
         function fetchKMAWeather() {
-            const workerUrl = 'https://sf-gs-weather.definezero.workers.dev';
-
-            fetch(workerUrl)
+            fetch(WORKER_URL)
                 .then(response => {
                     if (response.ok) return response.text();
                     throw new Error('네트워크 응답 오류');
