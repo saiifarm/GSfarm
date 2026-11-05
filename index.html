@@ -2,44 +2,136 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>사이팜 괴산농장 - 로그인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이팜 괴산농장 - 메인 컨트롤러</title>
+    <!-- Lucide 아이콘 라이브러리 (SVG 아이콘 사용) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f6f8; margin: 0; }
-        .login-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 10px; }
+        
+        /* 1. 로그인 전 박스 */
+        .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 100%; max-width: 340px; text-align: center; }
         .login-box img { width: 100%; max-width: 220px; height: auto; margin-bottom: 2px; }
         .login-box h2 { font-size: 25px; color: #333; margin: 0 0 20px 0; }
-        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
-        button:hover { background: #1b5e20; }
-        #main-content { display: none; padding: 20px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        .btn-login { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 5px; }
+        .btn-login:hover { background: #1b5e20; }
+        
+        /* 2. 로그인 후 대시보드 화면 (이미지 레이아웃 구현) */
+        #main-content { display: none; width: 100%; max-width: 900px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        
+        /* 상단 헤더 */
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
+        .header-logo { height: 32px; width: auto; }
+        .header-center { text-align: center; }
+        .header-title { font-size: 15px; font-weight: bold; color: #333; margin: 0; }
+        .header-clock { font-size: 18px; font-weight: 800; color: #000; margin-top: 2px; }
+        
+        /* 상단 우측 미니 아이콘 바 */
+        .top-nav-icons { display: flex; gap: 10px; align-items: center; }
+        .top-nav-btn { background: none; border: none; cursor: pointer; color: #444; padding: 4px; display: flex; align-items: center; transition: color 0.2s; }
+        .top-nav-btn:hover { color: #2e7d32; }
+        .btn-logout-icon { color: #d32f2f; margin-left: 10px; }
+
+        /* 메인 녹색 배경 영역 */
+        .main-hero { background-color: #2D6A3F; padding: 40px 20px 30px 20px; text-align: center; color: white; }
+        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 25px; filter: brightness(0) invert(1); } /* 로고 흰색 반전 효과 */
+        .hero-divider { height: 2px; background-color: rgba(255, 255, 255, 0.4); width: 95%; margin: 0 auto 25px auto; }
+        .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 35px; }
+
+        /* 하단 6개 메뉴 아이콘 그리드 */
+        .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; }
+        .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
+        .menu-icon { color: #2D6A3F; margin-bottom: 6px; }
+        .menu-label { font-size: 13px; font-weight: bold; color: #333; }
+
+        /* 반응형 모바일 대응 */
+        @media (max-width: 600px) {
+            .top-header { flex-direction: column; text-align: center; }
+            .hero-date-clock { font-size: 18px; }
+            .menu-card { width: 80px; height: 80px; }
+            .menu-label { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. 로그인 화면 -->
+    <!-- [1. 로그인 화면] -->
     <div id="login-section" class="login-box">
-        <!-- 로고 이미지 -->
         <img src="saiifarm-logo1-s.png" alt="사이팜 로고">
         <h2>사이팜 괴산농장</h2>
         
         <input type="text" id="username" placeholder="아이디" autofocus>
         <input type="password" id="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter') checkLogin()">
-        <button onclick="checkLogin()">로그인</button>
+        <button class="btn-login" onclick="checkLogin()">로그인</button>
         <p id="error-msg" style="color:red; font-size:13px; display:none; margin-top:10px;">아이디 또는 비밀번호가 틀렸습니다.</p>
     </div>
 
-    <!-- 2. 로그인 성공 시 나타날 농장 관리 메인 화면 -->
+    <!-- [2. 로그인 성공 시 나타나는 메인 컨트롤러 화면] -->
     <div id="main-content">
-        <h1>🌱 사이팜 괴산농장 관리 시스템</h1>
-        <p>환영합니다! 이곳에 날씨, 센서 데이터 및 제어 시스템을 배치하세요.</p>
-        <button onclick="logout()" style="width: auto; padding: 8px 15px; background: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer;">로그아웃</button>
+        <!-- 상단 헤더 -->
+        <header class="top-header">
+            <img src="saiifarm-logo1-s.png" alt="saiifarm" class="header-logo">
+            <div class="header-center">
+                <div class="header-title">괴산농장 Main Controller V2.0</div>
+                <div class="header-clock" id="top-time">00시 00분 00초</div>
+            </div>
+            <!-- 상단 우측 미니 아이콘 (차트 제외 6개) -->
+            <div class="top-nav-icons">
+                <button class="top-nav-btn" onclick="openMenu('HOME')" title="HOME"><i data-lucide="home"></i></button>
+                <button class="top-nav-btn" onclick="openMenu('기상예보')" title="기상예보"><i data-lucide="sun"></i></button>
+                <button class="top-nav-btn" onclick="openMenu('농장현황')" title="농장현황"><i data-lucide="sprout"></i></button>
+                <button class="top-nav-btn" onclick="openMenu('농장관리')" title="농장관리"><i data-lucide="hand-metal"></i></button>
+                <button class="top-nav-btn" onclick="openMenu('자동설정')" title="자동설정"><i data-lucide="settings"></i></button>
+                <button class="top-nav-btn" onclick="openMenu('판넬연결')" title="판넬연결"><i data-lucide="plug"></i></button>
+                <button class="top-nav-btn btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out"></i></button>
+            </div>
+        </header>
+
+        <!-- 메인 녹색 히어로 영역 -->
+        <main class="main-hero">
+            <img src="saiifarm-logo1-s.png" alt="saiifarm" class="hero-logo">
+            <div class="hero-divider"></div>
+            <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>
+
+            <!-- 하단 6개 메뉴 아이콘 카드 -->
+            <div class="menu-grid">
+                <div class="menu-card" onclick="openMenu('HOME')">
+                    <i data-lucide="home" class="menu-icon" size="32"></i>
+                    <span class="menu-label">HOME</span>
+                </div>
+                <div class="menu-card" onclick="openMenu('기상예보')">
+                    <i data-lucide="sun" class="menu-icon" size="32"></i>
+                    <span class="menu-label">기상예보</span>
+                </div>
+                <div class="menu-card" onclick="openMenu('농장현황')">
+                    <i data-lucide="sprout" class="menu-icon" size="32"></i>
+                    <span class="menu-label">농장현황</span>
+                </div>
+                <div class="menu-card" onclick="openMenu('농장관리')">
+                    <i data-lucide="hand-metal" class="menu-icon" size="32"></i>
+                    <span class="menu-label">농장관리</span>
+                </div>
+                <div class="menu-card" onclick="openMenu('자동설정')">
+                    <i data-lucide="settings" class="menu-icon" size="32"></i>
+                    <span class="menu-label">자동설정</span>
+                </div>
+                <div class="menu-card" onclick="openMenu('판넬연결')">
+                    <i data-lucide="plug" class="menu-icon" size="32"></i>
+                    <span class="menu-label">판넬연결</span>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // 변경된 아이디와 비밀번호 설정
+        // 로그인 정보
         const CORRECT_ID = "saiifarm";
         const CORRECT_PW = "saioi4252";
 
+        // 로그인 검증
         function checkLogin() {
             const inputId = document.getElementById('username').value.trim();
             const inputPw = document.getElementById('password').value;
@@ -58,6 +150,8 @@
         function showMain() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
+            startClock();
+            lucide.createIcons(); // 아이콘 렌더링
         }
 
         function logout() {
@@ -65,10 +159,36 @@
             location.reload();
         }
 
-        // 페이지 로드 시 기존 로그인 세션 체크
+        // 메뉴 클릭 시 동작 함수
+        function openMenu(menuName) {
+            alert(menuName + " 페이지로 이동합니다.");
+            // 추후 각 메뉴별 연결 페이지나 코드를 이곳에 작성하시면 됩니다.
+        }
+
+        // 실시간 날짜 및 시계 업데이트
+        function startClock() {
+            function update() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const date = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+
+                document.getElementById('top-time').innerText = `${hours}시 ${minutes}분 ${seconds}초`;
+                document.getElementById('hero-full-time').innerText = `${year}년 ${month}월 ${date}일 ${hours}시 ${minutes}분 ${seconds}초`;
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // 페이지 로드 시 로그인 상태 체크
         window.onload = function() {
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 showMain();
+            } else {
+                lucide.createIcons();
             }
         };
     </script>
