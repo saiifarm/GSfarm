@@ -115,8 +115,8 @@
     </div>
 
     <script>
-        const WORKER_URL = "https://sf-gs-weather.definezero.workers.dev";
-        let currentMenu = "HOME";
+        const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
+        let currentMenu = 'HOME';
 
         // 서버(Cloudflare Worker)를 통한 안전한 로그인 검증
         function checkLogin() {
@@ -125,7 +125,7 @@
             const errorMsg = document.getElementById('error-msg');
 
             if (!inputId || !inputPw) {
-                errorMsg.innerText = "아이디와 비밀번호를 입력해주세요.";
+                errorMsg.innerText = '아이디와 비밀번호를 입력해주세요.';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -146,15 +146,15 @@
                     sessionStorage.setItem('isLoggedIn', 'true');
                     showMain();
                 } else {
-                    errorMsg.innerText = res.body.message || "아이디 또는 비밀번호가 틀렸습니다.";
+                    errorMsg.innerText = res.body.message || '아이디 또는 비밀번호가 틀렸습니다.';
                     errorMsg.style.display = 'block';
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
                 }
             })
             .catch(function(error) {
-                console.error("로그인 통신 오류:", error);
-                errorMsg.innerText = "서버 통신 중 오류가 발생했습니다.";
+                console.error('로그인 통신 오류:', error);
+                errorMsg.innerText = '서버 통신 중 오류가 발생했습니다.';
                 errorMsg.style.display = 'block';
             });
         }
@@ -238,4 +238,187 @@
                         <p>기상청 단기예보 데이터를 불러오는 중입니다...</p>\
                     </div>\
                     <div style="margin-top: 30px;">\
-                        ' + renderMenu
+                        ' + renderMenuGridHTML() + '\
+                    </div>\
+                ';
+                fetchKMAWeather();
+            } else {
+                container.innerHTML = '\
+                    <h2>📌 ' + menuName + '</h2>\
+                    <div class="hero-divider"></div>\
+                    <p style="margin-bottom: 30px;">해당 화면 기능 개발 중입니다.</p>\
+                    ' + renderMenuGridHTML() + '\
+                ';
+            }
+
+            updateNavigationState(menuName);
+            updateClockDisplay();
+        }
+
+        function fetchKMAWeather() {
+            fetch(WORKER_URL + '/api/weather')
+                .then(function(response) {
+                    if (response.ok) return response.json();
+                    throw new Error('네트워크 응답 오류');
+                })
+                .then(function(jsonData) {
+                    console.log('기상예보 Worker 응답:', jsonData);
+
+                    var weatherContainer = document.getElementById('weather-data-container');
+
+                    if (
+                        jsonData.success !== true ||
+                        !Array.isArray(jsonData.items) ||
+                        jsonData.items.length === 0
+                    ) {
+                        weatherContainer.innerHTML =
+                            '<p>기상 예보 데이터를 확인할 수 없습니다.</p>' +
+                            '<p>success: ' + jsonData.success + '</p>' +
+                            '<p>items 존재: ' + Array.isArray(jsonData.items) + '</p>' +
+                            '<p>데이터 개수: ' +
+                            (Array.isArray(jsonData.items) ? jsonData.items.length : 0) +
+                            '</p>';
+
+                        console.error('기상예보 데이터 형식 오류:', jsonData);
+                        return;
+                    }
+
+                    var items = jsonData.items;
+                    var groupedData = {};
+
+                    // 시간대별(fcstDate + fcstTime)로 데이터 그룹화
+                    items.forEach(function(item) {
+                        var key = item.fcstDate + '_' + item.fcstTime;
+                        if (!groupedData[key]) {
+                            groupedData[key] = {
+                                fcstDate: item.fcstDate,
+                                fcstTime: item.fcstTime
+                            };
+                        }
+                        groupedData[key][item.category] = item.fcstValue;
+                    });
+
+                    var tableRows = '';
+                    
+                    // 오늘 날짜 문자열 구하기 (YYYYMMDD)
+                    var now = new Date();
+                    var todayStr = String(now.getFullYear()) + 
+                                   String(now.getMonth() + 1).padStart(2, '0') + 
+                                   String(now.getDate()).padStart(2, '0');
+
+                    // 시간순으로 정렬하여 테이블 행 생성
+                    var sortedKeys = Object.keys(groupedData).sort();
+
+                    sortedKeys.forEach(function(key) {
+                        var d = groupedData[key];
+                        var dateStr = d.fcstDate;
+                        var timeStr = d.fcstTime; // 예: "0600"
+                        var hourDisplay = timeStr.substring(0, 2) + '시';
+
+                        // 날짜 표시 라벨 (오늘/내일/모레 구분)
+                        var dayLabel = '';
+                        if (dateStr === todayStr) {
+                            dayLabel = '오늘';
+                        } else {
+                            dayLabel = dateStr.substring(4, 6) + '/' + dateStr.substring(6, 8);
+                        }
+
+                        var temp = d.TMP || '-'; // 기온
+                        var pop = d.POP || '0';  // 강수확률
+                        var reh = d.REH || '0';  // 습도
+                        var wsd = d.WSD || '0';  // 풍속
+                        var pty = d.PTY || '0';  // 강수형태 (0:없음, 1:비, 2:비/눈, 3:눈, 4:소나기 등)
+                        var sky = d.SKY || '1';  // 하늘상태 (1:맑음, 3:구름많음, 4:흐림)
+
+                        // 날씨 텍스트 및 아이콘 변환
+                        var weatherText = '맑음';
+                        var weatherIcon = '☀️';
+
+                        if (pty !== '0') {
+                            if (pty === '1') { weatherText = '비'; weatherIcon = '🌧️'; }
+                            else if (pty === '2') { weatherText = '비/눈'; weatherIcon = '🌨️'; }
+                            else if (pty === '3') { weatherText = '눈'; weatherIcon = '❄️'; }
+                            else if (pty === '4') { weatherText = '소나기'; weatherIcon = '🌦️'; }
+                        } else {
+                            if (sky === '3') { weatherText = '구름많음'; weatherIcon = '⛅'; }
+                            else if (sky === '4') { weatherText = '흐림'; weatherIcon = '☁️'; }
+                        }
+
+                        tableRows += '\
+                            <tr>\
+                                <td><span class="weather-badge">' + dayLabel + ' ' + hourDisplay + '</span></td>\
+                                <td><b>' + weatherIcon + ' ' + weatherText + '</b></td>\
+                                <td>' + temp + ' ℃</td>\
+                                <td>🌧️ ' + pop + '%</td>\
+                                <td>💧 ' + reh + '%</td>\
+                                <td>💨 ' + parseFloat(wsd).toFixed(1) + ' m/s</td>\
+                            </tr>\
+                        ';
+                    });
+
+                    document.getElementById('weather-data-container').innerHTML = '\
+                        <div class="weather-table-wrapper">\
+                            <table class="weather-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th>시간</th>\
+                                        <th>날씨</th>\
+                                        <th>기온</th>\
+                                        <th>강수확률</th>\
+                                        <th>습도</th>\
+                                        <th>풍속</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    ' + tableRows + '\
+                                </tbody>\
+                            </table>\
+                        </div>\
+                    ';
+                })
+                .catch(function(error) {
+                    console.error('데이터 수신 오류:', error);
+                    document.getElementById('weather-data-container').innerHTML = '\
+                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>\
+                    ';
+                });
+        }
+
+        var currentTimeString = { top: '', hero: '' };
+
+        function updateClockDisplay() {
+            var topTimeEl = document.getElementById('top-time');
+            var heroTimeEl = document.getElementById('hero-full-time');
+            if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
+            if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
+        }
+
+        function startClock() {
+            function update() {
+                var now = new Date();
+                var year = now.getFullYear();
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var date = String(now.getDate()).padStart(2, '0');
+                var hours = String(now.getHours()).padStart(2, '0');
+                var minutes = String(now.getMinutes()).padStart(2, '0');
+                var seconds = String(now.getSeconds()).padStart(2, '0');
+
+                currentTimeString.top = hours + '시 ' + minutes + '분 ' + seconds + '초';
+                currentTimeString.hero = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
+
+                updateClockDisplay();
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        window.onload = function() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showMain();
+            } else {
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+</html>
