@@ -167,11 +167,11 @@
             });
         }
 
+        // 1번 수정 반영: 존재하지 않는 startClock() 호출 제거
         function showMain() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
-            startClock();
-            openMenu('HOME'); // 로그인 직후 빈 화면이 뜨지 않도록 홈 화면 강제 로드
+            openMenu('HOME');
             lucide.createIcons();
         }
 
@@ -223,6 +223,7 @@
             ';
         }
 
+        // 2번 수정 반영: 존재하지 않는 updateClockDisplay() 호출 제거
         function openMenu(menuName) {
             var container = document.getElementById('content-area');
 
@@ -252,18 +253,18 @@
             }
 
             updateNavigationState(menuName);
-            updateClockDisplay();
         }
 
+        // 3번 수정 반영: fetchKMAWeather 함수 시작 부분에 weatherContainer 선언 배치
         function fetchKMAWeather() {
+            var weatherContainer = document.getElementById('weather-data-container');
+
             fetch(WORKER_URL + '/api/weather')
                 .then(function(response) {
                     if (response.ok) return response.json();
                     throw new Error('네트워크 응답 오류');
                 })
                 .then(function(jsonData) {
-                    var weatherContainer = document.getElementById('weather-data-container');
-
                     if (
                         jsonData.success !== true ||
                         !Array.isArray(jsonData.items) ||
@@ -365,7 +366,6 @@
                         count++;
                     });
 
-                    // 단일 테이블 구조 내에 헤더와 바디를 같이 두어 컬럼 정렬(줄 맞춤) 완벽 해결
                     weatherContainer.innerHTML = '\
                         <div class="weather-table-scroll">\
                             <table class="weather-table">\
@@ -392,8 +392,7 @@
                 });
         }
 
-        var currentTimeString = { top: '', hero: '' };
-
+        // 시계 자동 갱신 IIFE
         (function startClock() {
             function update() {
                 var now = new Date();
@@ -404,13 +403,13 @@
                 var minutes = String(now.getMinutes()).padStart(2, '0');
                 var seconds = String(now.getSeconds()).padStart(2, '0');
 
-                currentTimeString.top = hours + '시 ' + minutes + '분 ' + seconds + '초';
-                currentTimeString.hero = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
+                var topTimeString = hours + '시 ' + minutes + '분 ' + seconds + '초';
+                var heroTimeString = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
 
                 var topTimeEl = document.getElementById('top-time');
                 var heroTimeEl = document.getElementById('hero-full-time');
-                if (topTimeEl) topTimeEl.innerText = currentTimeString.top;
-                if (heroTimeEl) heroTimeEl.innerText = currentTimeString.hero;
+                if (topTimeEl) topTimeEl.innerText = topTimeString;
+                if (heroTimeEl) heroTimeEl.innerText = heroTimeString;
             }
             update();
             setInterval(update, 1000);
