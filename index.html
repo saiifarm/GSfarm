@@ -35,7 +35,7 @@
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (정중앙 정렬 배치) */
+        /* 메인 녹색 배경 영역 (정중앙 정렬) */
         .main-hero { background-color: #2D6A3F; padding: 20px; text-align: center; color: white; height: 560px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
 
@@ -51,21 +51,19 @@
         .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 20px auto; }
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
-        /* 기상예보 구조 (상단 고정 타이틀 + 단일 테이블 내부 스크롤로 컬럼 완벽 정렬) */
+        /* 기상예보 구조 (컬럼 정렬 완벽 일치 테이블) */
         .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 10px; }
         .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
         
         .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 10px; }
         
-        /* 단일 테이블 스크롤 컨테이너 */
         .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 15px; }
         
+        /* 표 레이아웃 고정으로 헤더와 내용 줄 맞춤 보장 */
         .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; table-layout: fixed; }
         .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
         
-        /* 표 헤더를 테이블 내부 상단에 고정하여 열 너비 일치 */
         .weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        
         .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
 
         /* 야간(18시~06시) 행 배경 구분 스타일 */
@@ -173,7 +171,7 @@
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
             startClock();
-            openMenu('HOME'); // 로그인 직후 홈 화면이 확실하게 바로 노출되도록 설정
+            openMenu('HOME'); // 로그인 직후 빈 화면이 뜨지 않도록 홈 화면 강제 로드
             lucide.createIcons();
         }
 
@@ -367,7 +365,7 @@
                         count++;
                     });
 
-                    // 단일 테이블 구조로 통합하여 헤더와 데이터 열 너비가 완벽히 일치하도록 수정
+                    // 단일 테이블 구조 내에 헤더와 바디를 같이 두어 컬럼 정렬(줄 맞춤) 완벽 해결
                     weatherContainer.innerHTML = '\
                         <div class="weather-table-scroll">\
                             <table class="weather-table">\
