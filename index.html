@@ -256,45 +256,90 @@
         }
 
         function fetchKMAWeather() {
-            fetch(WORKER_URL)
+            fetch(WORKER_URL + '/api/weather')
                 .then(function(response) {
-                    if (response.ok) return response.text();
+                    if (response.ok) return response.json();
                     throw new Error('네트워크 응답 오류');
                 })
-                .then(function(xmlText) {
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                    var dataNodes = xmlDoc.getElementsByTagName("data");
-
-                    if (dataNodes.length === 0) {
+                .then(function(jsonData) {
+                    if (!jsonData.success || !jsonData.items) {
                         document.getElementById('weather-data-container').innerHTML = "<p>기상 예보 데이터를 찾을 수 없습니다.</p>";
                         return;
                     }
 
-                    var tableRows = '';
-                    var dayMap = { "0": "오늘", "1": "내일", "2": "모레" };
+                    var items = jsonData.items;
+                    var groupedData = {};
 
-                    for (var i = 0; i < dataNodes.length; i++) {
-                        var node = dataNodes[i];
-                        var hour = node.getElementsByTagName("hour")[0] ? node.getElementsByTagName("hour")[0].textContent : "";
-                        var day = node.getElementsByTagName("day")[0] ? node.getElementsByTagName("day")[0].textContent : "0";
-                        var temp = node.getElementsByTagName("temp")[0] ? node.getElementsByTagName("temp")[0].textContent : "";
-                        var wfKor = node.getElementsByTagName("wfKor")[0] ? node.getElementsByTagName("wfKor")[0].textContent : "";
-                        var pop = node.getElementsByTagName("pop")[0] ? node.getElementsByTagName("pop")[0].textContent : "0";
-                        var reh = node.getElementsByTagName("reh")[0] ? node.getElementsByTagName("reh")[0].textContent : "0";
-                        var wsr = node.getElementsByTagName("wsr")[0] ? node.getElementsByTagName("wsr")[0].textContent : "0";
+                    // 시간대별(fcstDate + fcstTime)로 데이터 그룹화
+                    items.forEach(function(item) {
+                        var key = item.fcstDate + "_" + item.fcstTime;
+                        if (!groupedData[key]) {
+                            groupedData[key] = {
+                                fcstDate: item.fcstDate,
+                                fcstTime: item.fcstTime
+                            };
+                        }
+                        groupedData[key][item.category] = item.fcstValue;
+                    });
+
+                    var tableRows = '';
+                    
+                    // 오늘 날짜 문자열 구하기 (YYYYMMDD)
+                    var now = new Date();
+                    var todayStr = String(now.getFullYear()) + 
+                                   String(now.getMonth() + 1).padStart(2, '0') + 
+                                   String(now.getDate()).padStart(2, '0');
+
+                    // 시간순으로 정렬하여 테이블 행 생성
+                    var sortedKeys = Object.keys(groupedData).sort();
+
+                    sortedKeys.forEach(function(key) {
+                        var d = groupedData[key];
+                        var dateStr = d.fcstDate;
+                        var timeStr = d.fcstTime; // 예: "0600"
+                        var hourDisplay = timeStr.substring(0, 2) + "시";
+
+                        // 날짜 표시 라벨 (오늘/내일/모레 구분)
+                        var dayLabel = "";
+                        if (dateStr === todayStr) {
+                            dayLabel = "오늘";
+                        } else {
+                            // 단순 비교를 위해 날짜 차이 계산 등 처리 가능 (여기본적으로 간단 매칭)
+                            dayLabel = dateStr.substring(4, 6) + "/" + dateStr.substring(6, 8);
+                        }
+
+                        var temp = d.TMP || "-"; // 기온
+                        var pop = d.POP || "0";  // 강수확률
+                        var reh = d.REH || "0";  // 습도
+                        var wsd = d.WSD || "0";  // 풍속
+                        var pty = d.PTY || "0";  // 강수형태 (0:없음, 1:비, 2:비/눈, 3:눈, 4:소나기 등)
+                        var sky = d.SKY || "1";  // 하늘상태 (1:맑음, 3:구름많음, 4:흐림)
+
+                        // 날씨 텍스트 및 아이콘 변환
+                        var weatherText = "맑음";
+                        var weatherIcon = "☀️";
+
+                        if (pty !== "0") {
+                            if (pty === "1") { weatherText = "비"; weatherIcon = "🌧️"; }
+                            else if (pty === "2") { weatherText = "비/눈"; weatherIcon = "🌨️"; }
+                            else if (pty === "3") { weatherText = "눈"; weatherIcon = "❄️"; }
+                            else if (pty === "4") { weatherText = "소나기"; weatherIcon = "🌦️"; }
+                        } else {
+                            if (sky === "3") { weatherText = "구름많음"; weatherIcon = "⛅"; }
+                            else if (sky === "4") { weatherText = "흐림"; weatherIcon = "☁️"; }
+                        }
 
                         tableRows += '\
                             <tr>\
-                                <td><span class="weather-badge">' + (dayMap[day] || "글피") + ' ' + hour + '시</span></td>\
-                                <td><b>' + wfKor + '</b></td>\
+                                <td><span class="weather-badge">' + dayLabel + ' ' + hourDisplay + '</span></td>\
+                                <td><b>' + weatherIcon + ' ' + weatherText + '</b></td>\
                                 <td>' + temp + ' ℃</td>\
                                 <td>🌧️ ' + pop + '%</td>\
                                 <td>💧 ' + reh + '%</td>\
-                                <td>💨 ' + parseFloat(wsr).toFixed(1) + ' m/s</td>\
+                                <td>💨 ' + parseFloat(wsd).toFixed(1) + ' m/s</td>\
                             </tr>\
                         ';
-                    }
+                    });
 
                     document.getElementById('weather-data-container').innerHTML = '\
                         <div class="weather-table-wrapper">\
@@ -317,10 +362,10 @@
                     ';
                 })
                 .catch(function(error) {
-                    console.error("RSS 수신 오류:", error);
+                    console.error("데이터 수신 오류:", error);
                     document.getElementById('weather-data-container').innerHTML = '\
-                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태를 확인해 주세요.</p>\
-                    '; // Fixed block end
+                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>\
+                    ';
                 });
         }
 
