@@ -35,9 +35,9 @@
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (전체 박스 높이 고정 및 내부 여백 확보) */
-        .main-hero { background-color: #2D6A3F; padding: 25px 20px; text-align: center; color: white; height: 550px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-        #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+        /* 메인 녹색 배경 영역 (내용 수직 중앙 정렬 배치) */
+        .main-hero { background-color: #2D6A3F; padding: 20px; text-align: center; color: white; height: 560px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
 
         /* 하단 6개 메뉴 아이콘 그리드 (HOME 화면용) */
         .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
@@ -47,22 +47,25 @@
         .menu-label { font-size: 13px; font-weight: bold; color: #333; }
 
         /* 공통 구분선 및 로고 */
-        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 25px; } 
-        .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 25px auto; }
+        .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 20px; } 
+        .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 20px auto; }
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
-        /* 기상예보 전용 레이아웃 (상단 고정 타이틀 + 내부 스크롤 표) */
-        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; }
+        /* 기상예보 구조 (상단 고정 제목 + 헤더 고정형 분리 테이블) */
+        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 10px; }
+        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
         
-        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); }
-        .weather-table-wrapper { width: 100%; overflow-y: auto; flex-grow: 1; }
+        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 10px; }
         
-        .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; }
-        .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
-        
-        /* 표 헤더 완전 상단 고정 */
-        .weather-table th { background: rgba(0, 0, 0, 0.4); font-weight: bold; position: sticky; top: 0; z-index: 10; }
+        /* 표 헤더 고정을 위한 분리형 테이블 스타일 */
+        .weather-table-fixed { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; flex-shrink: 0; }
+        .weather-table-fixed th { background: #1e4b2c; font-weight: bold; padding: 10px 8px; border-bottom: 2px solid rgba(255, 255, 255, 0.3); text-align: center; }
+
+        /* 오직 데이터 내용만 스크롤되도록 분리된 박스 */
+        .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 15px; }
+        .weather-table-body { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; }
+        .weather-table-body td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+
         .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
 
         /* 야간(18시~06시) 행 배경 구분 스타일 */
@@ -170,7 +173,7 @@
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
             startClock();
-            openMenu('HOME');
+            openMenu('HOME'); // 로그인 직후 홈 화면이 바로 열리도록 설정
             lucide.createIcons();
         }
 
@@ -237,16 +240,16 @@
                     <div class="weather-wrapper">\
                         <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
                         <div id="weather-data-container" class="weather-container">\
-                            <p style="color: #fff;">기상청 단기예보 데이터를 불러오는 중입니다...</p>\
+                            <p style="color: #fff; padding: 20px; text-align: center;">기상청 단기예보 데이터를 불러오는 중입니다...</p>\
                         </div>\
                     </div>\
                 ';
                 fetchKMAWeather();
             } else {
                 container.innerHTML = '\
-                    <h2 style="margin-top:20px; color:#fff;">📌 ' + menuName + '</h2>\
+                    <h2 style="color:#fff;">📌 ' + menuName + '</h2>\
                     <div class="hero-divider" style="width: 100%;"></div>\
-                    <p style="margin-top: 30px; color:#fff;">해당 화면 기능 개발 중입니다.</p>\
+                    <p style="margin-top: 20px; color:#fff;">해당 화면 기능 개발 중입니다.</p>\
                 ';
             }
 
@@ -268,7 +271,7 @@
                         !Array.isArray(jsonData.items) ||
                         jsonData.items.length === 0
                     ) {
-                        weatherContainer.innerHTML = '<p style="color: #fff;">기상 예보 데이터를 확인할 수 없습니다.</p>';
+                        weatherContainer.innerHTML = '<p style="color: #fff; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
                         return;
                     }
 
@@ -364,19 +367,22 @@
                         count++;
                     });
 
+                    // 헤더는 고정시키고 내용(tbody)만 스크롤되도록 분리된 테이블 구조 적용
                     weatherContainer.innerHTML = '\
-                        <div class="weather-table-wrapper">\
-                            <table class="weather-table">\
-                                <thead>\
-                                    <tr>\
-                                        <th>시간</th>\
-                                        <th>날씨</th>\
-                                        <th>기온</th>\
-                                        <th>강수확률</th>\
-                                        <th>습도</th>\
-                                        <th>풍속</th>\
-                                    </tr>\
-                                </thead>\
+                        <table class="weather-table-fixed">\
+                            <thead>\
+                                <tr>\
+                                    <th>시간</th>\
+                                    <th>날씨</th>\
+                                    <th>기온</th>\
+                                    <th>강수확률</th>\
+                                    <th>습도</th>\
+                                    <th>풍속</th>\
+                                </tr>\
+                            </thead>\
+                        </table>\
+                        <div class="weather-table-scroll">\
+                            <table class="weather-table-body">\
                                 <tbody>\
                                     ' + tableRows + '\
                                 </tbody>\
@@ -386,9 +392,7 @@
                 })
                 .catch(function(error) {
                     console.error('데이터 수신 오류:', error);
-                    document.getElementById('weather-data-container').innerHTML = '\
-                        <p style="color: #ffcdd2;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>\
-                    ';
+                    weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>';
                 });
         }
 
