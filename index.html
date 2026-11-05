@@ -31,36 +31,46 @@
         .top-nav-icons { display: flex; gap: 8px; align-items: center; }
         .top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; transition: transform 0.2s; }
         .top-nav-btn:hover:not(:disabled) { transform: scale(1.1); }
-        .top-nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .top-nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (크기 고정 및 내부 스크롤 적용) */
-        .main-hero { background-color: #2D6A3F; padding: 30px 20px 30px 20px; text-align: center; color: white; height: 550px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        #content-area { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        /* 메인 녹색 배경 영역 (크기 고정, 내부 스크롤 및 하단 모서리 여백 확보) */
+        .main-hero { background-color: #2D6A3F; padding: 25px 20px 20px 20px; text-align: center; color: white; height: 550px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
+        #content-area { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
 
-        /* 비활성화 스타일 (상단 네비게이션) */
-        .top-nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+        /* 하단 6개 메뉴 아이콘 그리드 */
+        .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
+        .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
+        .menu-icon-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; }
+        .menu-label { font-size: 13px; font-weight: bold; color: #333; }
 
         /* 공통 구분선 및 로고 */
         .hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 25px; } 
         .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 25px auto; }
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
-        /* 기상예보 전용 스타일 */
-        .weather-title-custom { font-size: 33px; font-weight: bold; margin-bottom: 15px; letter-spacing: -0.5px; }
-        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; width: 100%; backdrop-filter: blur(5px); }
+        /* 기상예보 전용 고정 제목 스타일 */
+        .weather-sticky-title { position: sticky; top: -25px; z-index: 10; background-color: #2D6A3F; width: 100%; padding: 10px 0 15px 0; font-size: 33px; font-weight: bold; letter-spacing: -0.5px; }
+        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; width: 100%; backdrop-filter: blur(5px); margin-top: 10px; }
         .weather-table-wrapper { overflow-x: auto; }
         .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; }
         .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
-        .weather-table th { background: rgba(0, 0, 0, 0.2); font-weight: bold; position: sticky; top: 0; }
+        .weather-table th { background: rgba(0, 0, 0, 0.25); font-weight: bold; position: sticky; top: 45px; z-index: 5; }
         .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
+
+        /* 야간(18시~06시) 행 배경 구분 스타일 */
+        .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
         /* 반응형 모바일 대응 */
         @media (max-width: 600px) {
             .top-header { flex-direction: column; text-align: center; }
             .hero-date-clock { font-size: 18px; }
-            .weather-title-custom { font-size: 24px; }
+            .weather-sticky-title { font-size: 22px; }
+            .menu-card { width: 80px; height: 80px; }
+            .menu-icon-img { width: 30px; height: 30px; }
+            .menu-label { font-size: 11px; }
         }
     </style>
 </head>
@@ -176,6 +186,37 @@
             });
         }
 
+        function renderMenuGridHTML() {
+            return '\
+                <div class="menu-grid">\
+                    <div class="menu-card" onclick="openMenu(\'HOME\')">\
+                        <img src="icon1-home.png" alt="HOME" class="menu-icon-img">\
+                        <span class="menu-label">HOME</span>\
+                    </div>\
+                    <div class="menu-card" onclick="openMenu(\'기상예보\')">\
+                        <img src="icon2-wt.png" alt="기상예보" class="menu-icon-img">\
+                        <span class="menu-label">기상예보</span>\
+                    </div>\
+                    <div class="menu-card" onclick="openMenu(\'농장현황\')">\
+                        <img src="icon3-now.png" alt="농장현황" class="menu-icon-img">\
+                        <span class="menu-label">농장현황</span>\
+                    </div>\
+                    <div class="menu-card" onclick="openMenu(\'농장관리\')">\
+                        <img src="icon4-man.png" alt="농장관리" class="menu-icon-img">\
+                        <span class="menu-label">농장관리</span>\
+                    </div>\
+                    <div class="menu-card" onclick="openMenu(\'자동설정\')">\
+                        <img src="icon-set.png" alt="자동설정" class="menu-icon-img">\
+                        <span class="menu-label">자동설정</span>\
+                    </div>\
+                    <div class="menu-card" onclick="openMenu(\'판넬연결\')">\
+                        <img src="icon5-auto.png" alt="판넬연결" class="menu-icon-img">\
+                        <span class="menu-label">판넬연결</span>\
+                    </div>\
+                </div>\
+            ';
+        }
+
         function openMenu(menuName) {
             var container = document.getElementById('content-area');
 
@@ -184,11 +225,11 @@
                     <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">\
                     <div class="hero-divider"></div>\
                     <div class="hero-date-clock" id="hero-full-time">2026년 00월 00일 00시 00분 00초</div>\
+                    ' + renderMenuGridHTML() + '\
                 ';
             } else if (menuName === '기상예보') {
                 container.innerHTML = '\
-                    <div class="weather-title-custom">SAIIFARM 괴산농장(칠성면) 기상예보</div>\
-                    <div class="hero-divider" style="width: 100%; margin-bottom: 15px;"></div>\
+                    <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
                     <div id="weather-data-container" class="weather-container">\
                         <p>기상청 단기예보 데이터를 불러오는 중입니다...</p>\
                     </div>\
@@ -247,13 +288,11 @@
                                        String(now.getMonth() + 1).padStart(2, '0') + 
                                        String(now.getDate()).padStart(2, '0');
 
-                    // 내일 날짜 계산
                     var tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
                     var tomorrowDateStr = String(tomorrow.getFullYear()) + 
                                           String(tomorrow.getMonth() + 1).padStart(2, '0') + 
                                           String(tomorrow.getDate()).padStart(2, '0');
 
-                    // 모레 날짜 계산
                     var afterTomorrow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
                     var afterTomorrowDateStr = String(afterTomorrow.getFullYear()) + 
                                                String(afterTomorrow.getMonth() + 1).padStart(2, '0') + 
@@ -261,7 +300,6 @@
 
                     var sortedKeys = Object.keys(groupedData).sort();
                     var count = 0;
-                    // 36시간 기준 (1시간 단위 예보 데이터 약 36개 행)
                     var maxHours = 36; 
 
                     sortedKeys.forEach(function(key) {
@@ -270,7 +308,12 @@
                         var d = groupedData[key];
                         var dateStr = d.fcstDate;
                         var timeStr = d.fcstTime; 
+                        var hourNum = parseInt(timeStr.substring(0, 2), 10);
                         var hourDisplay = timeStr.substring(0, 2) + '시';
+
+                        // 18시 ~ 06시 사이 야간 확인 (18시 이상 또는 06시 미만)
+                        var isNight = (hourNum >= 18 || hourNum < 6);
+                        var rowClass = isNight ? 'class="night-row"' : '';
 
                         // 오늘 / 내일 / 모레 매칭
                         var dayLabel = '';
@@ -281,7 +324,7 @@
                         } else if (dateStr === afterTomorrowDateStr) {
                             dayLabel = '모레';
                         } else {
-                            return; // 36시간 범위를 벗어나는 날짜는 제외
+                            return; 
                         }
 
                         var temp = d.TMP || '-'; 
@@ -292,7 +335,7 @@
                         var sky = d.SKY || '1';  
 
                         var weatherText = '맑음';
-                        var weatherIcon = '☀️';
+                        var weatherIcon = isNight ? '🌙' : '☀️';
 
                         if (pty !== '0') {
                             if (pty === '1') { weatherText = '비'; weatherIcon = '🌧️'; }
@@ -300,12 +343,12 @@
                             else if (pty === '3') { weatherText = '눈'; weatherIcon = '❄️'; }
                             else if (pty === '4') { weatherText = '소나기'; weatherIcon = '🌦️'; }
                         } else {
-                            if (sky === '3') { weatherText = '구름많음'; weatherIcon = '⛅'; }
+                            if (sky === '3') { weatherText = '구름많음'; weatherIcon = isNight ? '☁️' : '⛅'; }
                             else if (sky === '4') { weatherText = '흐림'; weatherIcon = '☁️'; }
                         }
 
                         tableRows += '\
-                            <tr>\
+                            <tr ' + rowClass + '>\
                                 <td><span class="weather-badge">' + dayLabel + ' ' + hourDisplay + '</span></td>\
                                 <td><b>' + weatherIcon + ' ' + weatherText + '</b></td>\
                                 <td>' + temp + ' ℃</td>\
