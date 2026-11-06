@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>사이팜 괴산농장 - 메인 컨트롤러</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- MQTT 클라이언트 라이브러리 로드 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 10px; }
+        body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 5px; overflow-x: hidden; }
         
         /* 1. 로그인 전 박스 */
         .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 100%; max-width: 340px; text-align: center; }
@@ -19,31 +19,31 @@
         .btn-login { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 5px; }
         .btn-login:hover { background: #1b5e20; }
         
-        /* 2. 로그인 후 대시보드 화면 */
-        #main-content { display: none; width: 100%; max-width: 900px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        /* 2. 로그인 후 대시보드 화면 (모바일 전체 화면 채우기 최적화) */
+        #main-content { display: none; width: 100%; max-width: 1000px; height: 98vh; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; }
         
         /* 상단 헤더 고정 (Sticky Header) */
-        .top-header { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
-        .header-logo { height: 50px; width: auto; }
+        .top-header { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+        .header-logo { height: 40px; width: auto; }
         .header-center { text-align: center; }
-        .header-title { font-size: 18px; font-weight: bold; color: #333; margin: 0; }
-        .header-clock { font-size: 20px; font-weight: 800; color: #000; margin-top: 2px; }
+        .header-title { font-size: 16px; font-weight: bold; color: #333; margin: 0; }
+        .header-clock { font-size: 17px; font-weight: 800; color: #000; margin-top: 2px; }
         
         /* MQTT 연결 상태 인디케이터 */
-        .mqtt-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: bold; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; margin-top: 2px; }
-        .mqtt-dot { width: 8px; height: 8px; border-radius: 50%; background: #d32f2f; display: inline-block; }
+        .mqtt-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: bold; background: #f5f5f5; padding: 2px 6px; border-radius: 10px; margin-top: 2px; }
+        .mqtt-dot { width: 7px; height: 7px; border-radius: 50%; background: #d32f2f; display: inline-block; }
         .mqtt-dot.connected { background: #2e7d32; }
 
         /* 상단 우측 미니 아이콘 바 */
-        .top-nav-icons { display: flex; gap: 8px; align-items: center; }
-        .top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; transition: transform 0.2s; }
+        .top-nav-icons { display: flex; gap: 6px; align-items: center; }
+        .top-nav-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; transition: transform 0.2s; }
         .top-nav-btn:hover:not(:disabled) { transform: scale(1.1); }
         .top-nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
-        .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
-        .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
+        .top-nav-btn img { width: 30px; height: 30px; object-fit: contain; }
+        .btn-logout-icon { color: #d32f2f; margin-left: 3px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 */
-        .main-hero { background-color: #2D6A3F; padding: 15px; text-align: center; color: white; height: 580px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        /* 메인 녹색 배경 영역 (화면 전체에 꽉 차도록 flex-grow 적용) */
+        .main-hero { background-color: #2D6A3F; padding: 10px; text-align: center; color: white; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
 
         /* 하단 6개 메뉴 아이콘 그리드 */
@@ -59,78 +59,112 @@
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
         /* 기상예보 구조 */
-        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 10px; }
-        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
-        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 10px; }
-        .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 15px; }
-        .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; table-layout: fixed; }
-        .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
+        .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 5px; }
+        .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 8px; font-size: 22px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
+        .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 10px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 5px; }
+        .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 10px; }
+        .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 500px; table-layout: fixed; }
+        .weather-table th, .weather-table td { padding: 8px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
         .weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
+        .weather-badge { background: #ffffff; color: #2D6A3F; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; }
         .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
-        /* [농장현황 페이지 전용 스타일] */
+        /* [농장현황 페이지 전용 스타일 - 모바일 화면 맞춤 반응형] */
         .status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; text-align: left; }
         
-        /* (1) 상단 날씨/온도 요약 바 (높이 20% 증가: 위아래 패딩 조정) */
-        .status-top-bar { background: #dff0d8; border: 5px solid #b5d6ad; border-radius: 10px; padding: 18px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .status-weather-box { display: flex; align-items: center; gap: 10px; }
-        .status-weather-icon { font-size: 40px; }
-        .status-weather-text { text-align: left; display: flex; align-items: baseline; gap: 10px; }
-        .status-rain-status { font-size: 35px; font-weight: 800; }
-        .status-rain-amount { font-size: 20px; font-weight: bold; color: #333; }
+        /* 상단 날씨/온도 요약 바 */
+        .status-top-bar { background: #dff0d8; border: 4px solid #b5d6ad; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-shrink: 0; }
+        .status-weather-box { display: flex; align-items: center; gap: 8px; }
+        .status-weather-icon { font-size: 32px; }
+        .status-weather-text { text-align: left; display: flex; align-items: baseline; gap: 8px; }
+        .status-rain-status { font-size: 26px; font-weight: 800; }
+        .status-rain-amount { font-size: 16px; font-weight: bold; color: #333; }
         
-        .status-summary-temps { display: flex; align-items: center; gap: 20px; }
-        .summary-temp-item { display: flex; align-items: center; gap: 20px; font-size: 35px; font-weight: bold; color: #333; }
+        .status-summary-temps { display: flex; align-items: center; gap: 15px; }
+        .summary-temp-item { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: bold; color: #333; }
         
         /* 본문 2분할 그리드 */
-        .status-body-grid { display: flex; gap: 12px; width: 100%; flex-grow: 1; height: calc(100% - 75px); margin-top: 18px; }
-        .status-column { flex: 1; display: flex; flex-direction: column; height: 100%; }
+        .status-body-grid { display: flex; gap: 10px; width: 100%; flex-grow: 1; margin-top: 10px; overflow: hidden; }
+        .status-column { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
         /* 구역 카드박스 및 두꺼운 헤더 */
-        .zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 5px solid #b5d6ad; height: 100%; }
-        .zone-header { background: #f0ad4e; color: #fff; font-size: 25px; font-weight: bold; padding: 12px 6px; text-align: center; letter-spacing: 0.5px; border-bottom: 5px solid #b5d6ad; }
+        .zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 4px solid #b5d6ad; height: 100%; }
+        .zone-header { background: #f0ad4e; color: #fff; font-size: 20px; font-weight: bold; padding: 8px 4px; text-align: center; letter-spacing: 0.5px; border-bottom: 4px solid #b5d6ad; flex-shrink: 0; }
         .zone-header.house-title { background: #46b8da; }
 
-        /* (2) 센서 테이블 스타일 (기존보다 30% 커진 폰트: 15px -> 약 20px) */
-        .sensor-table { width: 100%; border-collapse: collapse; font-size: 20px; table-layout: fixed; height: 100%; }
-        .sensor-table th, .sensor-table td { padding: 8px 10px; border-bottom: 2px solid #e5e5e5; text-align: center; vertical-align: middle; }
+        /* 센서 테이블 스타일 (모바일 화면에 맞춰 꽉 채우기) */
+        .sensor-table { width: 100%; border-collapse: collapse; font-size: clamp(13px, 1.8vw, 19px); table-layout: fixed; height: 100%; flex-grow: 1; }
+        .sensor-table th, .sensor-table td { padding: 4px 6px; border-bottom: 2px solid #e5e5e5; text-align: center; vertical-align: middle; }
         .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
         
-        /* (3) 구역별 배경 색상 대폭 강화 (측정값 칸 .val-cell까지 동일하게 확장 적용) */
-        .lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
-        .val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 15px !important; font-size: 21px; }
+        /* 구역별 배경 색상 대폭 강화 (측정값 칸 .val-cell까지 동일하게 확장 적용) */
+        .lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
+        .val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
 
-        .lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
-        .val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 15px !important; font-size: 21px; }
+        .lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
+        .val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
 
-        .lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
-        .val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 15px !important; font-size: 21px; }
+        .lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
+        .val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
 
-        .lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
-        .val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 15px !important; font-size: 21px; }
+        .lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
+        .val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
 
-        .lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
-        .val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 15px !important; font-size: 21px; }
+        .lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
+        .val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
 
-        .lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: 16px;}
-        .lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: 16px;}
-        .lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: 16px;}
-        
-        /* (4) 토양습도 색상 고동색 계열로 변경 */
-        .lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: 16px;}
+        .lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
+        .lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
+        .lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
+        .lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
+
+        /* 세로 모드 안내 팝업 레이어 */
+        #rotate-notice {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            color: white;
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        #rotate-notice .notice-box {
+            background: #2D6A3F;
+            padding: 25px 35px;
+            border-radius: 15px;
+            border: 3px solid #b5d6ad;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        #rotate-notice h3 { margin: 0 0 10px 0; font-size: 22px; }
+        #rotate-notice p { margin: 0; font-size: 14px; color: #e0e0e0; }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            #rotate-notice { display: flex; }
+        }
 
         @media (max-width: 600px) {
-            .top-header { flex-direction: column; text-align: center; }
-            .hero-date-clock { font-size: 18px; }
-            .weather-sticky-title { font-size: 20px; }
-            .menu-card { width: 80px; height: 80px; }
-            .menu-icon-img { width: 30px; height: 30px; }
-            .menu-label { font-size: 11px; }
+            .top-header { flex-direction: column; text-align: center; padding: 6px; }
+            .header-center { width: 100%; }
+            .hero-date-clock { font-size: 16px; }
+            .weather-sticky-title { font-size: 18px; }
+            .menu-card { width: 75px; height: 75px; }
+            .menu-icon-img { width: 35px; height: 35px; }
+            .menu-label { font-size: 10px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- 세로 모드 접속 시 가로 회전 안내 레이어 -->
+    <div id="rotate-notice">
+        <div class="notice-box">
+            <h3>🔄 화면을 가로로 돌려주세요!</h3>
+            <p>더 넓고 쾌적한 농장 현황 모니터링을 위해<br>스마트폰의 <b>'자동 회전'</b>을 켜고 가로로 시청해 주세요.</p>
+        </div>
+    </div>
 
     <!-- [1. 로그인 화면] -->
     <div id="login-section" class="login-box">
@@ -144,7 +178,7 @@
     </div>
 
     <!-- [2. 로그인 성공 시 메인 컨트롤러 화면] -->
-    <div id="main-content">
+    <div id="main-content" style="display: none;">
         <header class="top-header">
             <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
             <div class="header-center">
@@ -162,7 +196,7 @@
                 <button class="top-nav-btn" id="nav-btn-농장관리" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
                 <button class="top-nav-btn" id="nav-btn-자동설정" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
                 <button class="top-nav-btn" id="nav-btn-판넬연결" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
-                <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="20"></i></button>
+                <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="18"></i></button>
             </div>
         </header>
 
@@ -368,7 +402,8 @@
 
         function showMain() {
             document.getElementById('login-section').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
+            const mainContent = document.getElementById('main-content');
+            mainContent.style.display = 'flex';
             initMQTT(); 
             openMenu('HOME');
             lucide.createIcons();
@@ -458,7 +493,7 @@
             updateNavigationState(menuName);
         }
 
-        // 농장현황 페이지 HTML 구조 렌더링 (괄호 안의 텍스트 크기는 기존 크기 유지, 나머지 단위 포함 30% 확대, 배경색 채우기)
+        // 농장현황 페이지 HTML 구조 렌더링
         function renderStatusPageHTML() {
             var container = document.getElementById('content-area');
             container.innerHTML = '\
