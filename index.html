@@ -53,67 +53,50 @@
         .hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 20px auto; }
         .hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
 
-        /* 기상예보 구조 (컬럼 정렬 완벽 일치 테이블) */
+        /* 기상예보 구조 */
         .weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 10px; }
         .weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 12px; font-size: 25px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
-        
         .weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 10px; }
-        
         .weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 15px; }
-        
-        /* 표 레이아웃 고정으로 헤더와 내용 줄 맞춤 보장 */
         .weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 600px; table-layout: fixed; }
         .weather-table th, .weather-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
-        
         .weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .weather-badge { background: #ffffff; color: #2D6A3F; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
-
-        /* 야간(18시~06시) 행 배경 구분 스타일 */
         .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
         /* [농장현황 페이지 전용 스타일] */
         .status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; text-align: left; }
-        
-        /* 상단 날씨/온도 요약 바 */
         .status-top-bar { background: #ffffff; border-radius: 10px; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .status-weather-box { display: flex; align-items: center; gap: 12px; }
         .status-weather-icon { font-size: 30px; }
         .status-weather-text { text-align: left; }
         .status-rain-status { font-size: 18px; font-weight: 800; line-height: 1.2; }
         .status-rain-amount { font-size: 14px; font-weight: bold; color: #444; }
-        
         .status-summary-temps { display: flex; align-items: center; gap: 15px; }
         .summary-temp-item { display: flex; align-items: center; gap: 6px; font-size: 20px; font-weight: bold; color: #333; }
 
-        /* 본문 2분할 그리드 */
         .status-body-grid { display: flex; gap: 10px; width: 100%; height: calc(100% - 65px); }
         .status-column { flex: 1; display: flex; flex-direction: column; gap: 6px; height: 100%; }
 
-        /* 구역 카드박스 */
         .zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.06); display: flex; flex-direction: column; }
         .zone-header { background: #e5b365; color: #fff; font-size: 13px; font-weight: bold; padding: 4px 8px; text-align: center; letter-spacing: 0.5px; }
         .zone-header.house-title { background: #5ba39b; }
 
-        /* 센서 테이블 스타일 */
         .sensor-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .sensor-table th, .sensor-table td { padding: 4px 6px; border-bottom: 1px solid #eaeaea; text-align: center; }
         .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
         
-        /* 라벨 색상 */
         .lbl-sun { background: #ffd54f; color: #333; font-weight: bold; width: 30%; }
         .lbl-temp { background: #ef5350; color: #fff; font-weight: bold; width: 30%; }
         .lbl-hum { background: #4fc3f7; color: #fff; font-weight: bold; width: 30%; }
         .lbl-soil { background: #e0e0e0; color: #333; font-weight: bold; width: 30%; }
-        
         .val-cell { background: #f9f9f9; color: #111; font-weight: 600; text-align: left; padding-left: 10px; }
 
-        /* 하우스 섹션 내부 서브 아이템 (HOUSE 1, 2, 삽목장) */
         .house-item { display: flex; border-bottom: 1px solid #ddd; }
         .house-item:last-child { border-bottom: none; }
         .house-name { width: 30%; background: #00897b; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 12px; padding: 4px; text-align: center; }
         .house-sensors { flex: 1; display: flex; flex-direction: column; }
 
-        /* 반응형 모바일 대응 */
         @media (max-width: 600px) {
             .top-header { flex-direction: column; text-align: center; }
             .hero-date-clock { font-size: 18px; }
@@ -137,16 +120,14 @@
         <p id="error-msg" style="color:red; font-size:13px; display:none; margin-top:10px;"></p>
     </div>
 
-    <!-- [2. 로그인 성공 시 나타나는 메인 컨트롤러 화면] -->
+    <!-- [2. 로그인 성공 시 메인 컨트롤러 화면] -->
     <div id="main-content">
-        <!-- 상단 고정 헤더 -->
         <header class="top-header">
             <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
             <div class="header-center">
                 <div class="header-title">괴산농장 Main Controller V2.0</div>
                 <div class="header-clock" id="top-time">00시 00분 00초</div>
             </div>
-            <!-- 상단 우측 미니 아이콘 바 (6개) -->
             <div class="top-nav-icons">
                 <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
                 <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
@@ -158,11 +139,8 @@
             </div>
         </header>
 
-        <!-- 동적 교체 영역 (메인 녹색 배경) -->
         <main class="main-hero" id="main-hero-area">
-            <div id="content-area">
-                <!-- 기본 HOME 콘텐츠가 JavaScript에 의해 동적으로 로드됩니다 -->
-            </div>
+            <div id="content-area"></div>
         </main>
     </div>
 
@@ -172,7 +150,7 @@
 
         // 센서 데이터 저장 객체 (MQTT)
         let sensorData = {
-            firstWeatherIcon: '⛅', // 기상예보 첫번째 날씨 이미지(이모지)
+            firstWeatherIcon: '⛅', // 기상예보 연동 아이콘
             farm_a: { sun: '-', temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', rain: '0', rainAmount: '0', soil: '-' },
             farm_b: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
             house1: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
@@ -182,7 +160,7 @@
 
         let mqttClient = null;
 
-        // MQTT 브로커 연결 및 구독 설정
+        // MQTT 브로커 연결 및 페이로드 파싱 설정
         function initMQTT() {
             if (mqttClient) return;
             const clientId = "client_" + Math.random().toString(16).substring(2, 9);
@@ -197,73 +175,78 @@
                 try {
                     const topic = message.destinationName;
                     const payload = message.payloadString;
-                    const parts = payload.split(',');
+                    const parts = payload.split(',').map(item => item.trim());
+
+                    console.log("MQTT 수신 [" + topic + "]:", payload); // 디버깅용 로그
 
                     // (1) FARM A: saiifarm24/farm_o1
                     if (topic === "saiifarm24/farm_o1" && parts.length >= 11) {
                         sensorData.farm_a = {
-                            sun: parts[1].trim(),
-                            temp: parts[2].trim(),
-                            tempMax: parts[3].trim(),
-                            tempMin: parts[4].trim(),
-                            hum: parts[5].trim(),
-                            humMax: parts[6].trim(),
-                            humMin: parts[7].trim(),
-                            rain: parts[8].trim(),
-                            rainAmount: parts[9].trim(),
-                            soil: parts[10].trim()
+                            sun: parts[1],
+                            temp: parts[2],
+                            tempMax: parts[3],
+                            tempMin: parts[4],
+                            hum: parts[5],
+                            humMax: parts[6],
+                            humMin: parts[7],
+                            rain: parts[8],
+                            rainAmount: parts[9],
+                            soil: parts[10]
                         };
                     } 
                     // (2) FARM B: saiifarm24/farm_o2
                     else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
                         sensorData.farm_b = {
-                            temp: parts[1].trim(),
-                            tempMax: parts[2].trim(),
-                            tempMin: parts[3].trim(),
-                            hum: parts[4].trim(),
-                            humMax: parts[5].trim(),
-                            humMin: parts[6].trim()
+                            temp: parts[1],
+                            tempMax: parts[2],
+                            tempMin: parts[3],
+                            hum: parts[4],
+                            humMax: parts[5],
+                            humMin: parts[6]
                         };
                     } 
                     // (3) HOUSE 1: saiifarm24/house1
                     else if (topic === "saiifarm24/house1" && parts.length >= 7) {
                         sensorData.house1 = {
-                            temp: parts[1].trim(),
-                            tempMax: parts[2].trim(),
-                            tempMin: parts[3].trim(),
-                            hum: parts[4].trim(),
-                            humMax: parts[5].trim(),
-                            humMin: parts[6].trim()
+                            temp: parts[1],
+                            tempMax: parts[2],
+                            tempMin: parts[3],
+                            hum: parts[4],
+                            humMax: parts[5],
+                            humMin: parts[6]
                         };
                     } 
                     // (4) HOUSE 2: saiifarm24/house2
                     else if (topic === "saiifarm24/house2" && parts.length >= 7) {
                         sensorData.house2 = {
-                            temp: parts[1].trim(),
-                            tempMax: parts[2].trim(),
-                            tempMin: parts[3].trim(),
-                            hum: parts[4].trim(),
-                            humMax: parts[5].trim(),
-                            humMin: parts[6].trim()
+                            temp: parts[1],
+                            tempMax: parts[2],
+                            tempMin: parts[3],
+                            hum: parts[4],
+                            humMax: parts[5],
+                            humMin: parts[6]
                         };
                     } 
-                    // (5) 삽목장: saiifarm24/house3
+                    // (5) 삽목장 (HOUSE 3): saiifarm24/house3
                     else if (topic === "saiifarm24/house3" && parts.length >= 8) {
                         sensorData.house3 = {
-                            temp: parts[1].trim(),
-                            tempMax: parts[2].trim(),
-                            tempMin: parts[3].trim(),
-                            hum: parts[4].trim(),
-                            humMax: parts[5].trim(),
-                            humMin: parts[6].trim(),
-                            soil: parts[7].trim()
+                            temp: parts[1],
+                            tempMax: parts[2],
+                            tempMin: parts[3],
+                            hum: parts[4],
+                            humMax: parts[5],
+                            humMin: parts[6],
+                            soil: parts[7]
                         };
                     }
 
+                    // 현재 화면이 '농장현황'일 경우 실시간으로 DOM 갱신
                     if (currentMenu === '농장현황') {
                         updateStatusDOM();
                     }
+                    // 상단 헤더 우측 온도계 및 H 옆 온도 상시 갱신
                     updateTopHeaderTemp();
+
                 } catch (e) {
                     console.error("MQTT 메시지 파싱 오류:", e);
                 }
@@ -286,7 +269,7 @@
             });
         }
 
-        // 상단 헤더 및 현황페이지 온도계 옆(FARM A) & H 옆(HOUSE 1) 온도를 갱신하는 함수
+        // 상단 헤더 및 현황판의 온도계(FARM A 기온) & H(HOUSE 1 기온) 갱신
         function updateTopHeaderTemp() {
             const tempFarmA = document.getElementById('header-farm-temp');
             const tempHouse1 = document.getElementById('header-house1-temp');
@@ -294,7 +277,7 @@
             if (tempHouse1 && sensorData.house1.temp !== '-') tempHouse1.innerText = sensorData.house1.temp + " 'C";
         }
 
-        // 서버(Cloudflare Worker)를 통한 안전한 로그인 검증
+        // 로그인 검증
         function checkLogin() {
             const inputId = document.getElementById('username').value.trim();
             const inputPw = document.getElementById('password').value;
@@ -311,12 +294,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: inputId, password: inputPw })
             })
-            .then(function(response) {
-                return response.json().then(function(data) {
-                    return { status: response.status, body: data };
-                });
-            })
-            .then(function(res) {
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(res => {
                 if (res.status === 200 && res.body.success) {
                     sessionStorage.setItem('isLoggedIn', 'true');
                     showMain();
@@ -327,7 +306,7 @@
                     document.getElementById('password').focus();
                 }
             })
-            .catch(function(error) {
+            .catch(error => {
                 console.error('로그인 통신 오류:', error);
                 errorMsg.innerText = '서버 통신 중 오류가 발생했습니다.';
                 errorMsg.style.display = 'block';
@@ -337,11 +316,10 @@
         function showMain() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
-            initMQTT(); // 로그인 성공 시 MQTT 연결 시작
+            initMQTT(); 
             openMenu('HOME');
             lucide.createIcons();
-            // 초기 기상 예보 데이터를 미리 가져와 농장 현황에 날씨 아이콘 준비
-            fetchKMAWeather();
+            fetchKMAWeather(); // 날씨 아이콘 사전 로드
         }
 
         function logout() {
@@ -352,12 +330,9 @@
         function updateNavigationState(menuName) {
             currentMenu = menuName;
             var menus = ['HOME', '기상예보', '농장현황', '농장관리', '자동설정', '판넬연결'];
-
             menus.forEach(function(name) {
                 var topBtn = document.getElementById('nav-btn-' + name);
-                var isActive = (name === menuName);
-
-                if (topBtn) topBtn.disabled = isActive;
+                if (topBtn) topBtn.disabled = (name === menuName);
             });
         }
 
@@ -416,7 +391,7 @@
                 ';
                 fetchKMAWeather();
             } else if (menuName === '농장현황') {
-                heroArea.style.backgroundColor = '#bce0d0';
+                heroArea.style.backgroundColor = '#bce0d0'; // 파스텔 톤 배경
                 renderStatusPageHTML();
             } else {
                 heroArea.style.backgroundColor = '#2D6A3F';
@@ -430,7 +405,7 @@
             updateNavigationState(menuName);
         }
 
-        // 농장현황 페이지 HTML 렌더링
+        // 농장현황 페이지 HTML 구조 렌더링
         function renderStatusPageHTML() {
             var container = document.getElementById('content-area');
             container.innerHTML = '\
@@ -508,34 +483,24 @@
             updateTopHeaderTemp();
         }
 
-        // 수신된 센서 데이터 DOM 반영
+        // 수신된 MQTT 데이터를 DOM에 반영하는 함수
         function updateStatusDOM() {
-            // 기상 예보 아이콘 갱신
+            // 기상 아이콘
             const weatherIconEl = document.getElementById('st-weather-icon');
             if (weatherIconEl) weatherIconEl.innerText = sensorData.firstWeatherIcon;
 
             // (1) FARM A
-            const elSun = document.getElementById('st-fa-sun');
-            const elTemp = document.getElementById('st-fa-temp');
-            const elTmax = document.getElementById('st-fa-tmax');
-            const elTmin = document.getElementById('st-fa-tmin');
-            const elHum = document.getElementById('st-fa-hum');
-            const elHmax = document.getElementById('st-fa-hmax');
-            const elHmin = document.getElementById('st-fa-hmin');
-            const elSoil = document.getElementById('st-fa-soil');
-
-            if (elSun) elSun.innerText = sensorData.farm_a.sun;
-            if (elTemp) elTemp.innerText = sensorData.farm_a.temp;
-            if (elTmax) elTmax.innerText = sensorData.farm_a.tempMax;
-            if (elTmin) elTmin.innerText = sensorData.farm_a.tempMin;
-            if (elHum) elHum.innerText = sensorData.farm_a.hum;
-            if (elHmax) elHmax.innerText = sensorData.farm_a.humMax;
-            if (elHmin) elHmin.innerText = sensorData.farm_a.humMin;
-            if (elSoil) elSoil.innerText = sensorData.farm_a.soil;
+            setVal('st-fa-sun', sensorData.farm_a.sun);
+            setVal('st-fa-temp', sensorData.farm_a.temp);
+            setVal('st-fa-tmax', sensorData.farm_a.tempMax);
+            setVal('st-fa-tmin', sensorData.farm_a.tempMin);
+            setVal('st-fa-hum', sensorData.farm_a.hum);
+            setVal('st-fa-hmax', sensorData.farm_a.humMax);
+            setVal('st-fa-hmin', sensorData.farm_a.humMin);
+            setVal('st-fa-soil', sensorData.farm_a.soil);
+            setVal('status-rain-val', sensorData.farm_a.rainAmount);
 
             const rainText = document.getElementById('status-rain-text');
-            const rainVal = document.getElementById('status-rain-val');
-            if (rainVal) rainVal.innerText = sensorData.farm_a.rainAmount;
             if (rainText) {
                 if (sensorData.farm_a.rain === "1") {
                     rainText.innerText = "비가 옵니다.";
@@ -547,129 +512,83 @@
             }
 
             // (2) FARM B
-            const fbTemp = document.getElementById('st-fb-temp');
-            if (fbTemp) fbTemp.innerText = sensorData.farm_b.temp;
-            if (document.getElementById('st-fb-tmax')) document.getElementById('st-fb-tmax').innerText = sensorData.farm_b.tempMax;
-            if (document.getElementById('st-fb-tmin')) document.getElementById('st-fb-tmin').innerText = sensorData.farm_b.tempMin;
-            if (document.getElementById('st-fb-hum')) document.getElementById('st-fb-hum').innerText = sensorData.farm_b.hum;
-            if (document.getElementById('st-fb-hmax')) document.getElementById('st-fb-hmax').innerText = sensorData.farm_b.humMax;
-            if (document.getElementById('st-fb-hmin')) document.getElementById('st-fb-hmin').innerText = sensorData.farm_b.humMin;
+            setVal('st-fb-temp', sensorData.farm_b.temp);
+            setVal('st-fb-tmax', sensorData.farm_b.tempMax);
+            setVal('st-fb-tmin', sensorData.farm_b.tempMin);
+            setVal('st-fb-hum', sensorData.farm_b.hum);
+            setVal('st-fb-hmax', sensorData.farm_b.humMax);
+            setVal('st-fb-hmin', sensorData.farm_b.humMin);
 
             // (3) HOUSE 1
-            const h1Temp = document.getElementById('st-h1-temp');
-            if (h1Temp) h1Temp.innerText = sensorData.house1.temp;
-            if (document.getElementById('st-h1-tmax')) document.getElementById('st-h1-tmax').innerText = sensorData.house1.tempMax;
-            if (document.getElementById('st-h1-tmin')) document.getElementById('st-h1-tmin').innerText = sensorData.house1.tempMin;
-            if (document.getElementById('st-h1-hum')) document.getElementById('st-h1-hum').innerText = sensorData.house1.hum;
-            if (document.getElementById('st-h1-hmax')) document.getElementById('st-h1-hmax').innerText = sensorData.house1.humMax;
-            if (document.getElementById('st-h1-hmin')) document.getElementById('st-h1-hmin').innerText = sensorData.house1.humMin;
+            setVal('st-h1-temp', sensorData.house1.temp);
+            setVal('st-h1-tmax', sensorData.house1.tempMax);
+            setVal('st-h1-tmin', sensorData.house1.tempMin);
+            setVal('st-h1-hum', sensorData.house1.hum);
+            setVal('st-h1-hmax', sensorData.house1.humMax);
+            setVal('st-h1-hmin', sensorData.house1.humMin);
 
             // (4) HOUSE 2
-            const h2Temp = document.getElementById('st-h2-temp');
-            if (h2Temp) h2Temp.innerText = sensorData.house2.temp;
-            if (document.getElementById('st-h2-tmax')) document.getElementById('st-h2-tmax').innerText = sensorData.house2.tempMax;
-            if (document.getElementById('st-h2-tmin')) document.getElementById('st-h2-tmin').innerText = sensorData.house2.tempMin;
-            if (document.getElementById('st-h2-hum')) document.getElementById('st-h2-hum').innerText = sensorData.house2.hum;
-            if (document.getElementById('st-h2-hmax')) document.getElementById('st-h2-hmax').innerText = sensorData.house2.humMax;
-            if (document.getElementById('st-h2-hmin')) document.getElementById('st-h2-hmin').innerText = sensorData.house2.humMin;
+            setVal('st-h2-temp', sensorData.house2.temp);
+            setVal('st-h2-tmax', sensorData.house2.tempMax);
+            setVal('st-h2-tmin', sensorData.house2.tempMin);
+            setVal('st-h2-hum', sensorData.house2.hum);
+            setVal('st-h2-hmax', sensorData.house2.humMax);
+            setVal('st-h2-hmin', sensorData.house2.humMin);
 
             // (5) 삽목장 (House 3)
-            const h3Temp = document.getElementById('st-h3-temp');
-            if (h3Temp) h3Temp.innerText = sensorData.house3.temp;
-            if (document.getElementById('st-h3-tmax')) document.getElementById('st-h3-tmax').innerText = sensorData.house3.tempMax;
-            if (document.getElementById('st-h3-tmin')) document.getElementById('st-h3-tmin').innerText = sensorData.house3.tempMin;
-            if (document.getElementById('st-h3-hum')) document.getElementById('st-h3-hum').innerText = sensorData.house3.hum;
-            if (document.getElementById('st-h3-hmax')) document.getElementById('st-h3-hmax').innerText = sensorData.house3.humMax;
-            if (document.getElementById('st-h3-hmin')) document.getElementById('st-h3-hmin').innerText = sensorData.house3.humMin;
-            if (document.getElementById('st-h3-soil')) document.getElementById('st-h3-soil').innerText = sensorData.house3.soil;
+            setVal('st-h3-temp', sensorData.house3.temp);
+            setVal('st-h3-tmax', sensorData.house3.tempMax);
+            setVal('st-h3-tmin', sensorData.house3.tempMin);
+            setVal('st-h3-hum', sensorData.house3.hum);
+            setVal('st-h3-hmax', sensorData.house3.humMax);
+            setVal('st-h3-hmin', sensorData.house3.humMin);
+            setVal('st-h3-soil', sensorData.house3.soil);
         }
 
-        // 기상청 예보 호출 및 첫번째 예보 날씨 아이콘 추출
+        // 안전한 DOM 값 주입 헬퍼 함수
+        function setVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        }
+
+        // 기상청 예보 API 연동 (상단 날씨 이모지 추출용)
         function fetchKMAWeather() {
             var weatherContainer = document.getElementById('weather-data-container');
 
             fetch(WORKER_URL + '/api/weather')
-                .then(function(response) {
-                    if (response.ok) return response.json();
-                    throw new Error('네트워크 응답 오류');
-                })
-                .then(function(jsonData) {
-                    if (
-                        jsonData.success !== true ||
-                        !Array.isArray(jsonData.items) ||
-                        jsonData.items.length === 0
-                    ) {
-                        if (weatherContainer) weatherContainer.innerHTML = '<p style="color: #fff; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
-                        return;
-                    }
+                .then(res => res.ok ? res.json() : Promise.reject('네트워크 응답 오류'))
+                .then(jsonData => {
+                    if (!jsonData.success || !Array.isArray(jsonData.items) || jsonData.items.length === 0) return;
 
-                    var items = jsonData.items;
                     var groupedData = {};
-
-                    items.forEach(function(item) {
+                    jsonData.items.forEach(item => {
                         var key = item.fcstDate + '_' + item.fcstTime;
-                        if (!groupedData[key]) {
-                            groupedData[key] = {
-                                fcstDate: item.fcstDate,
-                                fcstTime: item.fcstTime
-                            };
-                        }
+                        if (!groupedData[key]) groupedData[key] = { fcstDate: item.fcstDate, fcstTime: item.fcstTime };
                         groupedData[key][item.category] = item.fcstValue;
                     });
 
                     var tableRows = '';
                     var now = new Date();
-                    
-                    var todayDateStr = String(now.getFullYear()) + 
-                                       String(now.getMonth() + 1).padStart(2, '0') + 
-                                       String(now.getDate()).padStart(2, '0');
-
-                    var tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-                    var tomorrowDateStr = String(tomorrow.getFullYear()) + 
-                                          String(tomorrow.getMonth() + 1).padStart(2, '0') + 
-                                          String(tomorrow.getDate()).padStart(2, '0');
-
-                    var afterTomorrow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-                    var afterTomorrowDateStr = String(afterTomorrow.getFullYear()) + 
-                                               String(afterTomorrow.getMonth() + 1).padStart(2, '0') + 
-                                               String(afterTomorrow.getDate()).padStart(2, '0');
+                    var todayStr = String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                    var tomorrowStr = String(new Date(now.getTime() + 86400000).getFullYear()) + String(new Date(now.getTime() + 86400000).getMonth() + 1).padStart(2, '0') + String(new Date(now.getTime() + 86400000).getDate()).padStart(2, '0');
+                    var afterTomorrowStr = String(new Date(now.getTime() + 172800000).getFullYear()) + String(new Date(now.getTime() + 172800000).getMonth() + 1).padStart(2, '0') + String(new Date(now.getTime() + 172800000).getDate()).padStart(2, '0');
 
                     var sortedKeys = Object.keys(groupedData).sort();
                     var count = 0;
-                    var maxHours = 36; 
 
-                    sortedKeys.forEach(function(key, idx) {
-                        if (count >= maxHours) return;
-
+                    sortedKeys.forEach(key => {
+                        if (count >= 36) return;
                         var d = groupedData[key];
-                        var dateStr = d.fcstDate;
-                        var timeStr = d.fcstTime; 
-                        var hourNum = parseInt(timeStr.substring(0, 2), 10);
-                        var hourDisplay = timeStr.substring(0, 2) + '시';
-
+                        var hourNum = parseInt(d.fcstTime.substring(0, 2), 10);
                         var isNight = (hourNum >= 18 || hourNum < 6);
-                        var rowClass = isNight ? 'class="night-row"' : '';
+                        
+                        var dayLabel = (d.fcstDate === todayStr) ? '오늘' : (d.fcstDate === tomorrowStr) ? '내일' : (d.fcstDate === afterTomorrowStr) ? '모레' : '';
+                        if (!dayLabel) return;
 
-                        var dayLabel = '';
-                        if (dateStr === todayDateStr) {
-                            dayLabel = '오늘';
-                        } else if (dateStr === tomorrowDateStr) {
-                            dayLabel = '내일';
-                        } else if (dateStr === afterTomorrowDateStr) {
-                            dayLabel = '모레';
-                        } else {
-                            return; 
-                        }
-
-                        var temp = d.TMP || '-'; 
-                        var pop = d.POP || '0';  
-                        var reh = d.REH || '0';  
-                        var wsd = d.WSD || '0';  
-                        var pty = d.PTY || '0';  
-                        var sky = d.SKY || '1';  
-
-                        var weatherText = '맑음';
+                        var pty = d.PTY || '0';
+                        var sky = d.SKY || '1';
                         var weatherIcon = isNight ? '🌙' : '☀️';
+                        var weatherText = '맑음';
 
                         if (pty !== '0') {
                             if (pty === '1') { weatherText = '비'; weatherIcon = '🌧️'; }
@@ -681,7 +600,7 @@
                             else if (sky === '4') { weatherText = '흐림'; weatherIcon = '☁️'; }
                         }
 
-                        // 첫 번째 예보 날씨 아이콘을 농장현황 상단 표시용으로 기록
+                        // 첫 번째 예보 아이콘을 농장현황 상단에 반영
                         if (count === 0) {
                             sensorData.firstWeatherIcon = weatherIcon;
                             const stIconEl = document.getElementById('st-weather-icon');
@@ -689,13 +608,13 @@
                         }
 
                         tableRows += '\
-                            <tr ' + rowClass + '>\
-                                <td><span class="weather-badge">' + dayLabel + ' ' + hourDisplay + '</span></td>\
+                            <tr ' + (isNight ? 'class="night-row"' : '') + '>\
+                                <td><span class="weather-badge">' + dayLabel + ' ' + d.fcstTime.substring(0, 2) + '시</span></td>\
                                 <td><b>' + weatherIcon + ' ' + weatherText + '</b></td>\
-                                <td>' + temp + ' ℃</td>\
-                                <td>🌧️ ' + pop + '%</td>\
-                                <td>💧 ' + reh + '%</td>\
-                                <td>💨 ' + parseFloat(wsd).toFixed(1) + ' m/s</td>\
+                                <td>' + (d.TMP || '-') + ' ℃</td>\
+                                <td>🌧️ ' + (d.POP || '0') + '%</td>\
+                                <td>💧 ' + (d.REH || '0') + '%</td>\
+                                <td>💨 ' + parseFloat(d.WSD || '0').toFixed(1) + ' m/s</td>\
                             </tr>\
                         ';
                         count++;
@@ -706,49 +625,26 @@
                             <div class="weather-table-scroll">\
                                 <table class="weather-table">\
                                     <thead>\
-                                        <tr>\
-                                            <th>시간</th>\
-                                            <th>날씨</th>\
-                                            <th>기온</th>\
-                                            <th>강수확률</th>\
-                                            <th>습도</th>\
-                                            <th>풍속</th>\
-                                        </tr>\
+                                        <tr><th>시간</th><th>날씨</th><th>기온</th><th>강수확률</th><th>습도</th><th>풍속</th></tr>\
                                     </thead>\
-                                    <tbody>\
-                                        ' + tableRows + '\
-                                    </tbody>\
+                                    <tbody>' + tableRows + '</tbody>\
                                 </table>\
                             </div>\
                         ';
                     }
                 })
-                .catch(function(error) {
-                    console.error('데이터 수신 오류:', error);
-                    if (weatherContainer) {
-                        weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>';
-                    }
-                });
+                .catch(err => console.error('기상 데이터 오류:', err));
         }
 
-        // 시계 자동 갱신 IIFE
+        // 시계 자동 갱신
         (function startClock() {
             function update() {
                 var now = new Date();
-                var year = now.getFullYear();
-                var month = String(now.getMonth() + 1).padStart(2, '0');
-                var date = String(now.getDate()).padStart(2, '0');
-                var hours = String(now.getHours()).padStart(2, '0');
-                var minutes = String(now.getMinutes()).padStart(2, '0');
-                var seconds = String(now.getSeconds()).padStart(2, '0');
+                var topTimeString = String(now.getHours()).padStart(2, '0') + '시 ' + String(now.getMinutes()).padStart(2, '0') + '분 ' + String(now.getSeconds()).padStart(2, '0') + '초';
+                var heroTimeString = now.getFullYear() + '년 ' + String(now.getMonth() + 1).padStart(2, '0') + '월 ' + String(now.getDate()).padStart(2, '0') + '일 ' + topTimeString;
 
-                var topTimeString = hours + '시 ' + minutes + '분 ' + seconds + '초';
-                var heroTimeString = year + '년 ' + month + '월 ' + date + '일 ' + hours + '시 ' + minutes + '분 ' + seconds + '초';
-
-                var topTimeEl = document.getElementById('top-time');
-                var heroTimeEl = document.getElementById('hero-full-time');
-                if (topTimeEl) topTimeEl.innerText = topTimeString;
-                if (heroTimeEl) heroTimeEl.innerText = heroTimeString;
+                setVal('top-time', topTimeString);
+                setVal('hero-full-time', heroTimeString);
             }
             update();
             setInterval(update, 1000);
