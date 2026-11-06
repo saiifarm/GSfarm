@@ -72,8 +72,8 @@
         /* [농장현황 페이지 전용 스타일] */
         .status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; text-align: left; }
         
-        /* 상단 날씨/온도 요약 바 */
-        .status-top-bar { background: #dff0d8; border: 5px solid #b5d6ad; border-radius: 10px; padding: 15px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        /* (1) 상단 날씨/온도 요약 바 (높이 20% 증가: 위아래 패딩 조정) */
+        .status-top-bar { background: #dff0d8; border: 5px solid #b5d6ad; border-radius: 10px; padding: 18px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .status-weather-box { display: flex; align-items: center; gap: 10px; }
         .status-weather-icon { font-size: 40px; }
         .status-weather-text { text-align: left; display: flex; align-items: baseline; gap: 10px; }
@@ -83,7 +83,7 @@
         .status-summary-temps { display: flex; align-items: center; gap: 20px; }
         .summary-temp-item { display: flex; align-items: center; gap: 20px; font-size: 35px; font-weight: bold; color: #333; }
         
-        /* 본문 2분할 그리드 (상단바와 표 사이 여백 3배 적용) */
+        /* 본문 2분할 그리드 */
         .status-body-grid { display: flex; gap: 12px; width: 100%; flex-grow: 1; height: calc(100% - 75px); margin-top: 18px; }
         .status-column { flex: 1; display: flex; flex-direction: column; height: 100%; }
 
@@ -92,24 +92,33 @@
         .zone-header { background: #f0ad4e; color: #fff; font-size: 25px; font-weight: bold; padding: 12px 6px; text-align: center; letter-spacing: 0.5px; border-bottom: 5px solid #b5d6ad; }
         .zone-header.house-title { background: #46b8da; }
 
-        /* 센서 테이블 스타일 */
-        .sensor-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed; height: 100%; }
+        /* (2) 센서 테이블 스타일 (기존보다 30% 커진 폰트: 15px -> 약 20px) */
+        .sensor-table { width: 100%; border-collapse: collapse; font-size: 20px; table-layout: fixed; height: 100%; }
         .sensor-table th, .sensor-table td { padding: 8px 10px; border-bottom: 2px solid #e5e5e5; text-align: center; vertical-align: middle; }
         .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
         
-        /* 구역별 배경 색상 세분화 (채도 및 명도 조절) */
-        .lbl-farma { background: #fcf1d2; color: #8a6d3b; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 20px; }
-        .lbl-farmb { background: #fdf5e2; color: #8a6d3b; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 20px; }
-        .lbl-h1 { background: #d9edf7; color: #31708f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 20px; }
-        .lbl-h2 { background: #e4f1fb; color: #31708f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 20px; }
-        .lbl-h3 { background: #f0f7fd; color: #31708f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 20px; }
+        /* (3) 구역별 배경 색상 대폭 강화 (측정값 칸 .val-cell까지 동일하게 확장 적용) */
+        .lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
+        .val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 21px; }
+
+        .lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
+        .val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 21px; }
+
+        .lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
+        .val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 21px; }
+
+        .lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
+        .val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 21px; }
+
+        .lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: 22px; }
+        .val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 21px; }
 
         .lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 20%; text-align: center; }
         .lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 20%; text-align: center; }
         .lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 20%; text-align: center; }
-        .lbl-soil { background: #f5f5f5; color: #333; font-weight: bold; width: 20%; text-align: center; }
         
-        .val-cell { background: #ffffff; color: #000; font-weight: bold; text-align: left; padding-left: 15px; font-size: 16px; }
+        /* (4) 토양습도 색상 고동색 계열로 변경 */
+        .lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 20%; text-align: center; }
 
         @media (max-width: 600px) {
             .top-header { flex-direction: column; text-align: center; }
@@ -449,7 +458,7 @@
             updateNavigationState(menuName);
         }
 
-        // 농장현황 페이지 HTML 구조 렌더링 (통합된 OUTDOOR FARM 6줄, HOUSE 7줄)
+        // 농장현황 페이지 HTML 구조 렌더링 (괄호 안의 텍스트 크기는 기존 크기 유지, 나머지 단위 포함 30% 확대, 배경색 채우기)
         function renderStatusPageHTML() {
             var container = document.getElementById('content-area');
             container.innerHTML = '\
@@ -475,28 +484,28 @@
                                     <tr>\
                                         <td rowspan="4" class="lbl-farma">A</td>\
                                         <td class="lbl-sun">태양광</td>\
-                                        <td class="val-cell"><span id="st-fa-sun">-</span> lx</td>\
+                                        <td class="val-farma"><span id="st-fa-sun">-</span> lx</td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-temp">기온</td>\
-                                        <td class="val-cell"><span id="st-fa-temp">-</span> °C (상<span id="st-fa-tmax">-</span>/하<span id="st-fa-tmin">-</span>)</td>\
+                                        <td class="val-farma"><span id="st-fa-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fa-tmax">-</span>/하<span id="st-fa-tmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-hum">습도</td>\
-                                        <td class="val-cell"><span id="st-fa-hum">-</span> % (상<span id="st-fa-hmax">-</span>/하<span id="st-fa-hmin">-</span>)</td>\
+                                        <td class="val-farma"><span id="st-fa-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fa-hmax">-</span>/하<span id="st-fa-hmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-soil">토양습도</td>\
-                                        <td class="val-cell"><span id="st-fa-soil">-</span> %</td>\
+                                        <td class="val-farma"><span id="st-fa-soil">-</span> %</td>\
                                     </tr>\
                                     <tr>\
                                         <td rowspan="2" class="lbl-farmb">B</td>\
                                         <td class="lbl-temp">기온</td>\
-                                        <td class="val-cell"><span id="st-fb-temp">-</span> °C (상<span id="st-fb-tmax">-</span>/하<span id="st-fb-tmin">-</span>)</td>\
+                                        <td class="val-farmb"><span id="st-fb-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fb-tmax">-</span>/하<span id="st-fb-tmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-hum">습도</td>\
-                                        <td class="val-cell"><span id="st-fb-hum">-</span> % (상<span id="st-fb-hmax">-</span>/하<span id="st-fb-hmin">-</span>)</td>\
+                                        <td class="val-farmb"><span id="st-fb-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fb-hmax">-</span>/하<span id="st-fb-hmin">-</span>)</span></td>\
                                     </tr>\
                                 </table>\
                             </div>\
@@ -508,33 +517,33 @@
                                     <tr>\
                                         <td rowspan="2" class="lbl-h1">H1</td>\
                                         <td class="lbl-temp">기온</td>\
-                                        <td class="val-cell"><span id="st-h1-temp">-</span> °C (상<span id="st-h1-tmax">-</span>/하<span id="st-h1-tmin">-</span>)</td>\
+                                        <td class="val-h1"><span id="st-h1-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h1-tmax">-</span>/하<span id="st-h1-tmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-hum">습도</td>\
-                                        <td class="val-cell"><span id="st-h1-hum">-</span> % (상<span id="st-h1-hmax">-</span>/하<span id="st-h1-hmin">-</span>)</td>\
+                                        <td class="val-h1"><span id="st-h1-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h1-hmax">-</span>/하<span id="st-h1-hmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td rowspan="2" class="lbl-h2">H2</td>\
                                         <td class="lbl-temp">기온</td>\
-                                        <td class="val-cell"><span id="st-h2-temp">-</span> °C (상<span id="st-h2-tmax">-</span>/하<span id="st-h2-tmin">-</span>)</td>\
+                                        <td class="val-h2"><span id="st-h2-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h2-tmax">-</span>/하<span id="st-h2-tmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-hum">습도</td>\
-                                        <td class="val-cell"><span id="st-h2-hum">-</span> % (상<span id="st-h2-hmax">-</span>/하<span id="st-h2-hmin">-</span>)</td>\
+                                        <td class="val-h2"><span id="st-h2-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h2-hmax">-</span>/하<span id="st-h2-hmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td rowspan="3" class="lbl-h3">H3</td>\
                                         <td class="lbl-temp">기온</td>\
-                                        <td class="val-cell"><span id="st-h3-temp">-</span> °C (상<span id="st-h3-tmax">-</span>/하<span id="st-h3-tmin">-</span>)</td>\
+                                        <td class="val-h3"><span id="st-h3-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h3-tmax">-</span>/하<span id="st-h3-tmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-hum">습도</td>\
-                                        <td class="val-cell"><span id="st-h3-hum">-</span> % (상<span id="st-h3-hmax">-</span>/하<span id="st-h3-hmin">-</span>)</td>\
+                                        <td class="val-h3"><span id="st-h3-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h3-hmax">-</span>/하<span id="st-h3-hmin">-</span>)</span></td>\
                                     </tr>\
                                     <tr>\
                                         <td class="lbl-soil">토양습도</td>\
-                                        <td class="val-cell"><span id="st-h3-soil">-</span> %</td>\
+                                        <td class="val-h3"><span id="st-h3-soil">-</span> %</td>\
                                     </tr>\
                                 </table>\
                             </div>\
