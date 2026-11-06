@@ -29,6 +29,11 @@
         .header-title { font-size: 18px; font-weight: bold; color: #333; margin: 0; }
         .header-clock { font-size: 20px; font-weight: 800; color: #000; margin-top: 2px; }
         
+        /* MQTT 연결 상태 인디케이터 */
+        .mqtt-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: bold; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; margin-top: 2px; }
+        .mqtt-dot { width: 8px; height: 8px; border-radius: 50%; background: #d32f2f; display: inline-block; }
+        .mqtt-dot.connected { background: #2e7d32; }
+
         /* 상단 우측 미니 아이콘 바 */
         .top-nav-icons { display: flex; gap: 8px; align-items: center; }
         .top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; transition: transform 0.2s; }
@@ -37,11 +42,11 @@
         .top-nav-btn img { width: 36px; height: 36px; object-fit: contain; }
         .btn-logout-icon { color: #d32f2f; margin-left: 5px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-        /* 메인 녹색 배경 영역 (정중앙 정렬 및 농장현황용 파스텔 톤 #bce0d0 적용) */
+        /* 메인 녹색 배경 영역 */
         .main-hero { background-color: #2D6A3F; padding: 20px; text-align: center; color: white; height: 560px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         #content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* 하단 6개 메뉴 아이콘 그리드 (HOME 화면용) */
+        /* 하단 6개 메뉴 아이콘 그리드 */
         .menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
         .menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
         .menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
@@ -127,6 +132,10 @@
             <div class="header-center">
                 <div class="header-title">괴산농장 Main Controller V2.0</div>
                 <div class="header-clock" id="top-time">00시 00분 00초</div>
+                <div class="mqtt-status-badge">
+                    <span id="mqtt-dot" class="mqtt-dot"></span>
+                    <span id="mqtt-status-text">MQTT 연결 중...</span>
+                </div>
             </div>
             <div class="top-nav-icons">
                 <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
@@ -150,7 +159,7 @@
 
         // 센서 데이터 저장 객체 (MQTT)
         let sensorData = {
-            firstWeatherIcon: '⛅', // 기상예보 연동 아이콘
+            firstWeatherIcon: '⛅',
             farm_a: { sun: '-', temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', rain: '0', rainAmount: '0', soil: '-' },
             farm_b: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
             house1: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
@@ -160,14 +169,50 @@
 
         let mqttClient = null;
 
-        // MQTT 브로커 연결 및 페이로드 파싱 설정
+        // MQTT 연결 상태 UI 업데이트 헬퍼
+        function updateMqttStatusUI(isConnected, text) {
+            const dot = document.getElementById('mqtt-dot');
+            const statusText = document.getElementById('mqtt-status-text');
+            if (dot && statusText) {
+                if (isConnected) {
+                    dot.classList.add('connected');
+                    statusText.innerText = text || "MQTT 연결됨";
+                } else {
+                    dot.classList.remove('connected');
+                    statusText.innerText = text || "MQTT 연결 끊김";
+                }
+            }
+        }
+
+        // [개선된 MQTT 초기화 및 자동 재연결 로직]
         function initMQTT() {
-            if (mqttClient) return;
-            const clientId = "client_" + Math.random().toString(16).substring(2, 9);
-            mqttClient = new Paho.MQTT.Client("broker.mqtt-dashboard.com", 8000, "/mqtt", clientId);
+            // 이미 연결 시도 중이거나 연결된 상태라면 중복 실행 방지
+            if (mqttClient && mqttClient.isConnected && mqttClient.isConnected()) return;
+
+            const clientId = "saiifarm_web_" + Math.random().toString(16).substring(2, 9);
+            
+            // HTTPS 환경 보안 WebSocket(WSS 8884) 및 HTTP 환경 일반 WebSocket(WS 8000) 자동 분기
+            const isSecure = window.location.protocol === 'https:';
+            const mqttHost = "broker.mqtt-dashboard.com";
+            const mqttPort = isSecure ? 8884 : 8000;
+            const mqttPath = "/mqtt";
+
+            console.log("MQTT 연결 시도:", mqttHost, mqttPort, isSecure ? "(WSS 보안)" : "(WS 일반)");
+            updateMqttStatusUI(false, "MQTT 연결 중...");
+
+            try {
+                mqttClient = new Paho.MQTT.Client(mqttHost, Number(mqttPort), mqttPath, clientId);
+            } catch (err) {
+                console.error("MQTT 클라이언트 객체 생성 실패:", err);
+                mqttClient = null;
+                setTimeout(initMQTT, 5000);
+                return;
+            }
 
             mqttClient.onConnectionLost = function(responseObject) {
                 console.warn("MQTT 연결 끊김:", responseObject.errorMessage);
+                updateMqttStatusUI(false, "연결 끊김 (재시도 중)");
+                mqttClient = null; // 재연결을 위해 객체 초기화 필수!
                 setTimeout(initMQTT, 5000);
             };
 
@@ -177,66 +222,66 @@
                     const payload = message.payloadString;
                     const parts = payload.split(',').map(item => item.trim());
 
-                    console.log("MQTT 수신 [" + topic + "]:", payload); // 디버깅용 로그
+                    console.log("📥 MQTT 수신 [" + topic + "]:", payload);
 
-                    // (1) FARM A: saiifarm24/farm_o1
-                    if (topic === "saiifarm24/farm_o1" && parts.length >= 11) {
+                    // (1) FARM A: saiifarm24/farm_o1 (최소 11개 필드)
+                    if (topic === "saiifarm24/farm_o1" && parts.length >= 10) {
                         sensorData.farm_a = {
-                            sun: parts[1],
-                            temp: parts[2],
-                            tempMax: parts[3],
-                            tempMin: parts[4],
-                            hum: parts[5],
-                            humMax: parts[6],
-                            humMin: parts[7],
-                            rain: parts[8],
-                            rainAmount: parts[9],
-                            soil: parts[10]
+                            sun: parts[1] || '-',
+                            temp: parts[2] || '-',
+                            tempMax: parts[3] || '-',
+                            tempMin: parts[4] || '-',
+                            hum: parts[5] || '-',
+                            humMax: parts[6] || '-',
+                            humMin: parts[7] || '-',
+                            rain: parts[8] || '0',
+                            rainAmount: parts[9] || '0.00',
+                            soil: parts[10] || '-'
                         };
                     } 
-                    // (2) FARM B: saiifarm24/farm_o2
+                    // (2) FARM B: saiifarm24/farm_o2 (최소 7개 필드)
                     else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
                         sensorData.farm_b = {
-                            temp: parts[1],
-                            tempMax: parts[2],
-                            tempMin: parts[3],
-                            hum: parts[4],
-                            humMax: parts[5],
-                            humMin: parts[6]
+                            temp: parts[1] || '-',
+                            tempMax: parts[2] || '-',
+                            tempMin: parts[3] || '-',
+                            hum: parts[4] || '-',
+                            humMax: parts[5] || '-',
+                            humMin: parts[6] || '-'
                         };
                     } 
                     // (3) HOUSE 1: saiifarm24/house1
                     else if (topic === "saiifarm24/house1" && parts.length >= 7) {
                         sensorData.house1 = {
-                            temp: parts[1],
-                            tempMax: parts[2],
-                            tempMin: parts[3],
-                            hum: parts[4],
-                            humMax: parts[5],
-                            humMin: parts[6]
+                            temp: parts[1] || '-',
+                            tempMax: parts[2] || '-',
+                            tempMin: parts[3] || '-',
+                            hum: parts[4] || '-',
+                            humMax: parts[5] || '-',
+                            humMin: parts[6] || '-'
                         };
                     } 
                     // (4) HOUSE 2: saiifarm24/house2
                     else if (topic === "saiifarm24/house2" && parts.length >= 7) {
                         sensorData.house2 = {
-                            temp: parts[1],
-                            tempMax: parts[2],
-                            tempMin: parts[3],
-                            hum: parts[4],
-                            humMax: parts[5],
-                            humMin: parts[6]
+                            temp: parts[1] || '-',
+                            tempMax: parts[2] || '-',
+                            tempMin: parts[3] || '-',
+                            hum: parts[4] || '-',
+                            humMax: parts[5] || '-',
+                            humMin: parts[6] || '-'
                         };
                     } 
-                    // (5) 삽목장 (HOUSE 3): saiifarm24/house3
+                    // (5) 삽목장 (HOUSE 3): saiifarm24/house3 (최소 8개 필드)
                     else if (topic === "saiifarm24/house3" && parts.length >= 8) {
                         sensorData.house3 = {
-                            temp: parts[1],
-                            tempMax: parts[2],
-                            tempMin: parts[3],
-                            hum: parts[4],
-                            humMax: parts[5],
-                            humMin: parts[6],
-                            soil: parts[7]
+                            temp: parts[1] || '-',
+                            tempMax: parts[2] || '-',
+                            tempMin: parts[3] || '-',
+                            hum: parts[4] || '-',
+                            humMax: parts[5] || '-',
+                            humMin: parts[6] || '-',
+                            soil: parts[7] || '-'
                         };
                     }
 
@@ -244,17 +289,17 @@
                     if (currentMenu === '농장현황') {
                         updateStatusDOM();
                     }
-                    // 상단 헤더 우측 온도계 및 H 옆 온도 상시 갱신
                     updateTopHeaderTemp();
 
                 } catch (e) {
-                    console.error("MQTT 메시지 파싱 오류:", e);
+                    console.error("MQTT 메시지 파싱 오류:", e, "Payload:", message.payloadString);
                 }
             };
 
             mqttClient.connect({
                 onSuccess: function() {
-                    console.log("MQTT 연결 성공");
+                    console.log("✅ MQTT 연결 성공!");
+                    updateMqttStatusUI(true, "MQTT 연결됨");
                     mqttClient.subscribe("saiifarm24/farm_o1");
                     mqttClient.subscribe("saiifarm24/farm_o2");
                     mqttClient.subscribe("saiifarm24/house1");
@@ -262,10 +307,12 @@
                     mqttClient.subscribe("saiifarm24/house3");
                 },
                 onFailure: function(message) {
-                    console.error("MQTT 연결 실패:", message.errorMessage);
+                    console.error("❌ MQTT 연결 실패:", message.errorMessage);
+                    updateMqttStatusUI(false, "연결 실패 (재시도 중)");
+                    mqttClient = null; // 실패 시에도 객체 초기화하여 재시도 허용
                     setTimeout(initMQTT, 5000);
                 },
-                useSSL: false
+                useSSL: isSecure // HTTPS 환경이면 자동으로 true(WSS) 적용
             });
         }
 
@@ -319,7 +366,7 @@
             initMQTT(); 
             openMenu('HOME');
             lucide.createIcons();
-            fetchKMAWeather(); // 날씨 아이콘 사전 로드
+            fetchKMAWeather();
         }
 
         function logout() {
@@ -391,7 +438,7 @@
                 ';
                 fetchKMAWeather();
             } else if (menuName === '농장현황') {
-                heroArea.style.backgroundColor = '#bce0d0'; // 파스텔 톤 배경
+                heroArea.style.backgroundColor = '#bce0d0';
                 renderStatusPageHTML();
             } else {
                 heroArea.style.backgroundColor = '#2D6A3F';
@@ -485,7 +532,6 @@
 
         // 수신된 MQTT 데이터를 DOM에 반영하는 함수
         function updateStatusDOM() {
-            // 기상 아이콘
             const weatherIconEl = document.getElementById('st-weather-icon');
             if (weatherIconEl) weatherIconEl.innerText = sensorData.firstWeatherIcon;
 
@@ -504,10 +550,10 @@
             if (rainText) {
                 if (sensorData.farm_a.rain === "1") {
                     rainText.innerText = "비가 옵니다.";
-                    rainText.style.color = "#1e88e5"; // 파란색
+                    rainText.style.color = "#1e88e5";
                 } else {
                     rainText.innerText = "비 안옴";
-                    rainText.style.color = "#9e9e9e"; // 밝은 회색
+                    rainText.style.color = "#9e9e9e";
                 }
             }
 
@@ -551,7 +597,7 @@
             if (el) el.innerText = val;
         }
 
-        // 기상청 예보 API 연동 (상단 날씨 이모지 추출용)
+        // 기상청 예보 API 연동
         function fetchKMAWeather() {
             var weatherContainer = document.getElementById('weather-data-container');
 
@@ -600,7 +646,6 @@
                             else if (sky === '4') { weatherText = '흐림'; weatherIcon = '☁️'; }
                         }
 
-                        // 첫 번째 예보 아이콘을 농장현황 상단에 반영
                         if (count === 0) {
                             sensorData.firstWeatherIcon = weatherIcon;
                             const stIconEl = document.getElementById('st-weather-icon');
