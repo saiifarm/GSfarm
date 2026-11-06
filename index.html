@@ -71,7 +71,7 @@
         /* 야간(18시~06시) 행 배경 구분 스타일 */
         .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
-        /* [농장현황 페이지 전용 스타일 (참고 이미지 완벽 일치)] */
+        /* [농장현황 페이지 전용 스타일] */
         .status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; text-align: left; }
         
         /* 상단 날씨/온도 요약 바 */
@@ -99,7 +99,7 @@
         .sensor-table th, .sensor-table td { padding: 4px 6px; border-bottom: 1px solid #eaeaea; text-align: center; }
         .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
         
-        /* 라벨 색상 (참고 이미지 기준) */
+        /* 라벨 색상 */
         .lbl-sun { background: #ffd54f; color: #333; font-weight: bold; width: 30%; }
         .lbl-temp { background: #ef5350; color: #fff; font-weight: bold; width: 30%; }
         .lbl-hum { background: #4fc3f7; color: #fff; font-weight: bold; width: 30%; }
@@ -172,6 +172,7 @@
 
         // 센서 데이터 저장 객체 (MQTT)
         let sensorData = {
+            firstWeatherIcon: '⛅', // 기상예보 첫번째 날씨 이미지(이모지)
             farm_a: { sun: '-', temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', rain: '0', rainAmount: '0', soil: '-' },
             farm_b: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
             house1: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-' },
@@ -198,6 +199,7 @@
                     const payload = message.payloadString;
                     const parts = payload.split(',');
 
+                    // (1) FARM A: saiifarm24/farm_o1
                     if (topic === "saiifarm24/farm_o1" && parts.length >= 11) {
                         sensorData.farm_a = {
                             sun: parts[1].trim(),
@@ -211,7 +213,9 @@
                             rainAmount: parts[9].trim(),
                             soil: parts[10].trim()
                         };
-                    } else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
+                    } 
+                    // (2) FARM B: saiifarm24/farm_o2
+                    else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
                         sensorData.farm_b = {
                             temp: parts[1].trim(),
                             tempMax: parts[2].trim(),
@@ -220,7 +224,9 @@
                             humMax: parts[5].trim(),
                             humMin: parts[6].trim()
                         };
-                    } else if (topic === "saiifarm24/house1" && parts.length >= 7) {
+                    } 
+                    // (3) HOUSE 1: saiifarm24/house1
+                    else if (topic === "saiifarm24/house1" && parts.length >= 7) {
                         sensorData.house1 = {
                             temp: parts[1].trim(),
                             tempMax: parts[2].trim(),
@@ -229,7 +235,9 @@
                             humMax: parts[5].trim(),
                             humMin: parts[6].trim()
                         };
-                    } else if (topic === "saiifarm24/house2" && parts.length >= 7) {
+                    } 
+                    // (4) HOUSE 2: saiifarm24/house2
+                    else if (topic === "saiifarm24/house2" && parts.length >= 7) {
                         sensorData.house2 = {
                             temp: parts[1].trim(),
                             tempMax: parts[2].trim(),
@@ -238,7 +246,9 @@
                             humMax: parts[5].trim(),
                             humMin: parts[6].trim()
                         };
-                    } else if (topic === "saiifarm24/house3" && parts.length >= 8) {
+                    } 
+                    // (5) 삽목장: saiifarm24/house3
+                    else if (topic === "saiifarm24/house3" && parts.length >= 8) {
                         sensorData.house3 = {
                             temp: parts[1].trim(),
                             tempMax: parts[2].trim(),
@@ -276,7 +286,7 @@
             });
         }
 
-        // 상단 헤더 우측 온도계 및 H 옆 온도 갱신
+        // 상단 헤더 및 현황페이지 온도계 옆(FARM A) & H 옆(HOUSE 1) 온도를 갱신하는 함수
         function updateTopHeaderTemp() {
             const tempFarmA = document.getElementById('header-farm-temp');
             const tempHouse1 = document.getElementById('header-house1-temp');
@@ -296,7 +306,6 @@
                 return;
             }
 
-            // Worker 서버로 로그인 요청 전송
             fetch(WORKER_URL + '/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -331,6 +340,8 @@
             initMQTT(); // 로그인 성공 시 MQTT 연결 시작
             openMenu('HOME');
             lucide.createIcons();
+            // 초기 기상 예보 데이터를 미리 가져와 농장 현황에 날씨 아이콘 준비
+            fetchKMAWeather();
         }
 
         function logout() {
@@ -386,7 +397,7 @@
             var heroArea = document.getElementById('main-hero-area');
 
             if (menuName === 'HOME') {
-                heroArea.style.backgroundColor = '#2D6A3F'; // 홈 화면 원래 녹색 배경
+                heroArea.style.backgroundColor = '#2D6A3F';
                 container.innerHTML = '\
                     <img src="saiifarm-logo1-01.png" alt="saiifarm" class="hero-logo">\
                     <div class="hero-divider"></div>\
@@ -394,7 +405,7 @@
                     ' + renderMenuGridHTML() + '\
                 ';
             } else if (menuName === '기상예보') {
-                heroArea.style.backgroundColor = '#2D6A3F'; // 기상예보 원래 녹색 배경
+                heroArea.style.backgroundColor = '#2D6A3F';
                 container.innerHTML = '\
                     <div class="weather-wrapper">\
                         <div class="weather-sticky-title">SAIIFARM 괴산농장 기상예보</div>\
@@ -405,7 +416,7 @@
                 ';
                 fetchKMAWeather();
             } else if (menuName === '농장현황') {
-                heroArea.style.backgroundColor = '#bce0d0'; // 요청하신 참고 이미지 색상 적용
+                heroArea.style.backgroundColor = '#bce0d0';
                 renderStatusPageHTML();
             } else {
                 heroArea.style.backgroundColor = '#2D6A3F';
@@ -426,7 +437,7 @@
                 <div class="status-wrapper">\
                     <div class="status-top-bar">\
                         <div class="status-weather-box">\
-                            <div class="status-weather-icon">⛅</div>\
+                            <div class="status-weather-icon" id="st-weather-icon">' + sensorData.firstWeatherIcon + '</div>\
                             <div class="status-weather-text">\
                                 <div id="status-rain-text" class="status-rain-status" style="color: #9e9e9e;">비 안옴</div>\
                                 <div class="status-rain-amount">강수 <span id="status-rain-val">0.00</span>mm</div>\
@@ -499,15 +510,28 @@
 
         // 수신된 센서 데이터 DOM 반영
         function updateStatusDOM() {
-            // FARM A
-            document.getElementById('st-fa-sun').innerText = sensorData.farm_a.sun;
-            document.getElementById('st-fa-temp').innerText = sensorData.farm_a.temp;
-            document.getElementById('st-fa-tmax').innerText = sensorData.farm_a.tempMax;
-            document.getElementById('st-fa-tmin').innerText = sensorData.farm_a.tempMin;
-            document.getElementById('st-fa-hum').innerText = sensorData.farm_a.hum;
-            document.getElementById('st-fa-hmax').innerText = sensorData.farm_a.humMax;
-            document.getElementById('st-fa-hmin').innerText = sensorData.farm_a.humMin;
-            document.getElementById('st-fa-soil').innerText = sensorData.farm_a.soil;
+            // 기상 예보 아이콘 갱신
+            const weatherIconEl = document.getElementById('st-weather-icon');
+            if (weatherIconEl) weatherIconEl.innerText = sensorData.firstWeatherIcon;
+
+            // (1) FARM A
+            const elSun = document.getElementById('st-fa-sun');
+            const elTemp = document.getElementById('st-fa-temp');
+            const elTmax = document.getElementById('st-fa-tmax');
+            const elTmin = document.getElementById('st-fa-tmin');
+            const elHum = document.getElementById('st-fa-hum');
+            const elHmax = document.getElementById('st-fa-hmax');
+            const elHmin = document.getElementById('st-fa-hmin');
+            const elSoil = document.getElementById('st-fa-soil');
+
+            if (elSun) elSun.innerText = sensorData.farm_a.sun;
+            if (elTemp) elTemp.innerText = sensorData.farm_a.temp;
+            if (elTmax) elTmax.innerText = sensorData.farm_a.tempMax;
+            if (elTmin) elTmin.innerText = sensorData.farm_a.tempMin;
+            if (elHum) elHum.innerText = sensorData.farm_a.hum;
+            if (elHmax) elHmax.innerText = sensorData.farm_a.humMax;
+            if (elHmin) elHmin.innerText = sensorData.farm_a.humMin;
+            if (elSoil) elSoil.innerText = sensorData.farm_a.soil;
 
             const rainText = document.getElementById('status-rain-text');
             const rainVal = document.getElementById('status-rain-val');
@@ -522,41 +546,45 @@
                 }
             }
 
-            // FARM B
-            document.getElementById('st-fb-temp').innerText = sensorData.farm_b.temp;
-            document.getElementById('st-fb-tmax').innerText = sensorData.farm_b.tempMax;
-            document.getElementById('st-fb-tmin').innerText = sensorData.farm_b.tempMin;
-            document.getElementById('st-fb-hum').innerText = sensorData.farm_b.hum;
-            document.getElementById('st-fb-hmax').innerText = sensorData.farm_b.humMax;
-            document.getElementById('st-fb-hmin').innerText = sensorData.farm_b.humMin;
+            // (2) FARM B
+            const fbTemp = document.getElementById('st-fb-temp');
+            if (fbTemp) fbTemp.innerText = sensorData.farm_b.temp;
+            if (document.getElementById('st-fb-tmax')) document.getElementById('st-fb-tmax').innerText = sensorData.farm_b.tempMax;
+            if (document.getElementById('st-fb-tmin')) document.getElementById('st-fb-tmin').innerText = sensorData.farm_b.tempMin;
+            if (document.getElementById('st-fb-hum')) document.getElementById('st-fb-hum').innerText = sensorData.farm_b.hum;
+            if (document.getElementById('st-fb-hmax')) document.getElementById('st-fb-hmax').innerText = sensorData.farm_b.humMax;
+            if (document.getElementById('st-fb-hmin')) document.getElementById('st-fb-hmin').innerText = sensorData.farm_b.humMin;
 
-            // HOUSE 1
-            document.getElementById('st-h1-temp').innerText = sensorData.house1.temp;
-            document.getElementById('st-h1-tmax').innerText = sensorData.house1.tempMax;
-            document.getElementById('st-h1-tmin').innerText = sensorData.house1.tempMin;
-            document.getElementById('st-h1-hum').innerText = sensorData.house1.hum;
-            document.getElementById('st-h1-hmax').innerText = sensorData.house1.humMax;
-            document.getElementById('st-h1-hmin').innerText = sensorData.house1.humMin;
+            // (3) HOUSE 1
+            const h1Temp = document.getElementById('st-h1-temp');
+            if (h1Temp) h1Temp.innerText = sensorData.house1.temp;
+            if (document.getElementById('st-h1-tmax')) document.getElementById('st-h1-tmax').innerText = sensorData.house1.tempMax;
+            if (document.getElementById('st-h1-tmin')) document.getElementById('st-h1-tmin').innerText = sensorData.house1.tempMin;
+            if (document.getElementById('st-h1-hum')) document.getElementById('st-h1-hum').innerText = sensorData.house1.hum;
+            if (document.getElementById('st-h1-hmax')) document.getElementById('st-h1-hmax').innerText = sensorData.house1.humMax;
+            if (document.getElementById('st-h1-hmin')) document.getElementById('st-h1-hmin').innerText = sensorData.house1.humMin;
 
-            // HOUSE 2
-            document.getElementById('st-h2-temp').innerText = sensorData.house2.temp;
-            document.getElementById('st-h2-tmax').innerText = sensorData.house2.tempMax;
-            document.getElementById('st-h2-tmin').innerText = sensorData.house2.tempMin;
-            document.getElementById('st-h2-hum').innerText = sensorData.house2.hum;
-            document.getElementById('st-h2-hmax').innerText = sensorData.house2.humMax;
-            document.getElementById('st-h2-hmin').innerText = sensorData.house2.humMin;
+            // (4) HOUSE 2
+            const h2Temp = document.getElementById('st-h2-temp');
+            if (h2Temp) h2Temp.innerText = sensorData.house2.temp;
+            if (document.getElementById('st-h2-tmax')) document.getElementById('st-h2-tmax').innerText = sensorData.house2.tempMax;
+            if (document.getElementById('st-h2-tmin')) document.getElementById('st-h2-tmin').innerText = sensorData.house2.tempMin;
+            if (document.getElementById('st-h2-hum')) document.getElementById('st-h2-hum').innerText = sensorData.house2.hum;
+            if (document.getElementById('st-h2-hmax')) document.getElementById('st-h2-hmax').innerText = sensorData.house2.humMax;
+            if (document.getElementById('st-h2-hmin')) document.getElementById('st-h2-hmin').innerText = sensorData.house2.humMin;
 
-            // 삽목장 (House 3)
-            document.getElementById('st-h3-temp').innerText = sensorData.house3.temp;
-            document.getElementById('st-h3-tmax').innerText = sensorData.house3.tempMax;
-            document.getElementById('st-h3-tmin').innerText = sensorData.house3.tempMin;
-            document.getElementById('st-h3-hum').innerText = sensorData.house3.hum;
-            document.getElementById('st-h3-hmax').innerText = sensorData.house3.humMax;
-            document.getElementById('st-h3-hmin').innerText = sensorData.house3.humMin;
-            document.getElementById('st-h3-soil').innerText = sensorData.house3.soil;
+            // (5) 삽목장 (House 3)
+            const h3Temp = document.getElementById('st-h3-temp');
+            if (h3Temp) h3Temp.innerText = sensorData.house3.temp;
+            if (document.getElementById('st-h3-tmax')) document.getElementById('st-h3-tmax').innerText = sensorData.house3.tempMax;
+            if (document.getElementById('st-h3-tmin')) document.getElementById('st-h3-tmin').innerText = sensorData.house3.tempMin;
+            if (document.getElementById('st-h3-hum')) document.getElementById('st-h3-hum').innerText = sensorData.house3.hum;
+            if (document.getElementById('st-h3-hmax')) document.getElementById('st-h3-hmax').innerText = sensorData.house3.humMax;
+            if (document.getElementById('st-h3-hmin')) document.getElementById('st-h3-hmin').innerText = sensorData.house3.humMin;
+            if (document.getElementById('st-h3-soil')) document.getElementById('st-h3-soil').innerText = sensorData.house3.soil;
         }
 
-        // 3번 수정 반영: fetchKMAWeather 함수 시작 부분에 weatherContainer 선언 배치
+        // 기상청 예보 호출 및 첫번째 예보 날씨 아이콘 추출
         function fetchKMAWeather() {
             var weatherContainer = document.getElementById('weather-data-container');
 
@@ -571,7 +599,7 @@
                         !Array.isArray(jsonData.items) ||
                         jsonData.items.length === 0
                     ) {
-                        weatherContainer.innerHTML = '<p style="color: #fff; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
+                        if (weatherContainer) weatherContainer.innerHTML = '<p style="color: #fff; padding: 20px; text-align: center;">기상 예보 데이터를 확인할 수 없습니다.</p>';
                         return;
                     }
 
@@ -590,7 +618,6 @@
                     });
 
                     var tableRows = '';
-                    
                     var now = new Date();
                     
                     var todayDateStr = String(now.getFullYear()) + 
@@ -611,7 +638,7 @@
                     var count = 0;
                     var maxHours = 36; 
 
-                    sortedKeys.forEach(function(key) {
+                    sortedKeys.forEach(function(key, idx) {
                         if (count >= maxHours) return;
 
                         var d = groupedData[key];
@@ -654,6 +681,13 @@
                             else if (sky === '4') { weatherText = '흐림'; weatherIcon = '☁️'; }
                         }
 
+                        // 첫 번째 예보 날씨 아이콘을 농장현황 상단 표시용으로 기록
+                        if (count === 0) {
+                            sensorData.firstWeatherIcon = weatherIcon;
+                            const stIconEl = document.getElementById('st-weather-icon');
+                            if (stIconEl) stIconEl.innerText = weatherIcon;
+                        }
+
                         tableRows += '\
                             <tr ' + rowClass + '>\
                                 <td><span class="weather-badge">' + dayLabel + ' ' + hourDisplay + '</span></td>\
@@ -667,29 +701,33 @@
                         count++;
                     });
 
-                    weatherContainer.innerHTML = '\
-                        <div class="weather-table-scroll">\
-                            <table class="weather-table">\
-                                <thead>\
-                                    <tr>\
-                                        <th>시간</th>\
-                                        <th>날씨</th>\
-                                        <th>기온</th>\
-                                        <th>강수확률</th>\
-                                        <th>습도</th>\
-                                        <th>풍속</th>\
-                                    </tr>\
-                                </thead>\
-                                <tbody>\
-                                    ' + tableRows + '\
-                                </tbody>\
-                            </table>\
-                        </div>\
-                    ';
+                    if (weatherContainer) {
+                        weatherContainer.innerHTML = '\
+                            <div class="weather-table-scroll">\
+                                <table class="weather-table">\
+                                    <thead>\
+                                        <tr>\
+                                            <th>시간</th>\
+                                            <th>날씨</th>\
+                                            <th>기온</th>\
+                                            <th>강수확률</th>\
+                                            <th>습도</th>\
+                                            <th>풍속</th>\
+                                        </tr>\
+                                    </thead>\
+                                    <tbody>\
+                                        ' + tableRows + '\
+                                    </tbody>\
+                                </table>\
+                            </div>\
+                        ';
+                    }
                 })
                 .catch(function(error) {
                     console.error('데이터 수신 오류:', error);
-                    weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>';
+                    if (weatherContainer) {
+                        weatherContainer.innerHTML = '<p style="color: #ffcdd2; padding: 20px; text-align: center;">⚠️ 기상 데이터를 불러오지 못했습니다.<br>Cloudflare Worker 상태 및 인증키를 확인해 주세요.</p>';
+                    }
                 });
         }
 
