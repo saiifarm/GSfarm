@@ -1,12 +1,12 @@
 // [농장관리 페이지 상태 관리, UI 렌더링 및 조작 이벤트]
 let manageState = {
     windows: [
-        { id: 'w1', title: '-1중(좌)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
-        { id: 'w2', title: '-1중(우)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
-        { id: 'w3', title: '-2중(좌)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
-        { id: 'w4', title: '-2중(우)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
-        { id: 'w5', title: '-삽목(좌)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
-        { id: 'w6', title: '-삽목(우)-', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 }
+        { id: 'w1', title: '1중(좌)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
+        { id: 'w2', title: '1중(우)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
+        { id: 'w3', title: '2중(좌)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
+        { id: 'w4', title: '2중(우)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
+        { id: 'w5', title: '삽목(좌)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 },
+        { id: 'w6', title: '삽목(우)', statusImg: 'red.png', targetPct: 100, cmd: 'stop', currentPct: 0 }
     ],
     devices: {
         ventFan: { duration: '1분', power: 'OFF' },
