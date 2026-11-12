@@ -63,7 +63,7 @@ function renderManagePageHTML() {
                         <button class="win-btn" id="btn-stop-' + idx + '" onclick="controlWindow(' + idx + ', \'stop\')">정지</button>\
                         <button class="win-btn" id="btn-close-' + idx + '" onclick="controlWindow(' + idx + ', \'close\')">닫기</button>\
                     </div>\
-                    <div class="win-percent" id="win-pct-text-' + idx + '">' + win.currentPct + '%</div>\
+                    <div class="win-percent" id="win-pct-text-' + idx + '">' + String(win.currentPct).replace('%', '') + '%</div>\
                 </div>\
             ';
         }).join('');
@@ -117,7 +117,6 @@ function renderManagePageHTML() {
         </div>\
     ';
     
-    // 현재 저장된 상태 기준으로 UI 버튼 색상 초기 동기화
     syncAllManageUI();
 }
 
@@ -171,9 +170,11 @@ function handleSmartFeedback(parts) {
     // 1. 창 상태 피드백 처리 (1L, 1R, 2L, 2R, 3L, 3R)
     manageState.windows.forEach(function(win, idx) {
         if (p1 === win.prefix + '_WIN') {
-            win.currentPct = p2;
+            // %가 중복 붙지 않도록 순수 숫자만 추출 후 % 부착
+            var cleanPct = String(p2).replace('%', '').trim();
+            win.currentPct = cleanPct;
             var pctTextEl = document.getElementById('win-pct-text-' + idx);
-            if (pctTextEl) pctTextEl.innerText = p2 + '%';
+            if (pctTextEl) pctTextEl.innerText = cleanPct + '%';
         }
 
         if (p2 === win.prefix + '_UP') {
@@ -266,7 +267,7 @@ function updateDeviceUI(key, state) {
             offBtn.style.background = '#c7c7c7'; // 밝은 회색
         } else {
             onBtn.style.background = '#c7c7c7'; // 회색
-            offBtn.style.background = '#dc3545'; // 빨간색
+            offBtn.style.background = '#dc3545'; // 빨간색 -> 수정
         }
     }
 }
