@@ -20,11 +20,11 @@ function renderManagePageHTML() {
     const container = document.getElementById('content-area');
     const pctOptions = [25, 50, 75, 100];
 
-    // 쌍별로 그룹핑 (0,1 / 2,3 / 4,5)
+    // 3개의 쌍 그룹으로 명확히 분할 (1중, 2중, 삽목)
     const pairs = [
-        [0, 1],
-        [2, 3],
-        [4, 5]
+        [0, 1], // 1중(좌), 1중(우)
+        [2, 3], // 2중(좌), 2중(우)
+        [4, 5]  // 삽목(좌), 삽목(우)
     ];
 
     const pairsHTML = pairs.map(function(pair) {
