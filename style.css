@@ -101,23 +101,36 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 /* =========================================================
    [농장관리 페이지 스타일]
    ========================================================= */
-.manage-wrapper { width: 100%; height: 100%; display: flex; gap: 10px; color: #111; overflow: hidden; box-sizing: border-box; }
-.manage-windows-area { flex: 6.3; display: flex; justify-content: space-between; gap: 8px; height: 100%; min-width: 0; }
-.win-pair-group { display: flex; gap: 4px; flex: 1; background: rgba(0, 0, 0, 0.04); padding: 4px; border-radius: 6px; min-width: 0; }
-.win-col { background: #e6f0ed; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 5px 2px; height: 100%; flex: 1; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; }
-.win-title { font-size: clamp(13px, 1.6vw, 17px); font-weight: 800; color: #111; letter-spacing: -0.5px; white-space: nowrap; }
-.win-status-img { width: clamp(45px, 5.5vw, 68px); height: clamp(45px, 5.5vw, 68px); object-fit: contain; }
+.manage-wrapper { width: 100%; height: 100%; display: flex; gap: 12px; color: #111; overflow: hidden; box-sizing: border-box; }
+
+/* (1) 좌측 6개 창 영역을 넓히고 (기존 6.3 -> 7.2), 우측 탭을 약 70% 수준으로 축소 (기존 3.7 -> 2.8) */
+.manage-windows-area { flex: 7.2; display: flex; justify-content: space-between; gap: 12px; height: 100%; min-width: 0; }
+
+/* (2) 쌍 내부의 간격을 현재의 두 배로 늘림 (gap: 4px -> 8px) */
+.win-pair-group { display: flex; gap: 8px; flex: 1; background: rgba(0, 0, 0, 0.04); padding: 6px; border-radius: 6px; min-width: 0; }
+
+.win-col { background: #e6f0ed; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; height: 100%; flex: 1; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; }
+
+/* (3) 타이틀 글씨 크기 130% 확대 */
+.win-title { font-size: clamp(17px, 2.1vw, 22px); font-weight: 800; color: #111; letter-spacing: -0.5px; white-space: nowrap; }
+
+/* (3) 이미지 크기 130% 확대 */
+.win-status-img { width: clamp(58px, 7.2vw, 88px); height: clamp(58px, 7.2vw, 88px); object-fit: contain; }
+
 .win-checks { display: flex; flex-direction: column; gap: 2px; width: 100%; align-items: center; }
-.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 3px; width: 66px; font-size: clamp(10px, 1.2vw, 13px); font-weight: 700; color: #222; cursor: pointer; user-select: none; }
-.win-check-box { width: 15px; height: 15px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+
+/* (4) 체크 레이블 및 글씨 크기 140% 확대 */
+.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 5px; width: 85px; font-size: clamp(14px, 1.7vw, 18px); font-weight: 700; color: #222; cursor: pointer; user-select: none; }
+.win-check-box { width: 21px; height: 21px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
 .win-check-box.checked { background: #ff4b72; border-color: #ff4b72; }
-.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 10px; font-weight: bold; line-height: 1; }
-.win-btns { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 14px; font-weight: bold; line-height: 1; }
+
+.win-btns { display: flex; flex-direction: column; gap: 4px; width: 100%; }
 .win-btn { width: 100%; padding: clamp(6px, 1.1vh, 11px) 1px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(12px, 1.5vw, 16px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
 .win-btn.active { background: #e60012; }
 .win-percent { font-size: clamp(12px, 1.4vw, 15px); font-weight: 800; color: #111; margin-top: 1px; }
 
-.manage-devices-area { flex: 3.7; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+.manage-devices-area { flex: 2.8; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
 .dev-box { background: #bdd6cf; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26.5%; }
 .dev-divider { height: 3px; background: #1b4d3e; width: 100%; border-radius: 2px; }
 .dev-title { font-size: clamp(15px, 1.9vw, 20px); font-weight: 800; color: #111; width: 28%; text-align: center; white-space: nowrap; }
@@ -127,8 +140,10 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .dev-btn { flex: 1; padding: clamp(6px, 1.1vh, 11px) 4px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(13px, 1.6vw, 17px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
 .dev-btn.active { background: #e60012; }
 
-.auto-box { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px; height: 14%; gap: 8px; }
-.auto-title { font-size: clamp(16px, 2vw, 22px); font-weight: 800; color: #ffffff; width: 28%; text-align: center; white-space: nowrap; }
+/* (5) 자동화 부분도 환기팬/유동팬과 같이 배경 박스를 넣고 색톤을 다르게 구분 (#a3c1ad 등 고급스러운 민트/그린 톤) */
+.auto-box { background: #a3c1ad; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 14%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.auto-title { font-size: clamp(16px, 2vw, 20px); font-weight: 800; color: #111; width: 28%; text-align: center; white-space: nowrap; }
 .auto-btn-row { width: 72%; display: flex; gap: 8px; }
 
 
+/* 세로 모드 안내 팝업 레이어 */
