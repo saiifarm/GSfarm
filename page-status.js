@@ -7,97 +7,97 @@ function updateTopHeaderTemp() {
 }
 
 function renderStatusPageHTML() {
-    var container = document.getElementById('content-area');
-    container.innerHTML = '\
-        <div class="status-wrapper">\
-            <div class="status-top-bar">\
-                <div class="status-weather-box">\
-                    <div class="status-weather-icon" id="st-weather-icon">' + sensorData.firstWeatherIcon + '</div>\
-                    <div class="status-weather-text">\
-                        <div id="status-rain-text" class="status-rain-status" style="color: #444;">비 안옴</div>\
-                        <div class="status-rain-amount">강수 <span id="status-rain-val">0.00</span>mm</div>\
-                    </div>\
-                </div>\
-                <div class="status-summary-temps">\
-                    <div class="summary-temp-item">🌡️ <span id="header-farm-temp" style="color:#d9534f;">--.- °C</span></div>\
-                    <div class="summary-temp-item" style="margin-left: 20px;"><span style="color:#46b8da; font-weight:800;">H</span> <span id="header-house1-temp" style="color:#d9534f;">--.- °C</span></div>\
-                </div>\
-            </div>\
-            <div class="status-body-grid">\
-                <div class="status-column">\
-                    <div class="zone-card">\
-                        <div class="zone-header">OUTDOOR FARM</div>\
-                        <table class="sensor-table">\
-                            <tr>\
-                                <td rowspan="4" class="lbl-farma">A</td>\
-                                <td class="lbl-sun">태양광</td>\
-                                <td class="val-farma"><span id="st-fa-sun">-</span> lx</td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-temp">기온</td>\
-                                <td class="val-farma"><span id="st-fa-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fa-tmax">-</span>/하<span id="st-fa-tmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-hum">습도</td>\
-                                <td class="val-farma"><span id="st-fa-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fa-hmax">-</span>/하<span id="st-fa-hmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-soil">토양습도</td>\
-                                <td class="val-farma"><span id="st-fa-soil">-</span> %</td>\
-                            </tr>\
-                            <tr>\
-                                <td rowspan="2" class="lbl-farmb">B</td>\
-                                <td class="lbl-temp">기온</td>\
-                                <td class="val-farmb"><span id="st-fb-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fb-tmax">-</span>/하<span id="st-fb-tmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-hum">습도</td>\
-                                <td class="val-farmb"><span id="st-fb-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fb-hmax">-</span>/하<span id="st-fb-hmin">-</span>)</span></td>\
-                            </tr>\
-                        </table>\
-                    </div>\
-                </div>\
-                <div class="status-column">\
-                    <div class="zone-card">\
-                        <div class="zone-header house-title">HOUSE</div>\
-                        <table class="sensor-table">\
-                            <tr>\
-                                <td rowspan="2" class="lbl-h1">H1</td>\
-                                <td class="lbl-temp">기온</td>\
-                                <td class="val-h1"><span id="st-h1-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h1-tmax">-</span>/하<span id="st-h1-tmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-hum">습도</td>\
-                                <td class="val-h1"><span id="st-h1-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h1-hmax">-</span>/하<span id="st-h1-hmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td rowspan="2" class="lbl-h2">H2</td>\
-                                <td class="lbl-temp">기온</td>\
-                                <td class="val-h2"><span id="st-h2-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h2-tmax">-</span>/하<span id="st-h2-tmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-hum">습도</td>\
-                                <td class="val-h2"><span id="st-h2-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h2-hmax">-</span>/하<span id="st-h2-hmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td rowspan="3" class="lbl-h3">H3</td>\
-                                <td class="lbl-temp">기온</td>\
-                                <td class="val-h3"><span id="st-h3-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h3-tmax">-</span>/하<span id="st-h3-tmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-hum">습도</td>\
-                                <td class="val-h3"><span id="st-h3-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h3-hmax">-</span>/하<span id="st-h3-hmin">-</span>)</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td class="lbl-soil">토양습도</td>\
-                                <td class="val-h3"><span id="st-h3-soil">-</span> %</td>\
-                            </tr>\
-                        </table>\
-                    </div>\
-                </div>\
-            </div>\
-        </div>\
-    ';
+    const container = document.getElementById('content-area');
+    container.innerHTML = `
+        <div class="status-wrapper">
+            <div class="status-top-bar">
+                <div class="status-weather-box">
+                    <div class="status-weather-icon" id="st-weather-icon">${sensorData.firstWeatherIcon}</div>
+                    <div class="status-weather-text">
+                        <div id="status-rain-text" class="status-rain-status" style="color: #444;">비 안옴</div>
+                        <div class="status-rain-amount">강수 <span id="status-rain-val">0.00</span>mm</div>
+                    </div>
+                </div>
+                <div class="status-summary-temps">
+                    <div class="summary-temp-item">🌡️ <span id="header-farm-temp" style="color:#d9534f;">--.- °C</span></div>
+                    <div class="summary-temp-item" style="margin-left: 20px;"><span style="color:#46b8da; font-weight:800;">H</span> <span id="header-house1-temp" style="color:#d9534f;">--.- °C</span></div>
+                </div>
+            </div>
+            <div class="status-body-grid">
+                <div class="status-column">
+                    <div class="zone-card">
+                        <div class="zone-header">OUTDOOR FARM</div>
+                        <table class="sensor-table">
+                            <tr>
+                                <td rowspan="4" class="lbl-farma">A</td>
+                                <td class="lbl-sun">태양광</td>
+                                <td class="val-farma"><span id="st-fa-sun">-</span> lx</td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-temp">기온</td>
+                                <td class="val-farma"><span id="st-fa-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fa-tmax">-</span>/하<span id="st-fa-tmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-hum">습도</td>
+                                <td class="val-farma"><span id="st-fa-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fa-hmax">-</span>/하<span id="st-fa-hmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-soil">토양습도</td>
+                                <td class="val-farma"><span id="st-fa-soil">-</span> %</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2" class="lbl-farmb">B</td>
+                                <td class="lbl-temp">기온</td>
+                                <td class="val-farmb"><span id="st-fb-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-fb-tmax">-</span>/하<span id="st-fb-tmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-hum">습도</td>
+                                <td class="val-farmb"><span id="st-fb-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-fb-hmax">-</span>/하<span id="st-fb-hmin">-</span>)</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="status-column">
+                    <div class="zone-card">
+                        <div class="zone-header house-title">HOUSE</div>
+                        <table class="sensor-table">
+                            <tr>
+                                <td rowspan="2" class="lbl-h1">H1</td>
+                                <td class="lbl-temp">기온</td>
+                                <td class="val-h1"><span id="st-h1-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h1-tmax">-</span>/하<span id="st-h1-tmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-hum">습도</td>
+                                <td class="val-h1"><span id="st-h1-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h1-hmax">-</span>/하<span id="st-h1-hmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2" class="lbl-h2">H2</td>
+                                <td class="lbl-temp">기온</td>
+                                <td class="val-h2"><span id="st-h2-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h2-tmax">-</span>/하<span id="st-h2-tmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-hum">습도</td>
+                                <td class="val-h2"><span id="st-h2-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h2-hmax">-</span>/하<span id="st-h2-hmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3" class="lbl-h3">H3</td>
+                                <td class="lbl-temp">기온</td>
+                                <td class="val-h3"><span id="st-h3-temp">-</span> °C <span style="font-size:0.75em;">(상<span id="st-h3-tmax">-</span>/하<span id="st-h3-tmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-hum">습도</td>
+                                <td class="val-h3"><span id="st-h3-hum">-</span> % <span style="font-size:0.75em;">(상<span id="st-h3-hmax">-</span>/하<span id="st-h3-hmin">-</span>)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="lbl-soil">토양습도</td>
+                                <td class="val-h3"><span id="st-h3-soil">-</span> %</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
     updateStatusDOM();
     updateTopHeaderTemp();
 }
