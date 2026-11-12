@@ -20,30 +20,42 @@ function renderManagePageHTML() {
     const container = document.getElementById('content-area');
     const pctOptions = [25, 50, 75, 100];
 
-    const windowsHTML = manageState.windows.map(function(win, idx) {
-        const checksHTML = pctOptions.map(function(pct) {
-            const isChecked = (win.targetPct === pct) ? 'checked' : '';
+    // 쌍별로 그룹핑 (0,1 / 2,3 / 4,5)
+    const pairs = [
+        [0, 1],
+        [2, 3],
+        [4, 5]
+    ];
+
+    const pairsHTML = pairs.map(function(pair) {
+        const colsHTML = pair.map(function(idx) {
+            const win = manageState.windows[idx];
+            const checksHTML = pctOptions.map(function(pct) {
+                const isChecked = (win.targetPct === pct) ? 'checked' : '';
+                return `
+                    <div class="win-check-label" onclick="selectWindowPct(${idx}, ${pct})">
+                        <span class="win-check-box ${isChecked}" id="chk-${idx}-${pct}"></span>
+                        <span>${pct}%</span>
+                    </div>
+                `;
+            }).join('');
+
             return `
-                <div class="win-check-label" onclick="selectWindowPct(${idx}, ${pct})">
-                    <span class="win-check-box ${isChecked}" id="chk-${idx}-${pct}"></span>
-                    <span>${pct}%</span>
+                <div class="win-col">
+                    <div class="win-title">${win.title}</div>
+                    <img src="${win.statusImg}" alt="상태" class="win-status-img" id="win-img-${idx}">
+                    <div class="win-checks">${checksHTML}</div>
+                    <div class="win-btns">
+                        <button class="win-btn ${win.cmd === 'open' ? 'active' : ''}" id="btn-open-${idx}" onclick="controlWindow(${idx}, 'open')">열기</button>
+                        <button class="win-btn ${win.cmd === 'stop' ? 'active' : ''}" id="btn-stop-${idx}" onclick="controlWindow(${idx}, 'stop')">정지</button>
+                        <button class="win-btn ${win.cmd === 'close' ? 'active' : ''}" id="btn-close-${idx}" onclick="controlWindow(${idx}, 'close')">닫기</button>
+                    </div>
+                    <div class="win-percent" id="win-pct-text-${idx}">${win.currentPct}%</div>
                 </div>
             `;
         }).join('');
 
-        return `
-            <div class="win-col">
-                <div class="win-title">${win.title}</div>
-                <img src="${win.statusImg}" alt="상태" class="win-status-img" id="win-img-${idx}">
-                <div class="win-checks">${checksHTML}</div>
-                <div class="win-btns">
-                    <button class="win-btn ${win.cmd === 'open' ? 'active' : ''}" id="btn-open-${idx}" onclick="controlWindow(${idx}, 'open')">열기</button>
-                    <button class="win-btn ${win.cmd === 'stop' ? 'active' : ''}" id="btn-stop-${idx}" onclick="controlWindow(${idx}, 'stop')">정지</button>
-                    <button class="win-btn ${win.cmd === 'close' ? 'active' : ''}" id="btn-close-${idx}" onclick="controlWindow(${idx}, 'close')">닫기</button>
-                </div>
-                <div class="win-percent" id="win-pct-text-${idx}">${win.currentPct}%</div>
-            </div>
-        `;
+        return `<div class="win-pair-group">${colsHTML}</div>`;
     }).join('');
 
     const timeOptions = ['1분', '1시간', '2시간', '3시간', '4시간', '5시간', '6시간', '7시간', '8시간'];
@@ -81,7 +93,7 @@ function renderManagePageHTML() {
 
     container.innerHTML = `
         <div class="manage-wrapper">
-            <div class="manage-windows-area">${windowsHTML}</div>
+            <div class="manage-windows-area">${pairsHTML}</div>
             <div class="manage-devices-area">
                 ${buildDeviceBox('ventFan', '환기팬')}
                 <div class="dev-divider"></div>

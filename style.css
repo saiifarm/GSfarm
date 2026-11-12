@@ -101,20 +101,21 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 /* =========================================================
    [농장관리 페이지 스타일]
    ========================================================= */
-.manage-wrapper { width: 100%; height: 100%; display: flex; gap: 10px; color: #111; overflow: hidden; }
-.manage-windows-area { flex: 6.3; display: grid; grid-template-columns: repeat(2, 1fr) 18px repeat(2, 1fr) 18px repeat(2, 1fr); gap: 4px; height: 100%; align-items: center; }
-.win-col { background: #e6f0ed; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-.win-title { font-size: clamp(16px, 2.1vw, 21px); font-weight: 800; color: #111; letter-spacing: -0.5px; white-space: nowrap; }
-.win-status-img { width: clamp(60px, 7.5vw, 88px); height: clamp(60px, 7.5vw, 88px); object-fit: contain; }
-.win-checks { display: flex; flex-direction: column; gap: 3px; width: 100%; align-items: center; }
-.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 5px; width: 74px; font-size: clamp(12px, 1.4vw, 15px); font-weight: 700; color: #222; cursor: pointer; user-select: none; }
-.win-check-box { width: 18px; height: 18px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.manage-wrapper { width: 100%; height: 100%; display: flex; gap: 12px; color: #111; overflow: hidden; }
+.manage-windows-area { flex: 6.3; display: flex; justify-content: space-between; gap: 8px; height: 100%; }
+.win-pair-group { display: flex; gap: 4px; flex: 1; background: rgba(0, 0, 0, 0.03); padding: 4px; border-radius: 6px; }
+.win-col { background: #e6f0ed; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; height: 100%; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; }
+.win-title { font-size: clamp(15px, 1.9vw, 20px); font-weight: 800; color: #111; letter-spacing: -0.5px; white-space: nowrap; }
+.win-status-img { width: clamp(55px, 6.8vw, 80px); height: clamp(55px, 6.8vw, 80px); object-fit: contain; }
+.win-checks { display: flex; flex-direction: column; gap: 2px; width: 100%; align-items: center; }
+.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 4px; width: 70px; font-size: clamp(11px, 1.3vw, 14px); font-weight: 700; color: #222; cursor: pointer; user-select: none; }
+.win-check-box { width: 16px; height: 16px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
 .win-check-box.checked { background: #ff4b72; border-color: #ff4b72; }
-.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 13px; font-weight: bold; line-height: 1; }
+.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 11px; font-weight: bold; line-height: 1; }
 .win-btns { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-.win-btn { width: 100%; padding: clamp(7px, 1.2vh, 12px) 2px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(14px, 1.7vw, 18px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
+.win-btn { width: 100%; padding: clamp(6px, 1.1vh, 11px) 2px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(13px, 1.6vw, 17px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
 .win-btn.active { background: #e60012; }
-.win-percent { font-size: clamp(14px, 1.7vw, 18px); font-weight: 800; color: #111; margin-top: 2px; }
+.win-percent { font-size: clamp(13px, 1.6vw, 17px); font-weight: 800; color: #111; margin-top: 2px; }
 
 .manage-devices-area { flex: 3.7; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
 .dev-box { background: #bdd6cf; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26.5%; }
@@ -130,7 +131,8 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .auto-title { font-size: clamp(16px, 2vw, 22px); font-weight: 800; color: #ffffff; width: 28%; text-align: center; white-space: nowrap; }
 .auto-btn-row { width: 72%; display: flex; gap: 8px; }
 
-/* 세로 모드 안내 팝업 레이어 */
+
+/* 세로 모드 안내 팝업 레이어 *//* 세로 모드 안내 팝업 레이어 */
 #rotate-notice { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.88); color: white; z-index: 99999; justify-content: center; align-items: center; text-align: center; padding: 20px; }
 #rotate-notice .notice-box { background: #2D6A3F; padding: 25px 35px; border-radius: 15px; border: 3px solid #b5d6ad; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
 #rotate-notice h3 { margin: 0 0 10px 0; font-size: 22px; }
