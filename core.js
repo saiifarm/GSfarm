@@ -2,7 +2,6 @@
 const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
 let currentMenu = 'HOME';
 
-// 센서 데이터 저장 객체 (MQTT)
 let sensorData = {
     firstWeatherIcon: '⛅',
     farm_a: { sun: '-', temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', rain: '0', rainAmount: '0.00', soil: '-' },
@@ -14,7 +13,6 @@ let sensorData = {
 
 let mqttClient = null;
 
-// MQTT 연결 상태 UI 업데이트
 function updateMqttStatusUI(isConnected, text) {
     const dot = document.getElementById('mqtt-dot');
     const statusText = document.getElementById('mqtt-status-text');
@@ -29,31 +27,26 @@ function updateMqttStatusUI(isConnected, text) {
     }
 }
 
-// MQTT 초기화 및 자동 재연결 로직
 function initMQTT() {
     if (mqttClient && mqttClient.isConnected && mqttClient.isConnected()) return;
 
     const clientId = "saiifarm_web_" + Math.random().toString(16).substring(2, 9);
-    
     const isSecure = window.location.protocol === 'https:';
     const mqttHost = "broker.mqtt-dashboard.com";
     const mqttPort = isSecure ? 8884 : 8000;
     const mqttPath = "/mqtt";
 
-    console.log("MQTT 연결 시도:", mqttHost, mqttPort, isSecure ? "(WSS 보안)" : "(WS 일반)");
     updateMqttStatusUI(false, "MQTT 연결 중...");
 
     try {
         mqttClient = new Paho.MQTT.Client(mqttHost, Number(mqttPort), mqttPath, clientId);
     } catch (err) {
-        console.error("MQTT 클라이언트 객체 생성 실패:", err);
         mqttClient = null;
         setTimeout(initMQTT, 5000);
         return;
     }
 
     mqttClient.onConnectionLost = function(responseObject) {
-        console.warn("MQTT 연결 끊김:", responseObject.errorMessage);
         updateMqttStatusUI(false, "연결 끊김 (재시도 중)");
         mqttClient = null;
         setTimeout(initMQTT, 5000);
@@ -66,6 +59,14 @@ function initMQTT() {
             const parts = payload.split(',').map(item => item.trim());
 
             console.log("📥 MQTT 수신 [" + topic + "]:", payload);
+
+            // 농장관리 피드백 토픽 수신 처리 (saiifarm24/smart_S)
+            if (topic === "saiifarm24/smart_S") {
+                if (typeof handleSmartFeedback === 'function') {
+                    handleSmartFeedback(parts);
+                }
+                return;
+            }
 
             if (topic === "saiifarm24/farm_o1" && parts.length >= 10) {
                 sensorData.farm_a = {
@@ -127,22 +128,21 @@ function initMQTT() {
             }
 
         } catch (e) {
-            console.error("MQTT 메시지 파싱 오류:", e, "Payload:", message.payloadString);
+            console.error("MQTT 메시지 파싱 오류:", e);
         }
     };
 
     mqttClient.connect({
         onSuccess: function() {
-            console.log("✅ MQTT 연결 성공!");
             updateMqttStatusUI(true, "MQTT 연결됨");
             mqttClient.subscribe("saiifarm24/farm_o1");
             mqttClient.subscribe("saiifarm24/farm_o2");
             mqttClient.subscribe("saiifarm24/house1");
             mqttClient.subscribe("saiifarm24/house2");
             mqttClient.subscribe("saiifarm24/house3");
+            mqttClient.subscribe("saiifarm24/smart_S"); // 👈 농장 피드백 토픽 구독 추가
         },
         onFailure: function(message) {
-            console.error("❌ MQTT 연결 실패:", message.errorMessage);
             updateMqttStatusUI(false, "연결 실패 (재시도 중)");
             mqttClient = null;
             setTimeout(initMQTT, 5000);
@@ -151,13 +151,11 @@ function initMQTT() {
     });
 }
 
-// DOM 값 주입 공통 헬퍼 함수
 function setVal(id, val) {
     const el = document.getElementById(id);
     if (el) el.innerText = val;
 }
 
-// 로그인 검증
 function checkLogin() {
     const inputId = document.getElementById('username').value.trim();
     const inputPw = document.getElementById('password').value;
@@ -183,11 +181,9 @@ function checkLogin() {
             errorMsg.innerText = res.body.message || '아이디 또는 비밀번호가 틀렸습니다.';
             errorMsg.style.display = 'block';
             document.getElementById('password').value = '';
-            document.getElementById('password').focus();
         }
     })
     .catch(error => {
-        console.error('로그인 통신 오류:', error);
         errorMsg.innerText = '서버 통신 중 오류가 발생했습니다.';
         errorMsg.style.display = 'block';
     });
@@ -199,12 +195,8 @@ function showMain() {
     mainContent.style.display = 'flex';
     initMQTT(); 
     openMenu('HOME');
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-    if (typeof fetchKMAWeather === 'function') {
-        fetchKMAWeather();
-    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (typeof fetchKMAWeather === 'function') fetchKMAWeather();
 }
 
 function logout() {
@@ -247,7 +239,6 @@ function openMenu(menuName) {
     updateNavigationState(menuName);
 }
 
-// 시계 자동 갱신
 (function startClock() {
     function update() {
         const now = new Date();
