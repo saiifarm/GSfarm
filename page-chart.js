@@ -237,7 +237,31 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 }
             },
             scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45 } },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        font: { size: 11 }, 
+                        maxRotation: 0,
+                        // 🌟 0시(00:00)에만 '26.11.14' 형식으로 표기하고 나머지는 생략
+                        callback: function(val, index) {
+                            const labelStr = this.getLabelForValue(index);
+                            if (metric === 'rain') {
+                                // 강수량은 일 단위이므로 모든 날짜 표기 (원하시면 조정 가능)
+                                return labelStr;
+                            }
+                            // '00:00'인 데이터만 날짜로 변환 (예: 2026-11-15 00:00 -> 26.11.15)
+                            if (labelStr && labelStr.includes('00:00')) {
+                                const datePart = labelStr.split(' ')[0]; // 2026-11-15
+                                const parts = datePart.split('-');
+                                if (parts.length === 3) {
+                                    const yy = parts[0].slice(2); // 26
+                                    return `${yy}.${parts[1]}.${parts[2]}`; // 26.11.15
+                                }
+                            }
+                            return ''; // 0시가 아닌 시간대는 라벨 비우기
+                        }
+                    } 
+                },
                 y: {
                     beginAtZero: true,
                     ticks: {
@@ -280,21 +304,27 @@ function generateSampleChartData(startStr, endStr, metric) {
     const end = new Date(endStr);
 
     while (curr <= end) {
-        const year = curr.getFullYear();
-        const month = String(curr.getMonth() + 1).padStart(2, '0');
-        const day = String(curr.getDate()).padStart(2, '0');
-        const timeStr = (metric === 'rain') 
-            ? `${year}년${month}월${day}일` 
-            : `${year}년${month}월${day}일06시`;
-        
-        labels.push(timeStr);
-        let val = 0;
-        if (metric === 'temp') val = +(15 + Math.random() * 12).toFixed(1);
-        else if (metric === 'hum') val = +(45 + Math.random() * 35).toFixed(1);
-        else if (metric === 'sun') val = Math.floor(15000 + Math.random() * 45000);
-        else if (metric === 'rain') val = +(Math.random() > 0.7 ? (Math.random() * 15).toFixed(1) : 0);
-        else if (metric === 'soil') val = +(30 + Math.random() * 30).toFixed(1);
-        values.push(val);
+        // 하루에 30분 간격으로 샘플 데이터 생성 (테스트용)
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const year = curr.getFullYear();
+                const month = String(curr.getMonth() + 1).padStart(2, '0');
+                const day = String(curr.getDate()).padStart(2, '0');
+                const hours = String(h).padStart(2, '0');
+                const mins = String(m).padStart(2, '0');
+
+                const timeStr = `${year}-${month}-${day} ${hours}:${mins}`;
+                labels.push(timeStr);
+
+                let val = 0;
+                if (metric === 'temp') val = +(15 + Math.random() * 12).toFixed(1);
+                else if (metric === 'hum') val = +(45 + Math.random() * 35).toFixed(1);
+                else if (metric === 'sun') val = Math.floor(15000 + Math.random() * 45000);
+                else if (metric === 'rain') val = +(Math.random() > 0.7 ? (Math.random() * 15).toFixed(1) : 0);
+                else if (metric === 'soil') val = +(30 + Math.random() * 30).toFixed(1);
+                values.push(val);
+            }
+        }
         curr.setDate(curr.getDate() + 1);
     }
     return { labels, values };
