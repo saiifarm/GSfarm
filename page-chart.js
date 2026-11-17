@@ -82,8 +82,8 @@ function renderChartPageHTML() {
                         <div class="chart-display-title" id="chart-header-title">OUT1 - 온도 추이</div>
                         <div class="chart-display-subtitle" id="chart-header-period">${formatDate(weekAgo)} ~ ${formatDate(today)}</div>
                     </div>
-                    <!-- 최저/최고값 표기 영역 -->
-                    <div id="chart-stats-box" style="font-size: 13px; font-weight: bold; color: #333; background: #f0f4f1; padding: 4px 10px; border-radius: 4px; border: 1px solid #d2e2d5;">
+                    <!-- 최고/최저값 표기 영역 -->
+                    <div id="chart-stats-box" style="font-size: 12px; font-weight: bold; color: #333; background: #f0f4f1; padding: 4px 10px; border-radius: 4px; border: 1px solid #d2e2d5;">
                         최저: - | 최고: -
                     </div>
                 </div>
@@ -176,11 +176,20 @@ async function fetchAndDrawChart() {
         values = sample.values;
     }
 
-    // 최저값 / 최고값 계산 및 표기
+    // 요구사항 (1), (2) 반영: 최고/최저 데이터에 날짜 및 시간 표기, 강수량은 최저 삭제 후 최고만 날짜 표기
     if (values.length > 0) {
         const minVal = Math.min(...values);
         const maxVal = Math.max(...values);
-        document.getElementById('chart-stats-box').innerText = `최저: ${minVal} ${meta.unit}  |  최고: ${maxVal} ${meta.unit}`;
+        const minIdx = values.indexOf(minVal);
+        const maxIdx = values.indexOf(maxVal);
+        const minTime = labels[minIdx];
+        const maxTime = labels[maxIdx];
+
+        if (metric === 'rain') {
+            document.getElementById('chart-stats-box').innerText = `최고강수량 : ${maxVal} ${meta.unit} (${maxTime})`;
+        } else {
+            document.getElementById('chart-stats-box').innerText = `최저 : ${minVal} ${meta.unit} (${minTime})  |  최고 : ${maxVal} ${meta.unit} (${maxTime})`;
+        }
     } else {
         document.getElementById('chart-stats-box').innerText = `최저: - | 최고: -`;
     }
@@ -195,7 +204,6 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
         farmChartInstance.destroy();
     }
 
-    // 강수량은 막대 그래프(bar), 나머지는 꺾은선 그래프(line)로 처리
     const chartType = (metric === 'rain') ? 'bar' : 'line';
 
     farmChartInstance = new Chart(ctx, {
@@ -208,7 +216,6 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
                 borderWidth: (chartType === 'bar' ? 1 : 2),
-                // 2번 요청사항 반영: 노드(포인트) 크기를 기존보다 축소 (radius: 2) 및 채우기 허용
                 pointRadius: 2,
                 pointHoverRadius: 4.5,
                 fill: true,
@@ -239,7 +246,30 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     }
                 }
             }
-        }
+        },
+        // 요구사항 (3) 반영: 강수량 막대그래프 각 막대에 수치 데이터를 표시하는 커스텀 플러그인
+        plugins: [{
+            id: 'barDataLabels',
+            afterDatasetsDraw(chart) {
+                if (chart.config.type !== 'bar') return;
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, i) => {
+                    const metaData = chart.getDatasetMeta(i);
+                    metaData.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value !== undefined && value !== null && value > 0) {
+                            ctx.save();
+                            ctx.fillStyle = '#222';
+                            ctx.font = 'bold 11px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillText(value + ' mm', bar.x, bar.y - 4);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }]
     });
 }
 
@@ -250,7 +280,14 @@ function generateSampleChartData(startStr, endStr, metric) {
     const end = new Date(endStr);
 
     while (curr <= end) {
-        labels.push(curr.toISOString().split('T')[0] + (metric === 'rain' ? '' : ' 23:30'));
+        const year = curr.getFullYear();
+        const month = String(curr.getMonth() + 1).padStart(2, '0');
+        const day = String(curr.getDate()).padStart(2, '0');
+        const timeStr = (metric === 'rain') 
+            ? `${year}년${month}월${day}일` 
+            : `${year}년${month}월${day}일06시`;
+        
+        labels.push(timeStr);
         let val = 0;
         if (metric === 'temp') val = +(15 + Math.random() * 12).toFixed(1);
         else if (metric === 'hum') val = +(45 + Math.random() * 35).toFixed(1);
