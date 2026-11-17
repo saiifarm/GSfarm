@@ -242,7 +242,8 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     ticks: { 
                         font: { size: 11 }, 
                         maxRotation: 0,
-                        autoSkip: false, // 🌟 Chart.js가 임의로 라벨을 숨기지 못하도록 고정
+                        autoSkip: false,
+                        // 🌟 중복 없이 하루에 딱 한 번만 날짜가 표기되도록 개선된 틱 콜백
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
                             
@@ -252,35 +253,33 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
 
                             if (!labelStr) return '';
 
-                            // 1. 기존 방식: 0시(00시) 데이터인 경우 날짜로 변환
+                            // 1. 0시 대 시간대(00시 또는 00:00)인 경우에만 날짜 추출
                             if (labelStr.includes('00시') || labelStr.includes('00:00')) {
                                 const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
                                 if (match) {
-                                    const yy = match[1].slice(2);
-                                    return `${yy}.${match[2]}.${match[3]}`;
-                                }
-                            }
-
-                            // 2. 💡 보완책: 데이터 타이밍 미세 오차로 0시를 놓쳤을 때, 
-                            // 하루의 첫 번째 데이터(예: 첫 번째 30분 데이터)를 그날의 대표 날짜로 강제 표기
-                            if (index === 0) {
-                                const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                if (match) {
-                                    return `${match[1].slice(2)}.${match[2]}.${match[3]}`;
-                                }
-                            } else {
-                                // 이전 데이터와 날짜(일자)가 바뀐 지점이라면 해당 날짜를 무조건 표기
-                                const prevLabel = this.getLabelForValue(index - 1);
-                                if (prevLabel) {
-                                    const currDateMatch = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                    const prevDateMatch = prevLabel.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                    if (currDateMatch && prevDateMatch && currDateMatch[3] !== prevDateMatch[3]) {
-                                        return `${currDateMatch[1].slice(2)}.${currDateMatch[2]}.${currDateMatch[3]}`;
+                                    const formattedDate = `${match[1].slice(2)}.${match[2]}.${match[3]}`; // 예: 26.11.14
+                                    
+                                    // 💡 핵심: 렌더링 주기에 이 날짜가 이미 출력된 적이 있다면 빈 문자열 반환 (중복 원천 차단)
+                                    if (!window._renderedDates) {
+                                        window._renderedDates = new Set();
                                     }
+                                    
+                                    if (window._renderedDates.has(formattedDate)) {
+                                        return ''; // 이미 나왔으면 스킵
+                                    }
+                                    
+                                    // 처음 나오는 날짜라면 기록하고 출력
+                                    window._renderedDates.add(formattedDate);
+                                    return formattedDate;
                                 }
                             }
 
-                            return ''; // 나머지는 비우기
+                            // 차트가 새로 그려질 때마다 메모리 초기화를 위한 안전장치 (마지막 인덱스 도달 시 초기화)
+                            if (index === this.chart.data.labels.length - 1) {
+                                window._renderedDates = null;
+                            }
+
+                            return ''; // 0시가 아니거나 이미 출력된 날짜는 비우기
                         }
                     } 
                 },
