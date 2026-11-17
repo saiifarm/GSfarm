@@ -5,27 +5,27 @@ const DEFAULT_AUTO_CONFIG = {
     rainVent1: true,
     rainVent2: false,
 
-    // 2. 고온관리 (지정된 값들 중에서만 선택)
+    // 2. 고온관리
     highTempEnable: true,
-    htExtTemp: 15,     // 기본값 15 (옵션: 10, 15, 20, 25, 30)
-    htIntTemp: 25,     // 기본값 25 (옵션: 15, 20, 25, 27, 30, 35)
-    htTempRange: 3,    // 기본값 3  (옵션: 3, 5)
+    htExtTemp: 15,
+    htIntTemp: 25,
+    htTempRange: 3,
 
-    // 3. 팬 제어 및 연동 기기 (지정된 값들 중에서만 선택)
-    fanTargetTemp: 30, // 기본값 30 (옵션: 20, 25, 30, 35)
-    fanRunTime: 1,     // 기본값 1  (옵션: 1, 2, 3)
-    fanRestTime: 15,   // 기본값 15 (옵션: 5, 10, 15, 20, 30)
+    // 3. 팬 제어 및 연동 기기
+    fanTargetTemp: 30,
+    fanRunTime: 1,
+    fanRestTime: 15,
     deviceVent1: true,
     deviceVent2: true,
     deviceExhaust: true,
     deviceCirculation: true,
 
-    // 4. 삽목장관리 (지정된 범위 및 값 중에서 선택)
+    // 4. 삽목장관리
     cuttingEnable: false,
-    cutOpenTime: 22,      // 기본값 22 (옵션: 0 ~ 23시)
-    cutInterval: 2,       // 기본값 2  (옵션: 1 ~ 10시간)
-    cutLightOn: 20,       // 기본값 20 (옵션: 0 ~ 23시)
-    cutLightDuration: 2,  // 기본값 2  (옵션: 1 ~ 10시간)
+    cutOpenTime: 22,
+    cutInterval: 2,
+    cutLightOn: 20,
+    cutLightDuration: 2,
     cutOpCheck: true,
     cutLightCheck: false
 };
@@ -202,7 +202,7 @@ function renderAutoPageHTML() {
     `;
 }
 
-// 1. 특정 배열 값들로 옵션을 생성하는 헬퍼 함수 (고온관리, 팬제어용)
+// 헬퍼 함수: 커스텀 옵션 생성
 function generateCustomOptions(values, selectedVal) {
     let options = '';
     values.forEach(val => {
@@ -212,7 +212,7 @@ function generateCustomOptions(values, selectedVal) {
     return options;
 }
 
-// 2. 연속된 범위(Min ~ Max)로 옵션을 생성하는 헬퍼 함수 (삽목장관리용)
+// 헬퍼 함수: 범위 옵션 생성
 function generateRangeOptions(min, max, selectedVal) {
     let options = '';
     for (let i = min; i <= max; i++) {
@@ -228,18 +228,15 @@ function resetAutoConfigDefault() {
 
     const cfg = DEFAULT_AUTO_CONFIG;
 
-    // 1. 우천관리 복원
     document.getElementById('auto-rain-enable').checked = cfg.rainEnable;
     document.getElementById('rain-vent-1').checked = cfg.rainVent1;
     document.getElementById('rain-vent-2').checked = cfg.rainVent2;
 
-    // 2. 고온관리 복원
     document.getElementById('auto-high-temp-enable').checked = cfg.highTempEnable;
     document.getElementById('ht-ext-temp').value = cfg.htExtTemp;
     document.getElementById('ht-int-temp').value = cfg.htIntTemp;
     document.getElementById('ht-temp-range').value = cfg.htTempRange;
 
-    // 3. 팬 제어 및 연동 기기 복원
     document.getElementById('fan-target-temp').value = cfg.fanTargetTemp;
     document.getElementById('fan-run-time').value = cfg.fanRunTime;
     document.getElementById('fan-rest-time').value = cfg.fanRestTime;
@@ -248,7 +245,6 @@ function resetAutoConfigDefault() {
     document.getElementById('device-exhaust').checked = cfg.deviceExhaust;
     document.getElementById('device-circulation').checked = cfg.deviceCirculation;
 
-    // 4. 삽목장관리 복원
     document.getElementById('auto-cutting-enable').checked = cfg.cuttingEnable;
     document.getElementById('cut-open-time').value = cfg.cutOpenTime;
     document.getElementById('cut-interval').value = cfg.cutInterval;
@@ -258,32 +254,53 @@ function resetAutoConfigDefault() {
     document.getElementById('cut-light-check').checked = cfg.cutLightCheck;
 }
 
-// [UPLOAD 버튼 동작] 현재 화면의 설정값을 수집하여 컨트롤러로 전송
+// [UPLOAD 버튼 동작] 지정된 조건(토픽, 21개 콤마 연결 페이로드, QoS 2, retain: false)으로 MQTT 퍼블리쉬 수행
 function uploadAutoConfig() {
-    const currentConfig = {
-        rainEnable: document.getElementById('auto-rain-enable').checked,
-        rainVent1: document.getElementById('rain-vent-1').checked,
-        rainVent2: document.getElementById('rain-vent-2').checked,
-        highTempEnable: document.getElementById('auto-high-temp-enable').checked,
-        htExtTemp: Number(document.getElementById('ht-ext-temp').value),
-        htIntTemp: Number(document.getElementById('ht-int-temp').value),
-        htTempRange: Number(document.getElementById('ht-temp-range').value),
-        fanTargetTemp: Number(document.getElementById('fan-target-temp').value),
-        fanRunTime: Number(document.getElementById('fan-run-time').value),
-        fanRestTime: Number(document.getElementById('fan-rest-time').value),
-        deviceVent1: document.getElementById('device-vent-1').checked,
-        deviceVent2: document.getElementById('device-vent-2').checked,
-        deviceExhaust: document.getElementById('device-exhaust').checked,
-        deviceCirculation: document.getElementById('device-circulation').checked,
-        cuttingEnable: document.getElementById('auto-cutting-enable').checked,
-        cutOpenTime: Number(document.getElementById('cut-open-time').value),
-        cutInterval: Number(document.getElementById('cut-interval').value),
-        cutLightOn: Number(document.getElementById('cut-light-on').value),
-        cutLightDuration: Number(document.getElementById('cut-light-duration').value),
-        cutOpCheck: document.getElementById('cut-op-check').checked,
-        cutLightCheck: document.getElementById('cut-light-check').checked
-    };
+    // 체크박스는 참/거짓을 각각 1과 0으로 변환, 선택값은 정수형으로 수집
+    const p1 = document.getElementById('auto-rain-enable').checked ? 1 : 0;
+    const p2 = document.getElementById('rain-vent-1').checked ? 1 : 0;
+    const p3 = document.getElementById('rain-vent-2').checked ? 1 : 0;
+    const p4 = document.getElementById('auto-high-temp-enable').checked ? 1 : 0;
+    const p5 = Number(document.getElementById('ht-ext-temp').value);
+    const p6 = Number(document.getElementById('ht-int-temp').value);
+    const p7 = Number(document.getElementById('ht-temp-range').value);
+    const p8 = Number(document.getElementById('fan-target-temp').value);
+    const p9 = Number(document.getElementById('fan-run-time').value);
+    const p10 = Number(document.getElementById('fan-rest-time').value);
+    const p11 = document.getElementById('device-vent-1').checked ? 1 : 0;
+    const p12 = document.getElementById('device-vent-2').checked ? 1 : 0;
+    const p13 = document.getElementById('device-exhaust').checked ? 1 : 0;
+    const p14 = document.getElementById('device-circulation').checked ? 1 : 0;
+    const p15 = document.getElementById('auto-cutting-enable').checked ? 1 : 0;
+    const p16 = Number(document.getElementById('cut-open-time').value);
+    const p17 = Number(document.getElementById('cut-interval').value);
+    const p18 = Number(document.getElementById('cut-light-on').value);
+    const p19 = Number(document.getElementById('cut-light-duration').value);
+    const p20 = document.getElementById('cut-op-check').checked ? 1 : 0;
+    const p21 = document.getElementById('cut-light-check').checked ? 1 : 0;
 
-    console.log('전송할 자동설정 데이터:', currentConfig);
-    alert('현재 설정값이 컨트롤러(ESP32)로 업로드되었습니다.');
+    // 21개 항목을 콤마로 연결한 페이로드 문자열 생성
+    const payloadString = [
+        p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
+        p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21
+    ].join(',');
+
+    const topic = "saiifarm24/autoset00";
+
+    // 프로젝트에서 사용 중인 전역 MQTT 클라이언트 객체(예: client)를 통해 퍼블리쉬 수행
+    if (typeof client !== 'undefined' && client && client.connected) {
+        client.publish(topic, payloadString, { qos: 2, retain: false }, function (err) {
+            if (!err) {
+                console.log(`MQTT Publish Success -> Topic: ${topic}, Payload: ${payloadString}`);
+                alert('자동설정값이 MQTT로 성공적으로 업로드(퍼블리쉬)되었습니다.');
+            } else {
+                console.error('MQTT Publish Error:', err);
+                alert('MQTT 업로드 중 오류가 발생했습니다.');
+            }
+        });
+    } else {
+        // MQTT 클라이언트가 정의되지 않았거나 연결되지 않은 경우 콘솔 시뮬레이션 및 안내
+        console.warn('MQTT client가 연결되어 있지 않습니다. 시뮬레이션 페이로드:', payloadString);
+        alert(`[MQTT 시뮬레이션]\n토픽: ${topic}\n페이로드: ${payloadString}\n(QoS: 2, Retain: false)`);
+    }
 }
