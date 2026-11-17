@@ -216,8 +216,8 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
                 borderWidth: (chartType === 'bar' ? 1 : 2),
-                pointRadius: 2,
-                pointHoverRadius: 4.5,
+                pointRadius: 0.5,
+                pointHoverRadius: 5,
                 fill: true,
                 tension: 0.25
             }]
