@@ -24,13 +24,13 @@ function renderChartPageHTML() {
                             <input type="radio" name="chart-zone" value="OUT2" onchange="onChartZoneChange()"> OUT2
                         </label>
                         <label class="chart-radio-label">
-                            <input type="radio" name="chart-zone" value="H1" onchange="onChartZoneChange()"> H1
+                            <input type="radio" name="chart-zone" value="HOUSE1" onchange="onChartZoneChange()"> HOUSE1
                         </label>
                         <label class="chart-radio-label">
-                            <input type="radio" name="chart-zone" value="H2" onchange="onChartZoneChange()"> H2
+                            <input type="radio" name="chart-zone" value="HOUSE2" onchange="onChartZoneChange()"> HOUSE2
                         </label>
                         <label class="chart-radio-label">
-                            <input type="radio" name="chart-zone" value="H3" onchange="onChartZoneChange()"> H3
+                            <input type="radio" name="chart-zone" value="HOUSE3" onchange="onChartZoneChange()"> HOUSE3
                         </label>
                     </div>
                 </div>
@@ -114,8 +114,8 @@ function onChartZoneChange() {
     sunLabel.classList.toggle('disabled', !allowSunRain);
     rainLabel.classList.toggle('disabled', !allowSunRain);
 
-    // 토양습도: OUT1과 H3에서만 선택 가능
-    const allowSoil = (selectedZone === 'OUT1' || selectedZone === 'H3');
+    // 토양습도: OUT1과 HOUSE3에서만 선택 가능
+    const allowSoil = (selectedZone === 'OUT1' || selectedZone === 'HOUSE3');
     soilInput.disabled = !allowSoil;
     soilLabel.classList.toggle('disabled', !allowSoil);
 
@@ -126,7 +126,7 @@ function onChartZoneChange() {
     }
 }
 
-// 데이터베이스 API 호출 및 Chart.js 그리기
+// InfluxDB 연동 API 호출 및 Chart.js 렌더링
 async function fetchAndDrawChart() {
     const zone = document.querySelector('input[name="chart-zone"]:checked').value;
     const metric = document.querySelector('input[name="chart-metric"]:checked').value;
@@ -159,14 +159,13 @@ async function fetchAndDrawChart() {
     let values = [];
 
     try {
-        // Cloudflare Worker / DB API 연동 호출 (엔드포인트에 맞게 URL 수정 가능)
+        // Cloudflare Worker 서버의 /api/chart 엔드포인트 호출
         const queryUrl = `${WORKER_URL}/api/chart?zone=${zone}&metric=${metric}&start=${startDate}&end=${endDate}`;
         const response = await fetch(queryUrl);
 
-        if (!response.ok) throw new Error('DB API 응답 없음');
+        if (!response.ok) throw new Error('DB API 응답 오류');
         const result = await response.json();
 
-        // 예상 응답 포맷: { success: true, data: [{ timestamp: '2026-11-15 12:00', value: 21.5 }, ...] }
         if (result.success && Array.isArray(result.data)) {
             labels = result.data.map(row => row.timestamp);
             values = result.data.map(row => row.value);
@@ -174,8 +173,8 @@ async function fetchAndDrawChart() {
             throw new Error('데이터 포맷 오류');
         }
     } catch (err) {
-        console.warn('DB API 연동 전이거나 응답이 없어 샘플 데이터를 표시합니다:', err);
-        // API 구축 전 화면 확인용 더미 데이터 생성 (시작일 ~ 종료일 일 단위)
+        console.warn('DB 연동 전이거나 응답이 없어 샘플 데이터를 표시합니다:', err);
+        // Worker API 구축 전 화면 테스트용 샘플 데이터 생성
         const sample = generateSampleChartData(startDate, endDate, metric);
         labels = sample.labels;
         values = sample.values;
