@@ -163,17 +163,30 @@ async function fetchAndDrawChart() {
         if (!response.ok) throw new Error('DB API 응답 오류');
         const result = await response.json();
 
-        if (result.success && Array.isArray(result.data)) {
+        // 🌟 가짜 데이터 출력을 막고, 실제 데이터가 올바를 때만 처리
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             labels = result.data.map(row => row.timestamp);
-            values = result.data.map(row => row.value);
+            values = result.data.map(row => Number(row.value));
+
+            if (values.some(v => !Number.isFinite(v))) {
+                throw new Error('온도 데이터에 잘못된 값이 있습니다.');
+            }
         } else {
-            throw new Error('데이터 포맷 오류');
+            throw new Error('조회된 데이터가 없거나 응답 형식이 잘못되었습니다.');
         }
     } catch (err) {
-        console.warn('DB 연동 전이거나 응답이 없어 샘플 데이터를 표시합니다:', err);
-        const sample = generateSampleChartData(startDate, endDate, metric);
-        labels = sample.labels;
-        values = sample.values;
+        console.error('차트 데이터 조회 실패:', err);
+
+        if (farmChartInstance) {
+            farmChartInstance.destroy();
+            farmChartInstance = null;
+        }
+
+        // 🌟 가짜 그래프 대신 에러 상태 표시
+        document.getElementById('chart-stats-box').innerText = '데이터 조회 실패 (Worker/DB 확인 필요)';
+        document.getElementById('chart-header-period').innerText = err.message;
+        
+        return; // 가짜 샘플 데이터 함수 호출을 완전히 차단합니다.
     }
 
     // 최고/최저값 표기 (강수량은 최저 삭제, 최고만 날짜 표기)
