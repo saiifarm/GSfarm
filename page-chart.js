@@ -206,7 +206,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
 
     const chartType = (metric === 'rain') ? 'bar' : 'line';
 
-    farmChartInstance = new Chart(ctx, {
+farmChartInstance = new Chart(ctx, {
         type: chartType,
         data: {
             labels: labels,
@@ -216,8 +216,8 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
                 borderWidth: (chartType === 'bar' ? 1 : 2),
-                pointRadius: 0.5,
-                pointHoverRadius: 5,
+                pointRadius: 2,
+                pointHoverRadius: 4.5,
                 fill: true,
                 tension: 0.25
             }]
@@ -243,7 +243,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                         font: { size: 11 }, 
                         maxRotation: 0,
                         autoSkip: false,
-                        // 🌟 중복 없이 하루에 딱 한 번만 날짜가 표기되도록 개선된 틱 콜백
+                        // 🌟 사전 계산된 날짜별 인덱스 위치에만 정확히 날짜를 표기하는 로직
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
                             
@@ -253,33 +253,48 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
 
                             if (!labelStr) return '';
 
-                            // 1. 0시 대 시간대(00시 또는 00:00)인 경우에만 날짜 추출
-                            if (labelStr.includes('00시') || labelStr.includes('00:00')) {
-                                const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                if (match) {
-                                    const formattedDate = `${match[1].slice(2)}.${match[2]}.${match[3]}`; // 예: 26.11.14
-                                    
-                                    // 💡 핵심: 렌더링 주기에 이 날짜가 이미 출력된 적이 있다면 빈 문자열 반환 (중복 원천 차단)
-                                    if (!window._renderedDates) {
-                                        window._renderedDates = new Set();
+                            // 1. 최초 실행 시 또는 차트가 바뀔 때, 전체 labels에서 각 날짜별 '첫 번째 0시(또는 해당 일자의 첫 데이터)' 인덱스를 미리 계산
+                            if (!this._targetDateIndices || this._lastLabels !== labels) {
+                                this._lastLabels = labels;
+                                this._targetDateIndices = new Map();
+                                
+                                labels.forEach((lbl, idx) => {
+                                    if (lbl) {
+                                        const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                        if (match) {
+                                            const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
+                                            // 해당 날짜로 등록된 인덱스가 아직 없고, 0시 부근이거나 그날의 첫 데이터라면 등록
+                                            if (!this._targetDateIndices.has(dateKey)) {
+                                                if (lbl.includes('00시') || lbl.includes('00:00') || idx === 0) {
+                                                    this._targetDateIndices.set(dateKey, idx);
+                                                }
+                                            }
+                                        }
                                     }
-                                    
-                                    if (window._renderedDates.has(formattedDate)) {
-                                        return ''; // 이미 나왔으면 스킵
+                                });
+
+                                // 만약 0시를 못 찾아 놓친 날짜가 있다면, 각 날짜의 첫 번째 등장 인덱스를 강제로 지정
+                                labels.forEach((lbl, idx) => {
+                                    if (lbl) {
+                                        const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                        if (match) {
+                                            const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
+                                            if (!this._targetDateIndices.has(dateKey)) {
+                                                this._targetDateIndices.set(dateKey, idx);
+                                            }
+                                        }
                                     }
-                                    
-                                    // 처음 나오는 날짜라면 기록하고 출력
-                                    window._renderedDates.add(formattedDate);
-                                    return formattedDate;
+                                });
+                            }
+
+                            // 2. 현재 인덱스가 미리 계산된 '날짜별 대표 인덱스' 중 하나라면 해당 날짜 텍스트 반환
+                            for (let [dateStr, targetIdx] of this._targetDateIndices.entries()) {
+                                if (index === targetIdx) {
+                                    return dateStr;
                                 }
                             }
 
-                            // 차트가 새로 그려질 때마다 메모리 초기화를 위한 안전장치 (마지막 인덱스 도달 시 초기화)
-                            if (index === this.chart.data.labels.length - 1) {
-                                window._renderedDates = null;
-                            }
-
-                            return ''; // 0시가 아니거나 이미 출력된 날짜는 비우기
+                            return ''; // 나머지는 전부 비우기
                         }
                     } 
                 },
