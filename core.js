@@ -206,7 +206,7 @@ function logout() {
 
 function updateNavigationState(menuName) {
     currentMenu = menuName;
-    const menus = ['HOME', '기상예보', '농장현황', '농장관리', '자동설정', '판넬연결'];
+    const menus = ['HOME', '기상예보', '농장현황', '농장관리', '차트', '자동설정', '판넬연결'];
     menus.forEach(function(name) {
         const topBtn = document.getElementById('nav-btn-' + name);
         if (topBtn) topBtn.disabled = (name === menuName);
@@ -228,6 +228,9 @@ function openMenu(menuName) {
     } else if (menuName === '농장관리') {
         heroArea.style.backgroundColor = '#66a182';
         renderManagePageHTML();
+    } else if (menuName === '차트') { // 👈 추가
+        heroArea.style.backgroundColor = '#2D6A3F';
+        renderChartPageHTML();
     } else if (menuName === '자동설정') {
         heroArea.style.backgroundColor = '#2D6A3F';
         renderAutoPageHTML();
@@ -238,6 +241,7 @@ function openMenu(menuName) {
 
     updateNavigationState(menuName);
 }
+
 
 (function startClock() {
     function update() {
