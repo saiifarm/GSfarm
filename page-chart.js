@@ -153,8 +153,7 @@ async function fetchAndDrawChart() {
     document.getElementById('chart-header-title').innerText = `${zone} - ${meta.label} (${meta.unit})`;
     document.getElementById('chart-header-period').innerText = `${startDate} ~ ${endDate}`;
 
-    let labels = [];
-    let values = [];
+    let rawData = [];
 
     try {
         const queryUrl = `${WORKER_URL}/api/chart?zone=${zone}&metric=${metric}&start=${startDate}&end=${endDate}`;
@@ -164,17 +163,21 @@ async function fetchAndDrawChart() {
         const result = await response.json();
 
         if (result.success && Array.isArray(result.data)) {
-            labels = result.data.map(row => row.timestamp);
-            values = result.data.map(row => row.value);
+            rawData = result.data;
         } else {
             throw new Error('데이터 포맷 오류');
         }
     } catch (err) {
         console.warn('DB 연동 전이거나 응답이 없어 샘플 데이터를 표시합니다:', err);
         const sample = generateSampleChartData(startDate, endDate, metric);
-        labels = sample.labels;
-        values = sample.values;
+        rawData = sample.labels.map((lbl, idx) => ({ timestamp: lbl, value: sample.values[idx] }));
     }
+
+    // 🌟 1. 데이터가 시간순으로 정렬되도록 보장 (그래프 꼬임 방지)
+    rawData.sort((a, b) => new Date(a.timestamp.replace(/년|월/g, '-').replace(/일/, '')) - new Date(b.timestamp.replace(/년|월/g, '-').replace(/일/, '')));
+
+    const labels = rawData.map(row => row.timestamp);
+    const values = rawData.map(row => row.value);
 
     // 최고/최저값 표기 (강수량은 최저 삭제, 최고만 날짜 표기)
     if (values.length > 0) {
@@ -206,7 +209,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
 
     const chartType = (metric === 'rain') ? 'bar' : 'line';
 
-farmChartInstance = new Chart(ctx, {
+    farmChartInstance = new Chart(ctx, {
         type: chartType,
         data: {
             labels: labels,
@@ -216,9 +219,9 @@ farmChartInstance = new Chart(ctx, {
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
                 borderWidth: (chartType === 'bar' ? 1 : 2),
-                pointRadius: 0.2,
+                pointRadius: 0,             // 🌟 점 크기를 0으로 두어 선만 깔끔하게 표시
                 pointHoverRadius: 5,
-                fill: true,
+                fill: false,                // 🌟 전체 배경 채우기 해제 (빨갛게 가득 차는 현상 방지)
                 tension: 0.25
             }]
         },
@@ -243,17 +246,15 @@ farmChartInstance = new Chart(ctx, {
                         font: { size: 11 }, 
                         maxRotation: 0,
                         autoSkip: false,
-                        // 🌟 사전 계산된 날짜별 인덱스 위치에만 정확히 날짜를 표기하는 로직
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
                             
                             if (metric === 'rain') {
-                                return labelStr; // 강수량은 일 단위 그대로 표기
+                                return labelStr; 
                             }
 
                             if (!labelStr) return '';
 
-                            // 1. 최초 실행 시 또는 차트가 바뀔 때, 전체 labels에서 각 날짜별 '첫 번째 0시(또는 해당 일자의 첫 데이터)' 인덱스를 미리 계산
                             if (!this._targetDateIndices || this._lastLabels !== labels) {
                                 this._lastLabels = labels;
                                 this._targetDateIndices = new Map();
@@ -263,7 +264,6 @@ farmChartInstance = new Chart(ctx, {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
                                         if (match) {
                                             const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
-                                            // 해당 날짜로 등록된 인덱스가 아직 없고, 0시 부근이거나 그날의 첫 데이터라면 등록
                                             if (!this._targetDateIndices.has(dateKey)) {
                                                 if (lbl.includes('00시') || lbl.includes('00:00') || idx === 0) {
                                                     this._targetDateIndices.set(dateKey, idx);
@@ -273,7 +273,6 @@ farmChartInstance = new Chart(ctx, {
                                     }
                                 });
 
-                                // 만약 0시를 못 찾아 놓친 날짜가 있다면, 각 날짜의 첫 번째 등장 인덱스를 강제로 지정
                                 labels.forEach((lbl, idx) => {
                                     if (lbl) {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
@@ -287,14 +286,13 @@ farmChartInstance = new Chart(ctx, {
                                 });
                             }
 
-                            // 2. 현재 인덱스가 미리 계산된 '날짜별 대표 인덱스' 중 하나라면 해당 날짜 텍스트 반환
                             for (let [dateStr, targetIdx] of this._targetDateIndices.entries()) {
                                 if (index === targetIdx) {
                                     return dateStr;
                                 }
                             }
 
-                            return ''; // 나머지는 전부 비우기
+                            return '';
                         }
                     } 
                 },
