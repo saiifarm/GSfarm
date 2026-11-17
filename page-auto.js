@@ -1,31 +1,31 @@
-// [괴산농장 Main Controller V2.0 - 자동설정 기본값 정의]
+// [괴산농장 Main Controller V2.0 - 자동설정 항목별 기본값 및 선택 옵션 정의]
 const DEFAULT_AUTO_CONFIG = {
     // 1. 우천관리
     rainEnable: true,
     rainVent1: true,
     rainVent2: false,
 
-    // 2. 고온관리
+    // 2. 고온관리 (지정된 값들 중에서만 선택)
     highTempEnable: true,
-    htExtTemp: 15,
-    htIntTemp: 25,
-    htTempRange: 3,
+    htExtTemp: 15,     // 기본값 15 (옵션: 10, 15, 20, 25, 30)
+    htIntTemp: 25,     // 기본값 25 (옵션: 15, 20, 25, 27, 30, 35)
+    htTempRange: 3,    // 기본값 3  (옵션: 3, 5)
 
-    // 3. 팬 제어 및 연동 기기
-    fanTargetTemp: 30,
-    fanRunTime: 1,
-    fanRestTime: 15,
+    // 3. 팬 제어 및 연동 기기 (지정된 값들 중에서만 선택)
+    fanTargetTemp: 30, // 기본값 30 (옵션: 20, 25, 30, 35)
+    fanRunTime: 1,     // 기본값 1  (옵션: 1, 2, 3)
+    fanRestTime: 15,   // 기본값 15 (옵션: 5, 10, 15, 20, 30)
     deviceVent1: true,
     deviceVent2: true,
     deviceExhaust: true,
     deviceCirculation: true,
 
-    // 4. 삽목장관리
+    // 4. 삽목장관리 (지정된 범위 및 값 중에서 선택)
     cuttingEnable: false,
-    cutOpenTime: 22,
-    cutInterval: 2,
-    cutLightOn: 20,
-    cutLightDuration: 2,
+    cutOpenTime: 22,      // 기본값 22 (옵션: 0 ~ 23시)
+    cutInterval: 2,       // 기본값 2  (옵션: 1 ~ 10시간)
+    cutLightOn: 20,       // 기본값 20 (옵션: 0 ~ 23시)
+    cutLightDuration: 2,  // 기본값 2  (옵션: 1 ~ 10시간)
     cutOpCheck: true,
     cutLightCheck: false
 };
@@ -68,7 +68,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">기준온도(외부)</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="ht-ext-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(5, 35, cfg.htExtTemp)}
+                                    ${generateCustomOptions([10, 15, 20, 25, 30], cfg.htExtTemp)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
@@ -76,7 +76,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">기준온도(내부)</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="ht-int-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(10, 45, cfg.htIntTemp)}
+                                    ${generateCustomOptions([15, 20, 25, 27, 30, 35], cfg.htIntTemp)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
@@ -84,7 +84,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">온도폭</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="ht-temp-range" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(1, 10, cfg.htTempRange)}
+                                    ${generateCustomOptions([3, 5], cfg.htTempRange)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
@@ -100,7 +100,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000; font-weight: bold;">팬온도(내부)</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="fan-target-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(15, 50, cfg.fanTargetTemp)}
+                                    ${generateCustomOptions([20, 25, 30, 35], cfg.fanTargetTemp)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
@@ -108,7 +108,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000; font-weight: bold;">팬 가동시간</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="fan-run-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(1, 12, cfg.fanRunTime)}
+                                    ${generateCustomOptions([1, 2, 3], cfg.fanRunTime)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
@@ -116,7 +116,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000; font-weight: bold;">팬 휴식시간</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="fan-rest-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(5, 60, cfg.fanRestTime, 5)}
+                                    ${generateCustomOptions([5, 10, 15, 20, 30], cfg.fanRestTime)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">분</span>
                             </div>
@@ -150,7 +150,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">개폐시간</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="cut-open-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(0, 23, cfg.cutOpenTime)}
+                                    ${generateRangeOptions(0, 23, cfg.cutOpenTime)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
                             </div>
@@ -158,7 +158,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">개폐간격</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="cut-interval" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(1, 12, cfg.cutInterval)}
+                                    ${generateRangeOptions(1, 10, cfg.cutInterval)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
@@ -166,7 +166,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">생육등 점등</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="cut-light-on" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(0, 23, cfg.cutLightOn)}
+                                    ${generateRangeOptions(0, 23, cfg.cutLightOn)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
                             </div>
@@ -174,7 +174,7 @@ function renderAutoPageHTML() {
                             <span style="font-size: 13px; color: #000;">점등시간</span>
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <select id="cut-light-duration" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                    ${generateNumberOptions(1, 12, cfg.cutLightDuration)}
+                                    ${generateRangeOptions(1, 10, cfg.cutLightDuration)}
                                 </select>
                                 <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
@@ -202,10 +202,20 @@ function renderAutoPageHTML() {
     `;
 }
 
-// 숫자를 동적으로 드롭다운(select) 옵션으로 생성해주는 헬퍼 함수
-function generateNumberOptions(min, max, selectedVal, step = 1) {
+// 1. 특정 배열 값들로 옵션을 생성하는 헬퍼 함수 (고온관리, 팬제어용)
+function generateCustomOptions(values, selectedVal) {
     let options = '';
-    for (let i = min; i <= max; i += step) {
+    values.forEach(val => {
+        const selected = (val === selectedVal) ? 'selected' : '';
+        options += `<option value="${val}" ${selected}>${val}</option>`;
+    });
+    return options;
+}
+
+// 2. 연속된 범위(Min ~ Max)로 옵션을 생성하는 헬퍼 함수 (삽목장관리용)
+function generateRangeOptions(min, max, selectedVal) {
+    let options = '';
+    for (let i = min; i <= max; i++) {
         const selected = (i === selectedVal) ? 'selected' : '';
         options += `<option value="${i}" ${selected}>${i}</option>`;
     }
