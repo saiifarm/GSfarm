@@ -4,7 +4,6 @@ let farmChartInstance = null;
 function renderChartPageHTML() {
     const container = document.getElementById('content-area');
 
-    // 기본 날짜 설정 (7일 전 ~ 오늘)
     const today = new Date();
     const weekAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
     const formatDate = (d) => d.toISOString().split('T')[0];
@@ -79,8 +78,14 @@ function renderChartPageHTML() {
             <!-- 우측 70% 차트 출력 영역 -->
             <div class="chart-display-area">
                 <div class="chart-display-header">
-                    <div class="chart-display-title" id="chart-header-title">OUT1 - 온도 추이</div>
-                    <div class="chart-display-subtitle" id="chart-header-period">${formatDate(weekAgo)} ~ ${formatDate(today)}</div>
+                    <div>
+                        <div class="chart-display-title" id="chart-header-title">OUT1 - 온도 추이</div>
+                        <div class="chart-display-subtitle" id="chart-header-period">${formatDate(weekAgo)} ~ ${formatDate(today)}</div>
+                    </div>
+                    <!-- 최저/최고값 표기 영역 -->
+                    <div id="chart-stats-box" style="font-size: 13px; font-weight: bold; color: #333; background: #f0f4f1; padding: 4px 10px; border-radius: 4px; border: 1px solid #d2e2d5;">
+                        최저: - | 최고: -
+                    </div>
                 </div>
                 <div class="chart-canvas-container">
                     <canvas id="farmChartCanvas"></canvas>
@@ -89,12 +94,10 @@ function renderChartPageHTML() {
         </div>
     `;
 
-    // 초기 구역 조건에 맞게 항목 활성화 상태 동기화 및 초기 차트 로드
     onChartZoneChange();
     fetchAndDrawChart();
 }
 
-// 구역 변경 시 항목 활성화/비활성화 제어
 function onChartZoneChange() {
     const selectedZone = document.querySelector('input[name="chart-zone"]:checked').value;
 
@@ -107,26 +110,22 @@ function onChartZoneChange() {
     const rainLabel = document.getElementById('lbl-metric-rain');
     const soilLabel = document.getElementById('lbl-metric-soil');
 
-    // 태양광, 강수량: OUT1에서만 선택 가능
     const allowSunRain = (selectedZone === 'OUT1');
     sunInput.disabled = !allowSunRain;
     rainInput.disabled = !allowSunRain;
     sunLabel.classList.toggle('disabled', !allowSunRain);
     rainLabel.classList.toggle('disabled', !allowSunRain);
 
-    // 토양습도: OUT1과 HOUSE3에서만 선택 가능
     const allowSoil = (selectedZone === 'OUT1' || selectedZone === 'HOUSE3');
     soilInput.disabled = !allowSoil;
     soilLabel.classList.toggle('disabled', !allowSoil);
 
-    // 현재 선택된 항목이 비활성화되었다면 기본값('온도')으로 자동 전환
     const currentCheckedMetric = document.querySelector('input[name="chart-metric"]:checked');
     if (currentCheckedMetric && currentCheckedMetric.disabled) {
         tempInput.checked = true;
     }
 }
 
-// InfluxDB 연동 API 호출 및 Chart.js 렌더링
 async function fetchAndDrawChart() {
     const zone = document.querySelector('input[name="chart-zone"]:checked').value;
     const metric = document.querySelector('input[name="chart-metric"]:checked').value;
@@ -143,15 +142,14 @@ async function fetchAndDrawChart() {
     }
 
     const metricMeta = {
-        temp: { label: '온도', unit: '°C', color: '#d9534f', bg: 'rgba(217, 83, 79, 0.15)' },
-        hum:  { label: '습도', unit: '%',  color: '#337ab7', bg: 'rgba(51, 122, 183, 0.15)' },
-        sun:  { label: '태양광', unit: 'lx', color: '#f0ad4e', bg: 'rgba(240, 173, 78, 0.2)' },
-        rain: { label: '강수량', unit: 'mm', color: '#5bc0de', bg: 'rgba(91, 192, 222, 0.2)' },
-        soil: { label: '토양습도', unit: '%', color: '#8d5524', bg: 'rgba(141, 85, 36, 0.15)' }
+        temp: { label: '온도', unit: '°C', color: '#d9534f', bg: 'rgba(217, 83, 79, 0.2)' },
+        hum:  { label: '습도', unit: '%',  color: '#337ab7', bg: 'rgba(51, 122, 183, 0.2)' },
+        sun:  { label: '태양광', unit: 'lx', color: '#f0ad4e', bg: 'rgba(240, 173, 78, 0.25)' },
+        rain: { label: '강수량', unit: 'mm', color: '#5bc0de', bg: 'rgba(91, 192, 222, 0.4)' },
+        soil: { label: '토양습도', unit: '%', color: '#8d5524', bg: 'rgba(141, 85, 36, 0.2)' }
     };
     const meta = metricMeta[metric];
 
-    // 상단 타이틀 갱신
     document.getElementById('chart-header-title').innerText = `${zone} - ${meta.label} (${meta.unit})`;
     document.getElementById('chart-header-period').innerText = `${startDate} ~ ${endDate}`;
 
@@ -159,7 +157,6 @@ async function fetchAndDrawChart() {
     let values = [];
 
     try {
-        // Cloudflare Worker 서버의 /api/chart 엔드포인트 호출
         const queryUrl = `${WORKER_URL}/api/chart?zone=${zone}&metric=${metric}&start=${startDate}&end=${endDate}`;
         const response = await fetch(queryUrl);
 
@@ -174,25 +171,35 @@ async function fetchAndDrawChart() {
         }
     } catch (err) {
         console.warn('DB 연동 전이거나 응답이 없어 샘플 데이터를 표시합니다:', err);
-        // Worker API 구축 전 화면 테스트용 샘플 데이터 생성
         const sample = generateSampleChartData(startDate, endDate, metric);
         labels = sample.labels;
         values = sample.values;
     }
 
-    renderChartCanvas(labels, values, zone, meta);
+    // 최저값 / 최고값 계산 및 표기
+    if (values.length > 0) {
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        document.getElementById('chart-stats-box').innerText = `최저: ${minVal} ${meta.unit}  |  최고: ${maxVal} ${meta.unit}`;
+    } else {
+        document.getElementById('chart-stats-box').innerText = `최저: - | 최고: -`;
+    }
+
+    renderChartCanvas(labels, values, zone, meta, metric);
 }
 
-// Chart.js 인스턴스 생성 및 업데이트
-function renderChartCanvas(labels, values, zone, meta) {
+function renderChartCanvas(labels, values, zone, meta, metric) {
     const ctx = document.getElementById('farmChartCanvas').getContext('2d');
 
     if (farmChartInstance) {
         farmChartInstance.destroy();
     }
 
+    // 강수량은 막대 그래프(bar), 나머지는 꺾은선 그래프(line)로 처리
+    const chartType = (metric === 'rain') ? 'bar' : 'line';
+
     farmChartInstance = new Chart(ctx, {
-        type: 'line',
+        type: chartType,
         data: {
             labels: labels,
             datasets: [{
@@ -200,9 +207,10 @@ function renderChartCanvas(labels, values, zone, meta) {
                 data: values,
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
-                borderWidth: 2.5,
-                pointRadius: 3.5,
-                pointHoverRadius: 6,
+                borderWidth: (chartType === 'bar' ? 1 : 2),
+                // 2번 요청사항 반영: 노드(포인트) 크기를 기존보다 축소 (radius: 2) 및 채우기 허용
+                pointRadius: 2,
+                pointHoverRadius: 4.5,
                 fill: true,
                 tension: 0.25
             }]
@@ -210,16 +218,9 @@ function renderChartCanvas(labels, values, zone, meta) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: { font: { size: 13, weight: 'bold' } }
-                },
+                legend: { display: true, position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -229,17 +230,12 @@ function renderChartCanvas(labels, values, zone, meta) {
                 }
             },
             scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 0 }
-                },
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45 } },
                 y: {
-                    beginAtZero: (meta.unit === 'mm' || meta.unit === 'lx'),
+                    beginAtZero: true,
                     ticks: {
                         font: { size: 12 },
-                        callback: function(value) {
-                            return value + ' ' + meta.unit;
-                        }
+                        callback: function(value) { return value + ' ' + meta.unit; }
                     }
                 }
             }
@@ -247,7 +243,6 @@ function renderChartCanvas(labels, values, zone, meta) {
     });
 }
 
-// DB API 연결 전 화면 테스트용 샘플 데이터 생성기
 function generateSampleChartData(startStr, endStr, metric) {
     const labels = [];
     const values = [];
@@ -255,7 +250,7 @@ function generateSampleChartData(startStr, endStr, metric) {
     const end = new Date(endStr);
 
     while (curr <= end) {
-        labels.push(curr.toISOString().split('T')[0]);
+        labels.push(curr.toISOString().split('T')[0] + (metric === 'rain' ? '' : ' 23:30'));
         let val = 0;
         if (metric === 'temp') val = +(15 + Math.random() * 12).toFixed(1);
         else if (metric === 'hum') val = +(45 + Math.random() * 35).toFixed(1);
