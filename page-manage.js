@@ -16,28 +16,36 @@ let manageState = {
     }
 };
 
-// MQTT 메시지 발행 공통 함수 (버튼 클릭 시 자체 UI 변경 없음)
+// Cloudflare Worker를 통한 안전한 MQTT 발행 함수
 function sendManageMQTT(payloadStr) {
-    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
-        try {
-            const message = new Paho.MQTT.Message(payloadStr);
-            message.destinationName = "saiifarm24/smart_R";
-            message.qos = 2;
-            message.retained = false;
-            mqttClient.send(message);
-            console.log("📤 MQTT 송신 [saiifarm24/smart_R]:", payloadStr);
-        } catch (e) {
-            console.error("MQTT 송신 오류:", e);
+    const topic = "saiifarm24/smart_R";
+    
+    fetch(WORKER_URL + '/api/mqtt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            topic: topic,
+            payload: payloadStr,
+            qos: 2,
+            retain: false
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log("📤 MQTT Proxy 송신 성공 [saiifarm24/smart_R]:", payloadStr);
+        } else {
+            console.error("MQTT Proxy 송신 실패:", data.message);
         }
-    } else {
-        console.warn("MQTT가 연결되어 있지 않습니다:", payloadStr);
-    }
+    })
+    .catch(err => {
+        console.error("MQTT Proxy 통신 오류:", err);
+    });
 }
 
 function renderManagePageHTML() {
     var container = document.getElementById('content-area');
     var pctOptions = [25, 50, 75, 100];
-
     var pairs = [[0, 1], [2, 3], [4, 5]];
 
     var pairsHTML = pairs.map(function(pair) {
@@ -120,7 +128,6 @@ function renderManagePageHTML() {
     syncAllManageUI();
 }
 
-// 퍼센트 체크박스 선택 핸들러
 function selectWindowPct(winIdx, pct) {
     manageState.windows[winIdx].targetPct = pct;
     [25, 50, 75, 100].forEach(function(val) {
@@ -132,7 +139,6 @@ function selectWindowPct(winIdx, pct) {
     });
 }
 
-// 창 제어 버튼 클릭 (MQTT 송신만 수행, 로컬 UI 변경 없음)
 function controlWindow(winIdx, cmd) {
     var win = manageState.windows[winIdx];
     if (cmd === 'open') {
@@ -144,12 +150,10 @@ function controlWindow(winIdx, cmd) {
     }
 }
 
-// 시간 선택 변경
 function changeDeviceTime(key, val) {
     manageState.devices[key].duration = val;
 }
 
-// 팬/생육등/자동화 ON/OFF 버튼 클릭 (MQTT 송신만 수행)
 function toggleDevicePower(key, state) {
     var dev = manageState.devices[key];
     if (key === 'automation') {
@@ -159,69 +163,6 @@ function toggleDevicePower(key, state) {
     }
 }
 
-// -------------------------------------------------------------
-// [농장 컨트롤러 피드백 수신 핸들러: saiifarm24/smart_S 토픽]
-// -------------------------------------------------------------
-function handleSmartFeedback(parts) {
-    if (parts.length < 2) return;
-    var p1 = parts[0];
-    var p2 = parts[1];
-
-    // 1. 창 상태 피드백 처리 (1L, 1R, 2L, 2R, 3L, 3R)
-    manageState.windows.forEach(function(win, idx) {
-        if (p1 === win.prefix + '_WIN') {
-            // %가 중복 붙지 않도록 순수 숫자만 추출 후 % 부착
-            var cleanPct = String(p2).replace('%', '').trim();
-            win.currentPct = cleanPct;
-            var pctTextEl = document.getElementById('win-pct-text-' + idx);
-            if (pctTextEl) pctTextEl.innerText = cleanPct + '%';
-        }
-
-        if (p2 === win.prefix + '_UP') {
-            win.cmd = 'open';
-            win.statusImg = 'up.png';
-            updateWinUI(idx, 'open');
-        } else if (p2 === win.prefix + '_STOP') {
-            win.cmd = 'stop';
-            win.statusImg = 'red.png';
-            updateWinUI(idx, 'stop');
-        } else if (p2 === win.prefix + '_DOWN') {
-            win.cmd = 'close';
-            win.statusImg = 'down.png';
-            updateWinUI(idx, 'close');
-        }
-    });
-
-    // 2. 환기팬, 유동팬, 생육등, 자동화 피드백 처리
-    var devicesMap = { 'F1': 'ventFan', 'F2': 'circFan', 'LT': 'growLight' };
-    
-    // 시간 바 변경 피드백 (F1_TIME, F2_TIME, LT_TIME 등)
-    Object.keys(devicesMap).forEach(function(prefix) {
-        if (p1 === prefix + '_TIME') {
-            var devKey = devicesMap[prefix];
-            manageState.devices[devKey].duration = p2;
-            var selectEl = document.getElementById('select-' + devKey);
-            if (selectEl) selectEl.value = p2;
-        }
-    });
-
-    // 팬/생육등 ON/OFF 피드백 (F1_NOW, F2_NOW, LT_NOW 등)
-    Object.keys(devicesMap).forEach(function(prefix) {
-        if (p1 === prefix + '_NOW') {
-            var devKey = devicesMap[prefix];
-            manageState.devices[devKey].power = p2;
-            updateDeviceUI(devKey, p2);
-        }
-    });
-
-    // 자동화 피드백 처리 (AUTO_NOW00)
-    if (p1 === 'AUTO_NOW00') {
-        manageState.devices.automation.power = p2;
-        updateDeviceUI('automation', p2);
-    }
-}
-
-// 개별 창 UI 스타일 업데이트 헬퍼
 function updateWinUI(idx, state) {
     var win = manageState.windows[idx];
     var imgEl = document.getElementById('win-img-' + idx);
@@ -233,46 +174,29 @@ function updateWinUI(idx, state) {
 
     if (!btnOpen || !btnStop || !btnClose) return;
 
-    // 초기화 (밝은 회색)
     btnOpen.style.background = '#c7c7c7';
     btnStop.style.background = '#c7c7c7';
     btnClose.style.background = '#c7c7c7';
 
-    if (state === 'open') {
-        btnOpen.style.background = '#007bff'; // 파란색
-    } else if (state === 'stop') {
-        btnStop.style.background = '#dc3545'; // 빨간색
-    } else if (state === 'close') {
-        btnClose.style.background = '#007bff'; // 파란색
-    }
+    if (state === 'open') btnOpen.style.background = '#007bff';
+    else if (state === 'stop') btnStop.style.background = '#dc3545';
+    else if (state === 'close') btnClose.style.background = '#007bff';
 }
 
-// 설비(환기팬, 유동팬, 생육등, 자동화) 버튼 색상 업데이트 헬퍼
 function updateDeviceUI(key, state) {
     var onBtn = document.getElementById('dev-on-' + key);
     var offBtn = document.getElementById('dev-off-' + key);
     if (!onBtn || !offBtn) return;
 
-    if (key === 'automation') {
-        if (state === 'ON') {
-            onBtn.style.background = '#007bff'; // 파란색
-            offBtn.style.background = '#c7c7c7'; // 밝은 회색
-        } else {
-            onBtn.style.background = '#c7c7c7'; // 회색
-            offBtn.style.background = '#dc3545'; // 빨간색
-        }
+    if (state === 'ON') {
+        onBtn.style.background = '#007bff';
+        offBtn.style.background = '#c7c7c7';
     } else {
-        if (state === 'ON') {
-            onBtn.style.background = '#007bff'; // 파란색
-            offBtn.style.background = '#c7c7c7'; // 밝은 회색
-        } else {
-            onBtn.style.background = '#c7c7c7'; // 회색
-            offBtn.style.background = '#dc3545'; // 빨간색 -> 수정
-        }
+        onBtn.style.background = '#c7c7c7';
+        offBtn.style.background = '#dc3545';
     }
 }
 
-// 전체 관리 UI 동기화 초기화
 function syncAllManageUI() {
     manageState.windows.forEach(function(win, idx) {
         updateWinUI(idx, win.cmd);
