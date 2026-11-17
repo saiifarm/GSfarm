@@ -1,4 +1,4 @@
-// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현 - Worker 프록시 보안 적용]
+// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현]
 
 function renderPanelPageHTML() {
     const container = document.getElementById('content-area');
@@ -30,7 +30,7 @@ function renderPanelPageHTML() {
     `;
 }
 
-// 📌 텍스트 박스에 로그 메시지 추가 (안내용)
+// 📌 텍스트 박스에 안내 메시지 추가 함수
 function appendLogMessage(message, color = "#333") {
     const logContainer = document.getElementById('log-scroll-container');
     if (!logContainer) return;
@@ -48,32 +48,23 @@ function appendLogMessage(message, color = "#333") {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
-// 1. [LOG 다운] 버튼 클릭 시 -> Worker API를 통해 토픽 "saiifarm24/smart_R", 페이로드 "saiiLOG,request" 발행 (QoS 2, Retain false)
+// 1. [LOG 다운] 버튼 클릭 시 -> 서버에 단순 액션명만 전달 (토픽/페이로드 은닉)
 function handleLogDownload() {
-    const topic = "saiifarm24/smart_R";
-    const payload = "saiiLOG" + "," + "request"; // "saiiLOG,request"
-
     fetch(WORKER_URL + '/api/mqtt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            topic: topic,
-            payload: payload,
-            qos: 2,
-            retain: false
-        })
+        body: JSON.stringify({ action: "get_log" })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            appendLogMessage(`💾 [안내] LOG 다운 요청 전송 완료 (${payload})`, "#2980b9");
+            appendLogMessage("💾 LOG 다운 요청 전송 완료", "#2980b9");
         } else {
-            appendLogMessage(`⚠️ 전송 실패: ${data.message || '알 수 없는 오류'}`, "#c0392b");
+            appendLogMessage("⚠️ 전송 실패", "#c0392b");
         }
     })
     .catch(err => {
-        appendLogMessage("❌ 서버 통신 오류 발생", "#c0392b");
-        console.error("Worker API 통신 오류:", err);
+        appendLogMessage("❌ 서버 통신 오류", "#c0392b");
     });
 }
 
@@ -85,32 +76,23 @@ function handleLogDelete() {
     }
 }
 
-// 3. [농장연결] 버튼 클릭 시 -> Worker API를 통해 토픽 "saiifarm24/smart_R", 페이로드 "SMLOVE,AUTONOW00" 발행 (QoS 2, Retain false)
+// 3. [농장연결] 버튼 클릭 시 -> 서버에 단순 액션명만 전달 (토픽/페이로드 은닉)
 function handleFarmConnect() {
-    const topic = "saiifarm24/smart_R";
-    const payload = "SMLOVE,AUTONOW00";
-
     fetch(WORKER_URL + '/api/mqtt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            topic: topic,
-            payload: payload,
-            qos: 2,
-            retain: false
-        })
+        body: JSON.stringify({ action: "farm_connect" })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            appendLogMessage(`🔗 [안내] 농장연결 요청 전송 완료 (${payload})`, "#d35400");
+            appendLogMessage("🔗 농장연결 요청 전송 완료", "#d35400");
         } else {
-            appendLogMessage(`⚠️ 전송 실패: ${data.message || '알 수 없는 오류'}`, "#c0392b");
+            appendLogMessage("⚠️ 전송 실패", "#c0392b");
         }
     })
     .catch(err => {
-        appendLogMessage("❌ 서버 통신 오류 발생", "#c0392b");
-        console.error("Worker API 통신 오류:", err);
+        appendLogMessage("❌ 서버 통신 오류", "#c0392b");
     });
 }
 
