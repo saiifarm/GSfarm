@@ -224,7 +224,7 @@ function resetAutoConfigDefault() {
     document.getElementById('cut-light-check').checked = cfg.cutLightCheck;
 }
 
-// UPLOAD 버튼 클릭 시 Worker API(POST /api/mqtt)를 통해 안전하게 MQTT 발행
+// UPLOAD 버튼 클릭 시 브라우저의 mqttClient를 통해 직접 MQTT 발행 (직결 방식)
 function uploadAutoConfig() {
     const p1 = document.getElementById('auto-rain-enable').checked ? 1 : 0;
     const p2 = document.getElementById('rain-vent-1').checked ? 1 : 0;
@@ -255,27 +255,22 @@ function uploadAutoConfig() {
 
     const topic = "saiifarm24/autoset00";
 
-    fetch(WORKER_URL + '/api/mqtt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            topic: topic,
-            payload: payloadString,
-            qos: 2,
-            retain: false
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            console.log(`MQTT Proxy Upload Success -> Topic: ${topic}, Payload: ${payloadString}`);
-            alert('자동설정값이 서버를 통해 안전하게 업로드(퍼블리쉬)되었습니다.');
-        } else {
-            alert('업로드 실패: ' + (data.message || '알 수 없는 오류'));
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+        try {
+            const message = new Paho.MQTT.Message(payloadString);
+            message.destinationName = topic;
+            message.qos = 2;
+            message.retained = false;
+            mqttClient.send(message);
+            
+            console.log(`📤 직접 MQTT 송신 성공 [${topic}]:`, payloadString);
+            alert('자동설정값이 MQTT로 직접 안전하게 업로드되었습니다.');
+        } catch (e) {
+            console.error("MQTT 직접 송신 오류:", e);
+            alert('MQTT 송신 중 예외가 발생했습니다.');
         }
-    })
-    .catch(err => {
-        console.error('MQTT Proxy 통신 오류:', err);
-        alert('서버 통신 중 오류가 발생했습니다.');
-    });
+    } else {
+        console.warn("⚠️ MQTT가 연결되어 있지 않습니다.");
+        alert('MQTT가 연결되어 있지 않습니다. 연결 상태를 확인해주세요.');
+    }
 }
