@@ -18,6 +18,10 @@ function renderMenuGridHTML() {
                 <img src="icon4-man.png" alt="농장관리" class="menu-icon-img">
                 <span class="menu-label">농장관리</span>
             </div>
+            <div class="menu-card" onclick="openMenu('차트')"> <!-- 👈 추가 -->
+                <img src="icon-chart.png" alt="차트" class="menu-icon-img">
+                <span class="menu-label">차트</span>
+            </div>
             <div class="menu-card" onclick="openMenu('자동설정')">
                 <img src="icon-set.png" alt="자동설정" class="menu-icon-img">
                 <span class="menu-label">자동설정</span>
