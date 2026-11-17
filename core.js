@@ -119,7 +119,14 @@ function initMQTT() {
                     humMin: parts[6] || '-',
                     soil: parts[7] || '-'
                 };
+            } else if (topic === "saiifarm24/smart_LOG") {
+                if (typeof handleSmartLogMessage === 'function') {
+                handleSmartLogMessage(payload);
+                }
+                return;
             }
+
+            
 
             if (currentMenu === '농장현황' && typeof updateStatusDOM === 'function') {
                 updateStatusDOM();
@@ -142,6 +149,7 @@ function initMQTT() {
             mqttClient.subscribe("saiifarm24/house2");
             mqttClient.subscribe("saiifarm24/house3");
             mqttClient.subscribe("saiifarm24/smart_S");
+            mqttClient.subscribe("saiifarm24/smart_LOG");
         },
         onFailure: function(message) {
             updateMqttStatusUI(false, "연결 실패 (재시도 중)");
