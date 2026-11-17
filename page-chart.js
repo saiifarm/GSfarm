@@ -216,7 +216,7 @@ farmChartInstance = new Chart(ctx, {
                 borderColor: meta.color,
                 backgroundColor: meta.bg,
                 borderWidth: (chartType === 'bar' ? 1 : 2),
-                pointRadius: 0.5,
+                pointRadius: 0.2,
                 pointHoverRadius: 5,
                 fill: true,
                 tension: 0.25
