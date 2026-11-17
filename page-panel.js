@@ -48,24 +48,29 @@ function appendLogMessage(message, color = "#333") {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
-// 1. [LOG 다운] 버튼 클릭 시 -> 서버에 단순 액션명만 전달 (토픽/페이로드 은닉)
+// 1. [LOG 다운] 버튼 클릭 시 -> 토픽 "saiifarm24/smart_R", 페이로드 "saiiLOG,request" 직접 발행
 function handleLogDownload() {
-    fetch(WORKER_URL + '/api/mqtt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: "get_log" })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            appendLogMessage("💾 LOG 다운 요청 전송 완료", "#2980b9");
-        } else {
-            appendLogMessage("⚠️ 전송 실패", "#c0392b");
+    const topic = "saiifarm24/smart_R";
+    const payload = "saiiLOG,request";
+
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+        try {
+            const message = new Paho.MQTT.Message(payload);
+            message.destinationName = topic;
+            message.qos = 2;
+            message.retained = false;
+            mqttClient.send(message);
+            
+            appendLogMessage(`💾 송신완료 [${topic}] : ${payload}`, "#2980b9");
+            console.log(`📤 MQTT 송신 성공 [${topic}]:`, payload);
+        } catch (e) {
+            appendLogMessage("❌ MQTT 송신 중 예외 발생", "#c0392b");
+            console.error("MQTT 송신 오류:", e);
         }
-    })
-    .catch(err => {
-        appendLogMessage("❌ 서버 통신 오류", "#c0392b");
-    });
+    } else {
+        appendLogMessage("⚠️ MQTT가 연결되어 있지 않습니다.", "#c0392b");
+        console.warn("MQTT가 연결되어 있지 않습니다.");
+    }
 }
 
 // 2. [LOG 삭제] 버튼 클릭 시 -> 좌측 텍스트 박스의 내용을 전부 지움
@@ -76,24 +81,29 @@ function handleLogDelete() {
     }
 }
 
-// 3. [농장연결] 버튼 클릭 시 -> 서버에 단순 액션명만 전달 (토픽/페이로드 은닉)
+// 3. [농장연결] 버튼 클릭 시 -> 토픽 "saiifarm24/smart_R", 페이로드 "SMLOVE,AUTONOW00" 직접 발행
 function handleFarmConnect() {
-    fetch(WORKER_URL + '/api/mqtt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: "farm_connect" })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            appendLogMessage("🔗 농장연결 요청 전송 완료", "#d35400");
-        } else {
-            appendLogMessage("⚠️ 전송 실패", "#c0392b");
+    const topic = "saiifarm24/smart_R";
+    const payload = "SMLOVE,AUTONOW00";
+
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+        try {
+            const message = new Paho.MQTT.Message(payload);
+            message.destinationName = topic;
+            message.qos = 2;
+            message.retained = false;
+            mqttClient.send(message);
+            
+            appendLogMessage(`🔗 송신완료 [${topic}] : ${payload}`, "#d35400");
+            console.log(`📤 MQTT 송신 성공 [${topic}]:`, payload);
+        } catch (e) {
+            appendLogMessage("❌ MQTT 송신 중 예외 발생", "#c0392b");
+            console.error("MQTT 송신 오류:", e);
         }
-    })
-    .catch(err => {
-        appendLogMessage("❌ 서버 통신 오류", "#c0392b");
-    });
+    } else {
+        appendLogMessage("⚠️ MQTT가 연결되어 있지 않습니다.", "#c0392b");
+        console.warn("MQTT가 연결되어 있지 않습니다.");
+    }
 }
 
 // 4. [MQTT: saiifarm24/smart_LOG 수신 핸들러] core.js에서 호출됨
