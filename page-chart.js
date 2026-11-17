@@ -173,8 +173,16 @@ async function fetchAndDrawChart() {
         rawData = sample.labels.map((lbl, idx) => ({ timestamp: lbl, value: sample.values[idx] }));
     }
 
-    // 🌟 1. 데이터가 시간순으로 정렬되도록 보장 (그래프 꼬임 방지)
-    rawData.sort((a, b) => new Date(a.timestamp.replace(/년|월/g, '-').replace(/일/, '')) - new Date(b.timestamp.replace(/년|월/g, '-').replace(/일/, '')));
+    // 🌟 서버에서 받아온 데이터를 시간순(오름차순)으로 완벽하게 정렬하여 꺾임 방지
+    rawData.sort((a, b) => {
+        // "2026년11월11일12시" 형태의 문자열을 비교 가능한 Date 객체로 변환
+        const parseDateStr = (str) => {
+            const m = str.match(/(\d{4})년(\d{2})월(\d{2})일(\d{2})시?/);
+            if (!m) return new Date(str);
+            return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:00:00+09:00`);
+        };
+        return parseDateStr(a.timestamp) - parseDateStr(b.timestamp);
+    });
 
     const labels = rawData.map(row => row.timestamp);
     const values = rawData.map(row => row.value);
@@ -221,7 +229,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 borderWidth: (chartType === 'bar' ? 1 : 2),
                 pointRadius: 0,             // 🌟 점 크기를 0으로 두어 선만 깔끔하게 표시
                 pointHoverRadius: 5,
-                fill: false,                // 🌟 전체 배경 채우기 해제 (빨갛게 가득 차는 현상 방지)
+                fill: ture,                // 🌟 전체 배경 채우기 해제 (빨갛게 가득 차는 현상 방지)
                 tension: 0.25
             }]
         },
