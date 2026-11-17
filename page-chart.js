@@ -242,23 +242,28 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     ticks: { 
                         font: { size: 11 }, 
                         maxRotation: 0,
-                        // 🌟 0시(00:00)에만 '26.11.14' 형식으로 표기하고 나머지는 생략
+                        // 🌟 X축 틱(라벨) 텍스트 변환 설정
                         callback: function(val, index) {
+                            // 현재 인덱스의 원본 데이터 라벨 가져오기 (예: "2026년11월15일 00:30" 또는 "2026년11월15일 00:00")
                             const labelStr = this.getLabelForValue(index);
+                            
                             if (metric === 'rain') {
-                                // 강수량은 일 단위이므로 모든 날짜 표기 (원하시면 조정 가능)
+                                // 강수량은 일 단위 데이터이므로 전체 라벨(날짜) 그대로 표기
                                 return labelStr;
                             }
-                            // '00:00'인 데이터만 날짜로 변환 (예: 2026-11-15 00:00 -> 26.11.15)
-                            if (labelStr && labelStr.includes('00:00')) {
-                                const datePart = labelStr.split(' ')[0]; // 2026-11-15
-                                const parts = datePart.split('-');
-                                if (parts.length === 3) {
-                                    const yy = parts[0].slice(2); // 26
-                                    return `${yy}.${parts[1]}.${parts[2]}`; // 26.11.15
+
+                            // 0시(00시) 데이터인 경우에만 '26.11.15' 형식으로 변환하여 표기
+                            if (labelStr && (labelStr.includes('00시') || labelStr.includes('00:00'))) {
+                                // 예: "2026년11월15일00시" 형태에서 연, 월, 일 추출
+                                const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                if (match) {
+                                    const yy = match[1].slice(2); // 2026 -> 26
+                                    return `${yy}.${match[2]}.${match[3]}`; // 26.11.15
                                 }
                             }
-                            return ''; // 0시가 아닌 시간대는 라벨 비우기
+                            
+                            // 0시가 아닌 나머지 시간대(00:30, 01:00 등)는 텍스트를 비우기
+                            return '';
                         }
                     } 
                 },
