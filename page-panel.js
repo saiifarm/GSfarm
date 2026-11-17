@@ -1,4 +1,4 @@
-// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현]
+// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현 - 채도가 낮아진 세련된 버튼 컬러 적용]
 
 function renderPanelPageHTML() {
     const container = document.getElementById('content-area');
@@ -16,11 +16,14 @@ function renderPanelPageHTML() {
                 </div>
             </div>
 
-            <!-- [우측 하단 영역] 짙은 회색의 작은 버튼 3개 ([LOG 다운], [LOG 삭제], [농장연결]) -->
+            <!-- [우측 하단 영역] 채도를 낮추어 세련된 컬러를 적용한 작은 버튼 3개 -->
             <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 8px; height: 100%; width: 140px; flex-shrink: 0;">
-                <button onclick="handleLogDownload()" style="width: 100%; height: 38px; background: #555555; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 다운</button>
-                <button onclick="handleLogDelete()" style="width: 100%; height: 38px; background: #555555; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 삭제</button>
-                <button onclick="handleFarmConnect()" style="width: 100%; height: 38px; background: #555555; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">농장연결</button>
+                <!-- 1. LOG 다운 (차분하고 세련된 세이지 그린 톤) -->
+                <button onclick="handleLogDownload()" style="width: 100%; height: 38px; background: #6b8e73; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 다운</button>
+                <!-- 2. LOG 삭제 (차분하고 부드러운 뮤트 퍼플 톤) -->
+                <button onclick="handleLogDelete()" style="width: 100%; height: 38px; background: #8b7d9b; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 삭제</button>
+                <!-- 3. 농장연결 (채도를 낮춘 부드러운 브릭 레드 톤) -->
+                <button onclick="handleFarmConnect()" style="width: 100%; height: 38px; background: #c26a63; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">농장연결</button>
             </div>
 
         </div>
@@ -42,15 +45,12 @@ function appendLogMessage(message, color = "#333") {
     logItem.innerText = `[${timeStr}] ${message}`;
     
     logContainer.appendChild(logItem);
-    
-    // 스크롤을 항상 최하단(최신 로그)으로 이동
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
 // 1. [LOG 다운] 버튼 클릭 시
 function handleLogDownload() {
     appendLogMessage("💾 LOG 파일 다운로드가 요청되었습니다. (CSV 내보내기 준비 중...)", "#2980b9");
-    
     setTimeout(() => {
         appendLogMessage("✅ LOG 파일 다운로드가 완료되었습니다.", "#27ae60");
     }, 500);
@@ -69,7 +69,6 @@ function handleLogDelete() {
 // 3. [농장연결] 버튼 클릭 시
 function handleFarmConnect() {
     appendLogMessage("🔗 컨트롤러 및 농장 네트워크 연결을 시도합니다...", "#d35400");
-    
     setTimeout(() => {
         if (typeof initMQTT === 'function') {
             initMQTT();
