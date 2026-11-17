@@ -238,6 +238,12 @@ farmChartInstance = new Chart(ctx, {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            // 🌟 상단 범례와 그래프 상단 텍스트가 겹치지 않도록 여백 확보
+            layout: {
+                padding: {
+                    top: 25
+                }
+            },
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: true, position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
