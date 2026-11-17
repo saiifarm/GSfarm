@@ -1,4 +1,4 @@
-// [자동설정 페이지 렌더링 및 로직 - UI 및 입력창 정렬 개선 버전]
+// [자동설정 페이지 렌더링 및 로직 - 선택박스 및 체크박스 완벽 좌측 정렬 버전]
 function renderAutoPageHTML() {
     const container = document.getElementById('content-area');
 
@@ -31,33 +31,29 @@ function renderAutoPageHTML() {
                         <label style="display: flex; align-items: center; font-size: 16px; font-weight: bold; color: #000; margin-bottom: 12px; cursor: pointer;">
                             <input type="checkbox" id="auto-high-temp-enable" style="width: 18px; height: 18px; margin-right: 8px; accent-color: #d9534f;" checked> 고온관리
                         </label>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">기준온도(외부)</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="ht-ext-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(5, 35, 15)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
-                                </div>
+                        <div style="display: grid; grid-template-columns: 1fr auto; row-gap: 10px; column-gap: 10px; align-items: center;">
+                            <span style="font-size: 13px; color: #000;">기준온도(외부)</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="ht-ext-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(5, 35, 15)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">기준온도(내부)</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="ht-int-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(10, 45, 25)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000;">기준온도(내부)</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="ht-int-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(10, 45, 25)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">온도폭</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="ht-temp-range" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(1, 10, 3)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000;">온도폭</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="ht-temp-range" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(1, 10, 3)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
                         </div>
                     </div>
@@ -67,34 +63,30 @@ function renderAutoPageHTML() {
                 <!-- [2단 영역] 팬 제어 및 연동 기기 선택 -->
                 <div style="background: #ffffff; border: 2px solid #5a8262; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <!-- 팬 설정 입력 필드들 (열 맞춤 정렬) -->
-                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000; font-weight: bold;">팬온도(내부)</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="fan-target-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(15, 50, 30)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
-                                </div>
+                        <!-- 팬 설정 입력 필드들 (그리드 정렬 적용으로 선택박스 왼쪽선 완벽 일치) -->
+                        <div style="display: grid; grid-template-columns: 1fr auto; row-gap: 12px; column-gap: 10px; align-items: center; margin-bottom: 20px;">
+                            <span style="font-size: 13px; color: #000; font-weight: bold;">팬온도(내부)</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="fan-target-temp" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(15, 50, 30)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000; font-weight: bold;">팬 가동시간</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="fan-run-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(1, 12, 1)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000; font-weight: bold;">팬 가동시간</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="fan-run-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(1, 12, 1)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000; font-weight: bold;">팬 휴식시간</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="fan-rest-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(5, 60, 15, 5)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">분</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000; font-weight: bold;">팬 휴식시간</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="fan-rest-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(5, 60, 15, 5)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">분</span>
                             </div>
                         </div>
 
@@ -122,46 +114,41 @@ function renderAutoPageHTML() {
                         <label style="display: flex; align-items: center; font-size: 16px; font-weight: bold; color: #000; margin-bottom: 12px; cursor: pointer;">
                             <input type="checkbox" id="auto-cutting-enable" style="width: 18px; height: 18px; margin-right: 8px; accent-color: #5a8262;"> 삽목장관리
                         </label>
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">개폐시간</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="cut-open-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(0, 23, 22)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
-                                </div>
+                        <div style="display: grid; grid-template-columns: 1fr auto; row-gap: 10px; column-gap: 10px; align-items: center; margin-bottom: 15px;">
+                            <span style="font-size: 13px; color: #000;">개폐시간</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="cut-open-time" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(0, 23, 22)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">개폐간격</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="cut-interval" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(1, 12, 2)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000;">개폐간격</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="cut-interval" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(1, 12, 2)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">생육등 점등</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="cut-light-on" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(0, 23, 20)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000;">생육등 점등</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="cut-light-on" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(0, 23, 20)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 13px; color: #000;">점등시간</span>
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <select id="cut-light-duration" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
-                                        ${generateNumberOptions(1, 12, 2)}
-                                    </select>
-                                    <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
-                                </div>
+
+                            <span style="font-size: 13px; color: #000;">점등시간</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <select id="cut-light-duration" style="width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000;">
+                                    ${generateNumberOptions(1, 12, 2)}
+                                </select>
+                                <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
                             </div>
                         </div>
 
-                        <!-- 삽목장 관리 아래 선택박스 정렬 맞춤 -->
+                        <!-- 삽목장 관리 아래 선택박스(체크박스) 정렬 맞춤 -->
                         <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed #ccc; padding-top: 15px;">
                             <label style="display: flex; align-items: center; font-size: 14px; color: #000; cursor: pointer;">
                                 <input type="checkbox" id="cut-op-check" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" checked> 삽목장 개폐
