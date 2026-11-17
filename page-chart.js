@@ -306,13 +306,14 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 },
                 y: {
                     beginAtZero: true,
-                    // 🌟 Y축 상한선을 데이터 최고값보다 여유 있게 높여서, 바 위쪽 수치 텍스트와 상단 범례가 겹치지 않도록 공간 확보
+                    // 🌟 Y축 상한선을 안전하게 계산하여 범례와 수치 텍스트가 겹치지 않도록 공간 확보
                     suggestedMax: function(context) {
-                        const dataset = context.chart.data.datasets[0];
+                        const chart = context.chart;
+                        const dataset = chart.data.datasets[0];
                         if (!dataset || !dataset.data || dataset.data.length === 0) return 10;
                         const maxVal = Math.max(...dataset.data, 0);
-                        return maxVal > 0 ? maxVal * 1.35 : 10; // 최고값보다 35% 더 높게 설정
-                    }(),
+                        return maxVal > 0 ? maxVal * 1.35 : 10;
+                    },
                     ticks: {
                         font: { size: 12 },
                         callback: function(value) { return value + ' ' + meta.unit; }
