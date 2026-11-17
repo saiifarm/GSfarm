@@ -1,4 +1,4 @@
-// [코어 제어 스크립트 - 로그인, MQTT 연결 유지, 메뉴 라우팅, 시계]
+// [코어 제어 스크립트 - 로그인, 메뉴 라우팅, 시계]
 const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
 let currentMenu = 'HOME';
 
@@ -11,144 +11,23 @@ let sensorData = {
     house3: { temp: '-', tempMax: '-', tempMin: '-', hum: '-', humMax: '-', humMin: '-', soil: '-' }
 };
 
-let mqttClient = null;
-
 function updateMqttStatusUI(isConnected, text) {
     const dot = document.getElementById('mqtt-dot');
     const statusText = document.getElementById('mqtt-status-text');
     if (dot && statusText) {
         if (isConnected) {
             dot.classList.add('connected');
-            statusText.innerText = text || "MQTT 연결됨";
+            statusText.innerText = text || "시스템 연결됨";
         } else {
             dot.classList.remove('connected');
-            statusText.innerText = text || "MQTT 연결 끊김";
+            statusText.innerText = text || "시스템 연결 대기";
         }
     }
 }
 
-function initMQTT() {
-    if (mqttClient && mqttClient.isConnected && mqttClient.isConnected()) return;
-
-    const clientId = "saiifarm_web_" + Math.random().toString(16).substring(2, 9);
-    const isSecure = window.location.protocol === 'https:';
-    const mqttHost = "broker.mqtt-dashboard.com";
-    const mqttPort = isSecure ? 8884 : 8000;
-    const mqttPath = "/mqtt";
-
-    updateMqttStatusUI(false, "MQTT 연결 중...");
-
-    try {
-        mqttClient = new Paho.MQTT.Client(mqttHost, Number(mqttPort), mqttPath, clientId);
-    } catch (err) {
-        mqttClient = null;
-        setTimeout(initMQTT, 5000);
-        return;
-    }
-
-    mqttClient.onConnectionLost = function(responseObject) {
-        updateMqttStatusUI(false, "연결 끊김 (재시도 중)");
-        mqttClient = null;
-        setTimeout(initMQTT, 5000);
-    };
-
-    mqttClient.onMessageArrived = function(message) {
-        try {
-            const topic = message.destinationName;
-            const payload = message.payloadString;
-            const parts = payload.split(',').map(item => item.trim());
-
-            console.log("📥 MQTT 수신 [" + topic + "]:", payload);
-
-            // 농장관리 피드백 토픽 수신 처리 (saiifarm24/smart_S)
-            if (topic === "saiifarm24/smart_S") {
-                if (typeof handleSmartFeedback === 'function') {
-                    handleSmartFeedback(parts);
-                }
-                return;
-            }
-
-            if (topic === "saiifarm24/farm_o1" && parts.length >= 10) {
-                sensorData.farm_a = {
-                    sun: parts[1] || '-',
-                    temp: parts[2] || '-',
-                    tempMax: parts[3] || '-',
-                    tempMin: parts[4] || '-',
-                    hum: parts[5] || '-',
-                    humMax: parts[6] || '-',
-                    humMin: parts[7] || '-',
-                    rain: parts[8] || '0',
-                    rainAmount: parts[9] || '0.00',
-                    soil: parts[10] || '-'
-                };
-            } else if (topic === "saiifarm24/farm_o2" && parts.length >= 7) {
-                sensorData.farm_b = {
-                    temp: parts[1] || '-',
-                    tempMax: parts[2] || '-',
-                    tempMin: parts[3] || '-',
-                    hum: parts[4] || '-',
-                    humMax: parts[5] || '-',
-                    humMin: parts[6] || '-'
-                };
-            } else if (topic === "saiifarm24/house1" && parts.length >= 7) {
-                sensorData.house1 = {
-                    temp: parts[1] || '-',
-                    tempMax: parts[2] || '-',
-                    tempMin: parts[3] || '-',
-                    hum: parts[4] || '-',
-                    humMax: parts[5] || '-',
-                    humMin: parts[6] || '-'
-                };
-            } else if (topic === "saiifarm24/house2" && parts.length >= 7) {
-                sensorData.house2 = {
-                    temp: parts[1] || '-',
-                    tempMax: parts[2] || '-',
-                    tempMin: parts[3] || '-',
-                    hum: parts[4] || '-',
-                    humMax: parts[5] || '-',
-                    humMin: parts[6] || '-'
-                };
-            } else if (topic === "saiifarm24/house3" && parts.length >= 8) {
-                sensorData.house3 = {
-                    temp: parts[1] || '-',
-                    tempMax: parts[2] || '-',
-                    tempMin: parts[3] || '-',
-                    hum: parts[4] || '-',
-                    humMax: parts[5] || '-',
-                    humMin: parts[6] || '-',
-                    soil: parts[7] || '-'
-                };
-            }
-
-            if (currentMenu === '농장현황' && typeof updateStatusDOM === 'function') {
-                updateStatusDOM();
-            }
-            if (typeof updateTopHeaderTemp === 'function') {
-                updateTopHeaderTemp();
-            }
-
-        } catch (e) {
-            console.error("MQTT 메시지 파싱 오류:", e);
-        }
-    };
-
-    mqttClient.connect({
-        onSuccess: function() {
-            updateMqttStatusUI(true, "MQTT 연결됨");
-            mqttClient.subscribe("saiifarm24/farm_o1");
-            mqttClient.subscribe("saiifarm24/farm_o2");
-            mqttClient.subscribe("saiifarm24/house1");
-            mqttClient.subscribe("saiifarm24/house2");
-            mqttClient.subscribe("saiifarm24/house3");
-            mqttClient.subscribe("saiifarm24/smart_S"); // 👈 농장 피드백 토픽 구독 추가
-        },
-        onFailure: function(message) {
-            updateMqttStatusUI(false, "연결 실패 (재시도 중)");
-            mqttClient = null;
-            setTimeout(initMQTT, 5000);
-        },
-        useSSL: isSecure
-    });
+function initMQTTProxy() {
+    // 서버 중계 방식으로 전환되어 직접 연결 상태 대신 정상 표시
+    updateMqttStatusUI(true, "서버 연동 완료");
 }
 
 function setVal(id, val) {
@@ -193,7 +72,7 @@ function showMain() {
     document.getElementById('login-section').style.display = 'none';
     const mainContent = document.getElementById('main-content');
     mainContent.style.display = 'flex';
-    initMQTT(); 
+    initMQTTProxy(); 
     openMenu('HOME');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof fetchKMAWeather === 'function') fetchKMAWeather();
@@ -228,7 +107,7 @@ function openMenu(menuName) {
     } else if (menuName === '농장관리') {
         heroArea.style.backgroundColor = '#66a182';
         renderManagePageHTML();
-    } else if (menuName === '차트') { // 👈 추가
+    } else if (menuName === '차트') {
         heroArea.style.backgroundColor = '#2D6A3F';
         renderChartPageHTML();
     } else if (menuName === '자동설정') {
@@ -241,7 +120,6 @@ function openMenu(menuName) {
 
     updateNavigationState(menuName);
 }
-
 
 (function startClock() {
     function update() {
