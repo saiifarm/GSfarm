@@ -1,4 +1,4 @@
-// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현 - 채도가 낮아진 세련된 버튼 컬러 적용]
+// [판넬연결 및 로그 데이터 페이지 렌더링 및 기능 구현]
 
 function renderPanelPageHTML() {
     const container = document.getElementById('content-area');
@@ -16,21 +16,21 @@ function renderPanelPageHTML() {
                 </div>
             </div>
 
-            <!-- [우측 하단 영역] 채도를 낮추어 세련된 컬러를 적용한 작은 버튼 3개 -->
+            <!-- [우측 하단 영역] 첨부 이미지 색상 톤을 반영한 버튼 3개 -->
             <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 8px; height: 100%; width: 140px; flex-shrink: 0;">
-                <!-- 1. LOG 다운 (차분하고 세련된 세이지 그린 톤) -->
-                <button onclick="handleLogDownload()" style="width: 100%; height: 38px; background: #6b8e73; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 다운</button>
-                <!-- 2. LOG 삭제 (차분하고 부드러운 뮤트 퍼플 톤) -->
-                <button onclick="handleLogDelete()" style="width: 100%; height: 38px; background: #8b7d9b; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 삭제</button>
-                <!-- 3. 농장연결 (채도를 낮춘 부드러운 브릭 레드 톤) -->
-                <button onclick="handleFarmConnect()" style="width: 100%; height: 38px; background: #c26a63; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">농장연결</button>
+                <!-- 1. LOG 다운 (진한 초록색) -->
+                <button onclick="handleLogDownload()" style="width: 100%; height: 38px; background: #448654; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 다운</button>
+                <!-- 2. LOG 삭제 (진한 자주/보라색) -->
+                <button onclick="handleLogDelete()" style="width: 100%; height: 38px; background: #803f5c; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 삭제</button>
+                <!-- 3. 농장연결 (진한 벽돌/빨간색) -->
+                <button onclick="handleFarmConnect()" style="width: 100%; height: 38px; background: #b33939; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">농장연결</button>
             </div>
 
         </div>
     `;
 }
 
-// 📌 공통 로그 추가 및 자동 스크롤 함수
+// 📌 텍스트 박스에 로그 메시지 추가 (일반 출력용)
 function appendLogMessage(message, color = "#333") {
     const logContainer = document.getElementById('log-scroll-container');
     if (!logContainer) return;
@@ -48,31 +48,76 @@ function appendLogMessage(message, color = "#333") {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
-// 1. [LOG 다운] 버튼 클릭 시
+// 1. [LOG 다운] 버튼 클릭 시 -> MQTT 토픽 "saiifarm24/smart_R" / 페이로드 "saiiLOG,request" 발행
 function handleLogDownload() {
-    appendLogMessage("💾 LOG 파일 다운로드가 요청되었습니다. (CSV 내보내기 준비 중...)", "#2980b9");
-    setTimeout(() => {
-        appendLogMessage("✅ LOG 파일 다운로드가 완료되었습니다.", "#27ae60");
-    }, 500);
+    const topic = "saiifarm24/smart_R";
+    const payload = "saiiLOG,request";
+
+    fetch(WORKER_URL + '/api/mqtt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, payload, qos: 2, retain: false })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            appendLogMessage("💾 LOG 다운 요청 전송 완료 (saiiLOG,request)", "#2980b9");
+        } else {
+            appendLogMessage("⚠️ LOG 다운 요청 전송 실패", "#c0392b");
+        }
+    })
+    .catch(err => {
+        appendLogMessage("❌ 서버 통신 오류 발생", "#c0392b");
+    });
 }
 
-// 2. [LOG 삭제] 버튼 클릭 시
+// 2. [LOG 삭제] 버튼 클릭 시 -> 좌측 텍스트 박스 내용 전부 지우기
 function handleLogDelete() {
-    if (confirm('모든 로그 기록을 삭제하시겠습니까?')) {
-        const logContainer = document.getElementById('log-scroll-container');
-        if (logContainer) {
-            logContainer.innerHTML = '<div style="color: #e74c3c;">[시스템] 모든 로그 기록이 초기화되었습니다.</div>';
-        }
+    const logContainer = document.getElementById('log-scroll-container');
+    if (logContainer) {
+        logContainer.innerHTML = '';
     }
 }
 
-// 3. [농장연결] 버튼 클릭 시
+// 3. [농장연결] 버튼 클릭 시 -> MQTT 토픽 "saiifarm24/smart_R" / 페이로드 "SMLOVE,AUTONOW00" 발행
 function handleFarmConnect() {
-    appendLogMessage("🔗 컨트롤러 및 농장 네트워크 연결을 시도합니다...", "#d35400");
-    setTimeout(() => {
-        if (typeof initMQTT === 'function') {
-            initMQTT();
+    const topic = "saiifarm24/smart_R";
+    const payload = "SMLOVE,AUTONOW00";
+
+    fetch(WORKER_URL + '/api/mqtt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, payload, qos: 2, retain: false })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            appendLogMessage("🔗 농장연결 요청 전송 완료 (SMLOVE,AUTONOW00)", "#d35400");
+        } else {
+            appendLogMessage("⚠️ 농장연결 요청 전송 실패", "#c0392b");
         }
-        appendLogMessage("✨ 농장 컨트롤러와 성공적으로 연결되었습니다.", "#27ae60");
-    }, 800);
+    })
+    .catch(err => {
+        appendLogMessage("❌ 서버 통신 오류 발생", "#c0392b");
+    });
+}
+
+// 4. [MQTT: saiifarm24/smart_LOG 수신 핸들러] core.js에서 호출됨
+function handleSmartLogMessage(payload) {
+    const logContainer = document.getElementById('log-scroll-container');
+    if (!logContainer) return;
+
+    // (1) 먼저 텍스트 박스의 내용을 전부 지움
+    logContainer.innerHTML = '';
+
+    // (2) 데이터값을 텍스트 박스에 그대로 써줌 (줄바꿈 반영)
+    const lines = payload.split('\n');
+    lines.forEach(line => {
+        const item = document.createElement('div');
+        item.style.color = "#222";
+        item.innerText = line;
+        logContainer.appendChild(item);
+    });
+
+    logContainer.scrollTop = logContainer.scrollHeight;
 }
