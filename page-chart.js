@@ -176,7 +176,7 @@ async function fetchAndDrawChart() {
         values = sample.values;
     }
 
-    // 요구사항 (1), (2) 반영: 최고/최저 데이터에 날짜 및 시간 표기, 강수량은 최저 삭제 후 최고만 날짜 표기
+    // 최고/최저값 표기 (강수량은 최저 삭제, 최고만 날짜 표기)
     if (values.length > 0) {
         const minVal = Math.min(...values);
         const maxVal = Math.max(...values);
@@ -242,27 +242,21 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     ticks: { 
                         font: { size: 11 }, 
                         maxRotation: 0,
-                        // 🌟 X축 틱(라벨) 텍스트 변환 설정
+                        // X축 하단 0시(00시) 위치에만 '26.11.15' 형태로 표기하고 나머지는 비우기
                         callback: function(val, index) {
-                            // 현재 인덱스의 원본 데이터 라벨 가져오기 (예: "2026년11월15일 00:30" 또는 "2026년11월15일 00:00")
                             const labelStr = this.getLabelForValue(index);
                             
                             if (metric === 'rain') {
-                                // 강수량은 일 단위 데이터이므로 전체 라벨(날짜) 그대로 표기
-                                return labelStr;
+                                return labelStr; // 강수량은 일 단위이므로 날짜 그대로 표기
                             }
 
-                            // 0시(00시) 데이터인 경우에만 '26.11.15' 형식으로 변환하여 표기
-                            if (labelStr && (labelStr.includes('00시') || labelStr.includes('00:00'))) {
-                                // 예: "2026년11월15일00시" 형태에서 연, 월, 일 추출
+                            if (labelStr && labelStr.includes('00시')) {
                                 const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
                                 if (match) {
                                     const yy = match[1].slice(2); // 2026 -> 26
                                     return `${yy}.${match[2]}.${match[3]}`; // 26.11.15
                                 }
                             }
-                            
-                            // 0시가 아닌 나머지 시간대(00:30, 01:00 등)는 텍스트를 비우기
                             return '';
                         }
                     } 
@@ -276,7 +270,6 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 }
             }
         },
-        // 요구사항 (3) 반영: 강수량 막대그래프 각 막대에 수치 데이터를 표시하는 커스텀 플러그인
         plugins: [{
             id: 'barDataLabels',
             afterDatasetsDraw(chart) {
@@ -309,7 +302,6 @@ function generateSampleChartData(startStr, endStr, metric) {
     const end = new Date(endStr);
 
     while (curr <= end) {
-        // 하루에 30분 간격으로 샘플 데이터 생성 (테스트용)
         for (let h = 0; h < 24; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const year = curr.getFullYear();
@@ -318,7 +310,10 @@ function generateSampleChartData(startStr, endStr, metric) {
                 const hours = String(h).padStart(2, '0');
                 const mins = String(m).padStart(2, '0');
 
-                const timeStr = `${year}-${month}-${day} ${hours}:${mins}`;
+                const timeStr = (metric === 'rain') 
+                    ? `${year}년${month}월${day}일` 
+                    : `${year}년${month}월${day}일${hours}시`;
+                
                 labels.push(timeStr);
 
                 let val = 0;
