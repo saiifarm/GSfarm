@@ -16,31 +16,24 @@ let manageState = {
     }
 };
 
-// Cloudflare Worker를 통한 안전한 MQTT 발행 함수
+// 📌 웹페이지에서 토픽과 페이로드를 직접 관리하여 MQTT로 직접 발행하는 함수
 function sendManageMQTT(payloadStr) {
     const topic = "saiifarm24/smart_R";
-    
-    fetch(WORKER_URL + '/api/mqtt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            topic: topic,
-            payload: payloadStr,
-            qos: 2,
-            retain: false
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            console.log("📤 MQTT Proxy 송신 성공 [saiifarm24/smart_R]:", payloadStr);
-        } else {
-            console.error("MQTT Proxy 송신 실패:", data.message);
+
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+        try {
+            const message = new Paho.MQTT.Message(payloadStr);
+            message.destinationName = topic;
+            message.qos = 2;
+            message.retained = false;
+            mqttClient.send(message);
+            console.log(`📤 직접 MQTT 송신 [${topic}]:`, payloadStr);
+        } catch (e) {
+            console.error("MQTT 직접 송신 오류:", e);
         }
-    })
-    .catch(err => {
-        console.error("MQTT Proxy 통신 오류:", err);
-    });
+    } else {
+        console.warn("⚠️ MQTT가 연결되어 있지 않습니다:", payloadStr);
+    }
 }
 
 function renderManagePageHTML() {
@@ -163,6 +156,64 @@ function toggleDevicePower(key, state) {
     }
 }
 
+// -------------------------------------------------------------
+// [농장 컨트롤러 피드백 수신 핸들러: saiifarm24/smart_S 토픽]
+// -------------------------------------------------------------
+function handleSmartFeedback(parts) {
+    if (parts.length < 2) return;
+    var p1 = parts[0];
+    var p2 = parts[1];
+
+    // 1. 창 상태 피드백 처리 (1L, 1R, 2L, 2R, 3L, 3R)
+    manageState.windows.forEach(function(win, idx) {
+        if (p1 === win.prefix + '_WIN') {
+            var cleanPct = String(p2).replace('%', '').trim();
+            win.currentPct = cleanPct;
+            var pctTextEl = document.getElementById('win-pct-text-' + idx);
+            if (pctTextEl) pctTextEl.innerText = cleanPct + '%';
+        }
+
+        if (p2 === win.prefix + '_UP') {
+            win.cmd = 'open';
+            win.statusImg = 'up.png';
+            updateWinUI(idx, 'open');
+        } else if (p2 === win.prefix + '_STOP') {
+            win.cmd = 'stop';
+            win.statusImg = 'red.png';
+            updateWinUI(idx, 'stop');
+        } else if (p2 === win.prefix + '_DOWN') {
+            win.cmd = 'close';
+            win.statusImg = 'down.png';
+            updateWinUI(idx, 'close');
+        }
+    });
+
+    // 2. 환기팬, 유동팬, 생육등, 자동화 피드백 처리
+    var devicesMap = { 'F1': 'ventFan', 'F2': 'circFan', 'LT': 'growLight' };
+    
+    Object.keys(devicesMap).forEach(function(prefix) {
+        if (p1 === prefix + '_TIME') {
+            var devKey = devicesMap[prefix];
+            manageState.devices[devKey].duration = p2;
+            var selectEl = document.getElementById('select-' + devKey);
+            if (selectEl) selectEl.value = p2;
+        }
+    });
+
+    Object.keys(devicesMap).forEach(function(prefix) {
+        if (p1 === prefix + '_NOW') {
+            var devKey = devicesMap[prefix];
+            manageState.devices[devKey].power = p2;
+            updateDeviceUI(devKey, p2);
+        }
+    });
+
+    if (p1 === 'AUTO_NOW00') {
+        manageState.devices.automation.power = p2;
+        updateDeviceUI('automation', p2);
+    }
+}
+
 function updateWinUI(idx, state) {
     var win = manageState.windows[idx];
     var imgEl = document.getElementById('win-img-' + idx);
@@ -178,9 +229,13 @@ function updateWinUI(idx, state) {
     btnStop.style.background = '#c7c7c7';
     btnClose.style.background = '#c7c7c7';
 
-    if (state === 'open') btnOpen.style.background = '#007bff';
-    else if (state === 'stop') btnStop.style.background = '#dc3545';
-    else if (state === 'close') btnClose.style.background = '#007bff';
+    if (state === 'open') {
+        btnOpen.style.background = '#007bff';
+    } else if (state === 'stop') {
+        btnStop.style.background = '#dc3545';
+    } else if (state === 'close') {
+        btnClose.style.background = '#007bff';
+    }
 }
 
 function updateDeviceUI(key, state) {
@@ -188,12 +243,22 @@ function updateDeviceUI(key, state) {
     var offBtn = document.getElementById('dev-off-' + key);
     if (!onBtn || !offBtn) return;
 
-    if (state === 'ON') {
-        onBtn.style.background = '#007bff';
-        offBtn.style.background = '#c7c7c7';
+    if (key === 'automation') {
+        if (state === 'ON') {
+            onBtn.style.background = '#007bff';
+            offBtn.style.background = '#c7c7c7';
+        } else {
+            onBtn.style.background = '#c7c7c7';
+            offBtn.style.background = '#dc3545';
+        }
     } else {
-        onBtn.style.background = '#c7c7c7';
-        offBtn.style.background = '#dc3545';
+        if (state === 'ON') {
+            onBtn.style.background = '#007bff';
+            offBtn.style.background = '#c7c7c7';
+        } else {
+            onBtn.style.background = '#c7c7c7';
+            offBtn.style.background = '#dc3545';
+        }
     }
 }
 
