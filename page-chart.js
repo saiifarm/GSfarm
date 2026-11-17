@@ -242,22 +242,45 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     ticks: { 
                         font: { size: 11 }, 
                         maxRotation: 0,
-                        // X축 하단 0시(00시) 위치에만 '26.11.15' 형태로 표기하고 나머지는 비우기
+                        autoSkip: false, // 🌟 Chart.js가 임의로 라벨을 숨기지 못하도록 고정
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
                             
                             if (metric === 'rain') {
-                                return labelStr; // 강수량은 일 단위이므로 날짜 그대로 표기
+                                return labelStr; // 강수량은 일 단위 그대로 표기
                             }
 
-                            if (labelStr && labelStr.includes('00시')) {
+                            if (!labelStr) return '';
+
+                            // 1. 기존 방식: 0시(00시) 데이터인 경우 날짜로 변환
+                            if (labelStr.includes('00시') || labelStr.includes('00:00')) {
                                 const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
                                 if (match) {
-                                    const yy = match[1].slice(2); // 2026 -> 26
-                                    return `${yy}.${match[2]}.${match[3]}`; // 26.11.15
+                                    const yy = match[1].slice(2);
+                                    return `${yy}.${match[2]}.${match[3]}`;
                                 }
                             }
-                            return '';
+
+                            // 2. 💡 보완책: 데이터 타이밍 미세 오차로 0시를 놓쳤을 때, 
+                            // 하루의 첫 번째 데이터(예: 첫 번째 30분 데이터)를 그날의 대표 날짜로 강제 표기
+                            if (index === 0) {
+                                const match = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                if (match) {
+                                    return `${match[1].slice(2)}.${match[2]}.${match[3]}`;
+                                }
+                            } else {
+                                // 이전 데이터와 날짜(일자)가 바뀐 지점이라면 해당 날짜를 무조건 표기
+                                const prevLabel = this.getLabelForValue(index - 1);
+                                if (prevLabel) {
+                                    const currDateMatch = labelStr.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                    const prevDateMatch = prevLabel.match(/(\d{4})년(\d{2})월(\d{2})일/);
+                                    if (currDateMatch && prevDateMatch && currDateMatch[3] !== prevDateMatch[3]) {
+                                        return `${currDateMatch[1].slice(2)}.${currDateMatch[2]}.${currDateMatch[3]}`;
+                                    }
+                                }
+                            }
+
+                            return ''; // 나머지는 비우기
                         }
                     } 
                 },
