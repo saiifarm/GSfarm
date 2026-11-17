@@ -163,13 +163,12 @@ async function fetchAndDrawChart() {
         if (!response.ok) throw new Error('DB API 응답 오류');
         const result = await response.json();
 
-        // 🌟 가짜 데이터 출력을 막고, 실제 데이터가 올바를 때만 처리
         if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             labels = result.data.map(row => row.timestamp);
             values = result.data.map(row => Number(row.value));
 
             if (values.some(v => !Number.isFinite(v))) {
-                throw new Error('온도 데이터에 잘못된 값이 있습니다.');
+                throw new Error('데이터에 잘못된 값이 있습니다.');
             }
         } else {
             throw new Error('조회된 데이터가 없거나 응답 형식이 잘못되었습니다.');
@@ -182,11 +181,10 @@ async function fetchAndDrawChart() {
             farmChartInstance = null;
         }
 
-        // 🌟 가짜 그래프 대신 에러 상태 표시
         document.getElementById('chart-stats-box').innerText = '데이터 조회 실패 (Worker/DB 확인 필요)';
         document.getElementById('chart-header-period').innerText = err.message;
         
-        return; // 가짜 샘플 데이터 함수 호출을 완전히 차단합니다.
+        return;
     }
 
     // 최고/최저값 표기 (강수량은 최저 삭제, 최고만 날짜 표기)
@@ -219,7 +217,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
 
     const chartType = (metric === 'rain') ? 'bar' : 'line';
 
-farmChartInstance = new Chart(ctx, {
+    farmChartInstance = new Chart(ctx, {
         type: chartType,
         data: {
             labels: labels,
@@ -238,12 +236,6 @@ farmChartInstance = new Chart(ctx, {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // 🌟 상단 범례와 그래프 상단 텍스트가 겹치지 않도록 여백 확보
-            layout: {
-                padding: {
-                    top: 25
-                }
-            },
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: true, position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
@@ -262,17 +254,15 @@ farmChartInstance = new Chart(ctx, {
                         font: { size: 11 }, 
                         maxRotation: 0,
                         autoSkip: false,
-                        // 🌟 사전 계산된 날짜별 인덱스 위치에만 정확히 날짜를 표기하는 로직
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
                             
                             if (metric === 'rain') {
-                                return labelStr; // 강수량은 일 단위 그대로 표기
+                                return labelStr;
                             }
 
                             if (!labelStr) return '';
 
-                            // 1. 최초 실행 시 또는 차트가 바뀔 때, 전체 labels에서 각 날짜별 '첫 번째 0시(또는 해당 일자의 첫 데이터)' 인덱스를 미리 계산
                             if (!this._targetDateIndices || this._lastLabels !== labels) {
                                 this._lastLabels = labels;
                                 this._targetDateIndices = new Map();
@@ -282,7 +272,6 @@ farmChartInstance = new Chart(ctx, {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
                                         if (match) {
                                             const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
-                                            // 해당 날짜로 등록된 인덱스가 아직 없고, 0시 부근이거나 그날의 첫 데이터라면 등록
                                             if (!this._targetDateIndices.has(dateKey)) {
                                                 if (lbl.includes('00시') || lbl.includes('00:00') || idx === 0) {
                                                     this._targetDateIndices.set(dateKey, idx);
@@ -292,7 +281,6 @@ farmChartInstance = new Chart(ctx, {
                                     }
                                 });
 
-                                // 만약 0시를 못 찾아 놓친 날짜가 있다면, 각 날짜의 첫 번째 등장 인덱스를 강제로 지정
                                 labels.forEach((lbl, idx) => {
                                     if (lbl) {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
@@ -306,19 +294,25 @@ farmChartInstance = new Chart(ctx, {
                                 });
                             }
 
-                            // 2. 현재 인덱스가 미리 계산된 '날짜별 대표 인덱스' 중 하나라면 해당 날짜 텍스트 반환
                             for (let [dateStr, targetIdx] of this._targetDateIndices.entries()) {
                                 if (index === targetIdx) {
                                     return dateStr;
                                 }
                             }
 
-                            return ''; // 나머지는 전부 비우기
+                            return '';
                         }
                     } 
                 },
                 y: {
                     beginAtZero: true,
+                    // 🌟 Y축 상한선을 데이터 최고값보다 여유 있게 높여서, 바 위쪽 수치 텍스트와 상단 범례가 겹치지 않도록 공간 확보
+                    suggestedMax: function(context) {
+                        const dataset = context.chart.data.datasets[0];
+                        if (!dataset || !dataset.data || dataset.data.length === 0) return 10;
+                        const maxVal = Math.max(...dataset.data, 0);
+                        return maxVal > 0 ? maxVal * 1.35 : 10; // 최고값보다 35% 더 높게 설정
+                    }(),
                     ticks: {
                         font: { size: 12 },
                         callback: function(value) { return value + ' ' + meta.unit; }
@@ -349,39 +343,4 @@ farmChartInstance = new Chart(ctx, {
             }
         }]
     });
-}
-
-function generateSampleChartData(startStr, endStr, metric) {
-    const labels = [];
-    const values = [];
-    let curr = new Date(startStr);
-    const end = new Date(endStr);
-
-    while (curr <= end) {
-        for (let h = 0; h < 24; h++) {
-            for (let m = 0; m < 60; m += 30) {
-                const year = curr.getFullYear();
-                const month = String(curr.getMonth() + 1).padStart(2, '0');
-                const day = String(curr.getDate()).padStart(2, '0');
-                const hours = String(h).padStart(2, '0');
-                const mins = String(m).padStart(2, '0');
-
-                const timeStr = (metric === 'rain') 
-                    ? `${year}년${month}월${day}일` 
-                    : `${year}년${month}월${day}일${hours}시`;
-                
-                labels.push(timeStr);
-
-                let val = 0;
-                if (metric === 'temp') val = +(15 + Math.random() * 12).toFixed(1);
-                else if (metric === 'hum') val = +(45 + Math.random() * 35).toFixed(1);
-                else if (metric === 'sun') val = Math.floor(15000 + Math.random() * 45000);
-                else if (metric === 'rain') val = +(Math.random() > 0.7 ? (Math.random() * 15).toFixed(1) : 0);
-                else if (metric === 'soil') val = +(30 + Math.random() * 30).toFixed(1);
-                values.push(val);
-            }
-        }
-        curr.setDate(curr.getDate() + 1);
-    }
-    return { labels, values };
 }
