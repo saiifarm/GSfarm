@@ -73,13 +73,13 @@ function renderManagePageHTML() {
 
         return `
             <div class="dev-box">
-                <div class="dev-title">${label}</div>
-                <div class="dev-controls">
+                <div class="dev-top-row">
+                    <span class="dev-title">${label}</span>
                     <select class="dev-select" id="select-${key}" onchange="changeDeviceTime('${key}', this.value)">${optionsHTML}</select>
-                    <div class="dev-btn-row">
-                        <button class="dev-btn" id="dev-on-${key}" onclick="toggleDevicePower('${key}', 'ON')">ON</button>
-                        <button class="dev-btn" id="dev-off-${key}" onclick="toggleDevicePower('${key}', 'OFF')">OFF</button>
-                    </div>
+                </div>
+                <div class="dev-btn-row">
+                    <button class="dev-btn" id="dev-on-${key}" onclick="toggleDevicePower('${key}', 'ON')">ON</button>
+                    <button class="dev-btn" id="dev-off-${key}" onclick="toggleDevicePower('${key}', 'OFF')">OFF</button>
                 </div>
             </div>
         `;
@@ -95,11 +95,9 @@ function renderManagePageHTML() {
         </div>
     `;
 
-    // 1묶음: 1중(좌/우), 2중(좌/우)
-    // 2묶음: 삽목(좌/우) + 환기팬/유동팬/생육등/자동화
     container.innerHTML = `
         <div class="manage-wrapper">
-            <!-- 묶음 1: 1중(좌/우), 2중(좌/우) -->
+            <!-- 묶음 1: 1중(좌/우) [왼쪽 50%] | 2중(좌/우) [오른쪽 50%] -->
             <div class="manage-group-box">
                 <div class="manage-group-title">하우스 측창 제어 (1중 / 2중)</div>
                 <div class="manage-group-row">
@@ -108,10 +106,10 @@ function renderManagePageHTML() {
                 </div>
             </div>
 
-            <!-- 묶음 2: 삽목(좌/우) 및 환기팬/유동팬/생육등/자동화 -->
+            <!-- 묶음 2: 삽목(좌/우) [왼쪽 50%] | 우측 설비 제어 [오른쪽 50%] -->
             <div class="manage-group-box">
                 <div class="manage-group-title">삽목장 및 환경 설비 제어</div>
-                <div class="manage-group-sub">
+                <div class="manage-group-row manage-bottom-row">
                     ${renderWindowPairHTML([4, 5])}
                     <div class="manage-devices-area">
                         ${buildDeviceBox('ventFan', '환기팬')}
