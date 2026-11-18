@@ -15,25 +15,24 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 /* 상단 헤더 고정 (모든 페이지 통일) */
 .top-header { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; width: 100%; background: #ffffff; border-bottom: 1px solid #c8e6c9; flex-shrink: 0; }
 
-/* 상단 1행: 괴산농장 | 현재시간(크고 굵게) | MQTT 접속여부 */
-.header-top-row { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 8px 10px; background: #ffffff; flex-wrap: nowrap; }
-.header-farm-name { font-size: 16px; font-weight: 800; color: #1b5e20; white-space: nowrap; }
-.header-divider { color: #bbb; font-weight: bold; font-size: 14px; }
-.header-clock { font-size: 19px; font-weight: 900; color: #000000; letter-spacing: -0.5px; white-space: nowrap; }
+/* 상단 1행: 괴산농장 | 현재시간(120% 확대) | MQTT 접속여부 */
+.header-top-row { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 8px 10px; background: #ffffff; flex-wrap: nowrap; }
+.header-farm-name { font-size: 19px; font-weight: 800; color: #1b5e20; white-space: nowrap; }
+.header-divider { color: #bbb; font-weight: bold; font-size: 16px; }
+.header-clock { font-size: 23px; font-weight: 900; color: #000000; letter-spacing: -0.5px; white-space: nowrap; }
 
-/* MQTT 연결 상태 인디케이터 */
-.mqtt-status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; background: #f1f8e9; padding: 3px 7px; border-radius: 12px; border: 1px solid #c5e1a5; white-space: nowrap; color: #333; }
-.mqtt-dot { width: 7px; height: 7px; border-radius: 50%; background: #d32f2f; display: inline-block; flex-shrink: 0; }
+/* MQTT 연결 상태 인디케이터 (120% 확대) */
+.mqtt-status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: bold; background: #f1f8e9; padding: 3px 8px; border-radius: 12px; border: 1px solid #c5e1a5; white-space: nowrap; color: #333; }
+.mqtt-dot { width: 8px; height: 8px; border-radius: 50%; background: #d32f2f; display: inline-block; flex-shrink: 0; }
 .mqtt-dot.connected { background: #2e7d32; }
 
-/* 상단 2행: 엷은 녹색띠 배경 + 작은 아이콘 전부 중간 정렬 */
-.top-nav-bar { width: 100%; background-color: #e8f5e9; padding: 6px 8px; display: flex; justify-content: center; align-items: center; border-top: 1px solid #dcedc8; }
-.top-nav-icons { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: nowrap; }
-.top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; border-radius: 6px; }
+/* 상단 2행: 간격 축소 및 아이콘 크기 확대 */
+.top-nav-bar { width: 100%; background-color: #e8f5e9; padding: 5px 6px; display: flex; justify-content: center; align-items: center; border-top: 1px solid #dcedc8; }
+.top-nav-icons { display: flex; gap: 4px; align-items: center; justify-content: center; flex-wrap: nowrap; }
+.top-nav-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; border-radius: 6px; }
 .top-nav-btn:hover:not(:disabled) { transform: scale(1.1); background: rgba(46, 125, 50, 0.1); }
 .top-nav-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
-.top-nav-btn img { width: 26px; height: 26px; object-fit: contain; }
-.btn-logout-icon { color: #d32f2f; margin-left: 2px; background: none; border: none; cursor: pointer; display: flex; align-items: center; padding: 3px; }
+.top-nav-btn img { width: 33px; height: 33px; object-fit: contain; }
 
 /* 메인 배경 영역 */
 .main-hero { background-color: #2D6A3F; padding: 12px 10px; text-align: center; color: white; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; width: 100%; }
