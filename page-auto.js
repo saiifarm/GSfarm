@@ -37,10 +37,10 @@ function renderAutoPageHTML() {
                         <input type="checkbox" id="auto-rain-enable" style="width: 18px; height: 18px; margin-right: 8px; accent-color: #d9534f;" ${cfg.rainEnable ? 'checked' : ''}> 우천관리
                     </label>
                     <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 5px;">
-                        <label style="display: flex; align-items: center; font-size: 14px; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; color: #000; font-weight: bold; cursor: pointer;">
                             <input type="checkbox" id="rain-vent-1" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.rainVent1 ? 'checked' : ''}> 1중창
                         </label>
-                        <label style="display: flex; align-items: center; font-size: 14px; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; color: #000; font-weight: bold; cursor: pointer;">
                             <input type="checkbox" id="rain-vent-2" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.rainVent2 ? 'checked' : ''}> 2중창
                         </label>
                     </div>
@@ -52,61 +52,61 @@ function renderAutoPageHTML() {
                         <input type="checkbox" id="auto-high-temp-enable" style="width: 18px; height: 18px; margin-right: 8px; accent-color: #d9534f;" ${cfg.highTempEnable ? 'checked' : ''}> 고온관리
                     </label>
                     <div style="display: grid; grid-template-columns: 1fr auto; row-gap: 10px; column-gap: 10px; align-items: center; margin-bottom: 14px;">
-                        <span style="font-size: 13px; color: #000;">기준온도(외부)</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">기준온도(외부)</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="ht-ext-temp" class="auto-select">
                                 ${generateCustomOptions([10, 15, 20, 25, 30], cfg.htExtTemp)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
                         </div>
-                        <span style="font-size: 13px; color: #000;">기준온도(내부)</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">기준온도(내부)</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="ht-int-temp" class="auto-select">
                                 ${generateCustomOptions([15, 20, 25, 27, 30, 35], cfg.htIntTemp)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
                         </div>
-                        <span style="font-size: 13px; color: #000;">온도폭</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">온도폭</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="ht-temp-range" class="auto-select">
                                 ${generateCustomOptions([3, 5], cfg.htTempRange)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
                         </div>
-                        <span style="font-size: 13px; color: #000; font-weight: bold;">팬온도(내부)</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">팬온도(내부)</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="fan-target-temp" class="auto-select">
                                 ${generateCustomOptions([20, 25, 30, 35], cfg.fanTargetTemp)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
                         </div>
-                        <span style="font-size: 13px; color: #000; font-weight: bold;">팬 가동시간</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">팬 가동시간</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="fan-run-time" class="auto-select">
                                 ${generateCustomOptions([1, 2, 3], cfg.fanRunTime)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">시간</span>
                         </div>
-                        <span style="font-size: 13px; color: #000; font-weight: bold;">팬 휴식시간</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">팬 휴식시간</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="fan-rest-time" class="auto-select">
                                 ${generateCustomOptions([5, 10, 15, 20, 30], cfg.fanRestTime)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">분</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">분</span>
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px dashed #ccc; padding-top: 12px;">
-                        <label style="display: flex; align-items: center; font-size: 14px; font-weight: bold; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; font-weight: bold; color: #000; cursor: pointer;">
                             <input type="checkbox" id="device-vent-1" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.deviceVent1 ? 'checked' : ''}> 1중창
                         </label>
-                        <label style="display: flex; align-items: center; font-size: 14px; font-weight: bold; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; font-weight: bold; color: #000; cursor: pointer;">
                             <input type="checkbox" id="device-vent-2" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.deviceVent2 ? 'checked' : ''}> 2중창
                         </label>
-                        <label style="display: flex; align-items: center; font-size: 14px; font-weight: bold; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; font-weight: bold; color: #000; cursor: pointer;">
                             <input type="checkbox" id="device-exhaust" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.deviceExhaust ? 'checked' : ''}> 환풍기
                         </label>
-                        <label style="display: flex; align-items: center; font-size: 14px; font-weight: bold; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; font-weight: bold; color: #000; cursor: pointer;">
                             <input type="checkbox" id="device-circulation" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.deviceCirculation ? 'checked' : ''}> 유동팬
                         </label>
                     </div>
@@ -118,41 +118,41 @@ function renderAutoPageHTML() {
                         <input type="checkbox" id="auto-cutting-enable" style="width: 18px; height: 18px; margin-right: 8px; accent-color: #5a8262;" ${cfg.cuttingEnable ? 'checked' : ''}> 삽목장관리
                     </label>
                     <div style="display: grid; grid-template-columns: 1fr auto; row-gap: 10px; column-gap: 10px; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 13px; color: #000;">개폐시간</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">개폐시간</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="cut-open-time" class="auto-select">
                                 ${generateRangeOptions(0, 23, cfg.cutOpenTime)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">시</span>
                         </div>
-                        <span style="font-size: 13px; color: #000;">개폐간격</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">개폐간격</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="cut-interval" class="auto-select">
                                 ${generateRangeOptions(1, 10, cfg.cutInterval)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">시간</span>
                         </div>
-                        <span style="font-size: 13px; color: #000;">생육등 점등</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">생육등 점등</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="cut-light-on" class="auto-select">
                                 ${generateRangeOptions(0, 23, cfg.cutLightOn)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">시</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">시</span>
                         </div>
-                        <span style="font-size: 13px; color: #000;">점등시간</span>
+                        <span style="font-size: 20px; color: #000; font-weight: bold;">점등시간</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="cut-light-duration" class="auto-select">
                                 ${generateRangeOptions(1, 10, cfg.cutLightDuration)}
                             </select>
-                            <span style="font-size: 13px; font-weight: bold; color: #000;">시간</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">시간</span>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 15px; border-top: 1px dashed #ccc; padding-top: 12px;">
-                        <label style="display: flex; align-items: center; font-size: 14px; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; color: #000; font-weight: bold; cursor: pointer;">
                             <input type="checkbox" id="cut-op-check" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.cutOpCheck ? 'checked' : ''}> 삽목장 개폐
                         </label>
-                        <label style="display: flex; align-items: center; font-size: 14px; color: #000; cursor: pointer;">
+                        <label style="display: flex; align-items: center; font-size: 20px; color: #000; font-weight: bold; cursor: pointer;">
                             <input type="checkbox" id="cut-light-check" style="width: 16px; height: 16px; margin-right: 8px; accent-color: #d9534f;" ${cfg.cutLightCheck ? 'checked' : ''}> 생육등 점등
                         </label>
                     </div>
@@ -160,10 +160,10 @@ function renderAutoPageHTML() {
 
                 <!-- [카테고리 4] 설정 적용 및 초기화 버튼 별도 박스 -->
                 <div class="auto-category-card">
-                    <div style="font-size: 15px; font-weight: bold; color: #000; margin-bottom: 10px;">설정 전송 및 초기화</div>
+                    <div style="font-size: 25px; font-weight: bold; color: #000; margin-bottom: 10px;">설정 전송 및 초기화</div>
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="uploadAutoConfig()" style="flex: 1; background: #2D6A3F; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">UPLOAD</button>
-                        <button onclick="resetAutoConfigDefault()" style="flex: 1; background: #6c757d; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">DEFAULT</button>
+                        <button onclick="uploadAutoConfig()" style="flex: 1; background: #2D6A3F; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 20px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">UPLOAD</button>
+                        <button onclick="resetAutoConfigDefault()" style="flex: 1; background: #6c757d; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 20px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">DEFAULT</button>
                     </div>
                 </div>
 
