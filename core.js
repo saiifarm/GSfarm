@@ -1,4 +1,4 @@
-// [코어 제어 스크립트 - 로그인, MQTT 클라이언트 직접 연결 및 상태 관리, 메뉴 라우팅, 시계, 모바일 리사이즈 대응]
+// [코어 제어 스크립트 - 로그인, MQTT.js 클라이언트 직접 연결 및 상태 관리, 메뉴 라우팅, 시계, 모바일 리사이즈 대응]
 const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
 let currentMenu = 'HOME';
 
@@ -27,15 +27,15 @@ function updateMqttStatusUI(isConnected, text) {
     }
 }
 
-// 🌟 다중 접속 충돌 방지: 세션별 고유 Client ID 생성 및 연결 관리
+// 🌟 MQTT.js 기반 연결 및 다중 접속 충돌 방지 관리
 function initMQTT() {
-    // 이미 연결되어 있는 경우 중복 연결 방지
-    if (mqttClient && mqttClient.isConnected && mqttClient.isConnected()) return;
+    // 이미 연결 중이거나 연결된 경우 중복 생성 방지
+    if (mqttClient && mqttClient.connected) return;
 
-    // 이전 연결 객체가 남아있다면 안전하게 종료
+    // 이전 연결 객체가 있다면 안전하게 종료
     if (mqttClient) {
         try {
-            mqttClient.disconnect();
+            mqttClient.end(true);
         } catch (e) {
             console.error("이전 MQTT 세션 종료 오류:", e);
         }
@@ -51,30 +51,56 @@ function initMQTT() {
     }
 
     const isSecure = window.location.protocol === 'https:';
-    const mqttHost = "broker.hivemq.com";
-    const mqttPort = isSecure ? 8884 : 8000;
-    const mqttPath = "/mqtt";
+    // 송도 프로젝트에서 검증된 HiveMQ 웹소켓 URL 구조 적용
+    const brokerUrl = isSecure ? 'wss://broker.hivemq.com:8884/mqtt' : 'ws://broker.hivemq.com:8000/mqtt';
 
     updateMqttStatusUI(false, "MQTT 연결 중...");
+    console.log("🔗 MQTT.js 연결 시도:", brokerUrl, "Client ID:", clientId);
 
     try {
-        mqttClient = new Paho.MQTT.Client(mqttHost, Number(mqttPort), mqttPath, clientId);
+        mqttClient = mqtt.connect(brokerUrl, {
+            clientId: clientId,
+            clean: true,
+            reconnectPeriod: 5000, // 연결 끊김 시 자동 재연결 주기 (5초)
+            connectTimeout: 10000  // 연결 타임아웃 (10초)
+        });
     } catch (err) {
+        console.error("❌ MQTT.js 초기화 실패:", err);
         mqttClient = null;
         setTimeout(initMQTT, 5000);
         return;
     }
 
-    mqttClient.onConnectionLost = function(responseObject) {
-        updateMqttStatusUI(false, "연결 끊김 (재시도 중)");
-        mqttClient = null;
-        setTimeout(initMQTT, 5000);
-    };
+    // 연결 성공 이벤트
+    mqttClient.on('connect', function () {
+        console.log("✅ MQTT 연결 성공!");
+        updateMqttStatusUI(true, "MQTT 연결됨");
+        
+        // 토픽 구독
+        mqttClient.subscribe("saiifarm24/farm_o1", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/farm_o2", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/house1", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/house2", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/house3", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/smart_S", { qos: 0 });
+        mqttClient.subscribe("saiifarm24/smart_LOG", { qos: 0 });
+    });
 
-    mqttClient.onMessageArrived = function(message) {
+    // 오프라인 / 연결 끊김 이벤트
+    mqttClient.on('offline', function () {
+        updateMqttStatusUI(false, "연결 끊김 (재시도 중)");
+    });
+
+    // 에러 발생 이벤트
+    mqttClient.on('error', function (err) {
+        console.error("⚠️ MQTT 통신 오류:", err);
+        updateMqttStatusUI(false, "연결 오류 (재시도 중)");
+    });
+
+    // 메시지 수신 이벤트
+    mqttClient.on('message', function (topic, payloadBytes) {
         try {
-            const topic = message.destinationName;
-            const payload = message.payloadString;
+            const payload = payloadBytes.toString();
             const parts = payload.split(',').map(item => item.trim());
 
             console.log("📥 MQTT 수신 [" + topic + "]:", payload);
@@ -154,25 +180,6 @@ function initMQTT() {
         } catch (e) {
             console.error("MQTT 메시지 파싱 오류:", e);
         }
-    };
-
-    mqttClient.connect({
-        onSuccess: function() {
-            updateMqttStatusUI(true, "MQTT 연결됨");
-            mqttClient.subscribe("saiifarm24/farm_o1");
-            mqttClient.subscribe("saiifarm24/farm_o2");
-            mqttClient.subscribe("saiifarm24/house1");
-            mqttClient.subscribe("saiifarm24/house2");
-            mqttClient.subscribe("saiifarm24/house3");
-            mqttClient.subscribe("saiifarm24/smart_S");
-            mqttClient.subscribe("saiifarm24/smart_LOG");
-        },
-        onFailure: function(message) {
-            updateMqttStatusUI(false, "연결 실패 (재시도 중)");
-            mqttClient = null;
-            setTimeout(initMQTT, 5000);
-        },
-        useSSL: isSecure
     });
 }
 
@@ -218,7 +225,7 @@ function showMain() {
     document.getElementById('login-section').style.display = 'none';
     const mainContent = document.getElementById('main-content');
     mainContent.style.display = 'flex';
-    initMQTT(); // 👈 로그인 직후 MQTT 브로커 직접 연결 및 구독 시작
+    initMQTT(); // 👈 로그인 직후 MQTT.js 연결 및 구독 시작
     openMenu('HOME');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof fetchKMAWeather === 'function') fetchKMAWeather();
@@ -228,7 +235,7 @@ function logout() {
     sessionStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('saiifarm_client_id'); // 로그아웃 시 클라이언트 ID 정리
     if (mqttClient) {
-        try { mqttClient.disconnect(); } catch(e) {}
+        try { mqttClient.end(true); } catch(e) {}
     }
     location.reload();
 }
