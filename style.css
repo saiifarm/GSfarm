@@ -26,13 +26,17 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .mqtt-dot { width: 8px; height: 8px; border-radius: 50%; background: #d32f2f; display: inline-block; flex-shrink: 0; }
 .mqtt-dot.connected { background: #2e7d32; }
 
-/* 상단 2행: 간격 축소 및 아이콘 크기 확대 */
+/* 상단바 아이콘 및 로그아웃 아이콘 스타일 */
 .top-nav-bar { width: 100%; background-color: #e8f5e9; padding: 5px 6px; display: flex; justify-content: center; align-items: center; border-top: 1px solid #dcedc8; }
 .top-nav-icons { display: flex; gap: 4px; align-items: center; justify-content: center; flex-wrap: nowrap; }
 .top-nav-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; border-radius: 6px; }
 .top-nav-btn:hover:not(:disabled) { transform: scale(1.1); background: rgba(46, 125, 50, 0.1); }
 .top-nav-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
 .top-nav-btn img { width: 33px; height: 33px; object-fit: contain; }
+
+/* 로그아웃 아이콘: 박스 제거 및 빨간색 선 아이콘 유지 (크기 유지) */
+.btn-logout-icon { color: #d32f2f !important; margin-left: 2px; background: none !important; border: none !important; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px; }
+.btn-logout-icon svg { stroke: #d32f2f !important; width: 33px; height: 33px; }
 
 /* 메인 배경 영역 */
 .main-hero { background-color: #2D6A3F; padding: 12px 10px; text-align: center; color: white; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; width: 100%; }
