@@ -107,13 +107,12 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
 
 /* =========================================================
-   (4) 농장관리 페이지 스타일 (묶음 1 / 묶음 2 세로 스크롤 구조)
+   (4) 농장관리 페이지 스타일 (묶음 1: 1중/2중 2등분 | 묶음 2: 좌 삽목(좌/우) 50% : 우 설비제어 50%)
    ========================================================= */
 .manage-wrapper { width: 100%; display: flex; flex-direction: column; gap: 14px; color: #111; padding-bottom: 15px; }
 .manage-group-box { background: rgba(255, 255, 255, 0.16); border: 2px solid rgba(255, 255, 255, 0.35); border-radius: 10px; padding: 10px 8px; display: flex; flex-direction: column; gap: 8px; }
 .manage-group-title { font-size: 15px; font-weight: 800; color: #ffffff; text-align: left; padding-left: 4px; }
-.manage-group-row { display: flex; gap: 6px; width: 100%; }
-.manage-group-sub { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.manage-group-row { display: flex; gap: 6px; width: 100%; align-items: stretch; }
 
 .win-pair-group { display: flex; gap: 5px; flex: 1; background: rgba(0, 0, 0, 0.08); padding: 5px; border-radius: 6px; min-width: 0; }
 .win-col { background: #e6f0ed; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; flex: 1; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.12); gap: 5px; }
@@ -129,17 +128,18 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .win-btn { width: 100%; padding: 6px 2px; border: none; border-radius: 4px; background: #c7c7c7; color: #fff; font-size: 12px; font-weight: bold; cursor: pointer; }
 .win-percent { font-size: 12px; font-weight: 800; color: #111; }
 
-.manage-devices-area { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-.dev-box { background: #bdd6cf; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.dev-title { font-size: 15px; font-weight: 800; color: #111; width: 26%; text-align: center; white-space: nowrap; }
-.dev-controls { width: 74%; display: flex; align-items: center; gap: 6px; }
-.dev-select { width: 38%; padding: 6px 4px; border: 1px solid #9eb5ae; border-radius: 4px; background: #e9f2ef; color: #111; font-size: 13px; font-weight: bold; text-align: center; cursor: pointer; }
-.dev-btn-row { display: flex; gap: 6px; width: 62%; }
-.dev-btn { flex: 1; padding: 7px 4px; border: none; border-radius: 4px; background: #c7c7c7; color: #fff; font-size: 13px; font-weight: bold; cursor: pointer; }
+/* 묶음 2 우측 설비 제어 영역 (폭 50% - 좌측 삽목(좌/우)와 동일 폭원) */
+.manage-devices-area { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+.dev-box { background: #bdd6cf; border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.dev-top-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+.dev-title { font-size: 13px; font-weight: 800; color: #111; white-space: nowrap; }
+.dev-select { flex: 1; min-width: 0; padding: 4px 2px; border: 1px solid #9eb5ae; border-radius: 4px; background: #e9f2ef; color: #111; font-size: 12px; font-weight: bold; text-align: center; cursor: pointer; }
+.dev-btn-row { display: flex; gap: 5px; width: 100%; }
+.dev-btn { flex: 1; padding: 6px 2px; border: none; border-radius: 4px; background: #c7c7c7; color: #fff; font-size: 12px; font-weight: bold; cursor: pointer; }
 
-.auto-box { background: #a3c1ad; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.auto-title { font-size: 15px; font-weight: 800; color: #111; width: 26%; text-align: center; white-space: nowrap; }
-.auto-btn-row { width: 74%; display: flex; gap: 6px; }
+.auto-box { background: #a3c1ad; border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.auto-title { font-size: 13px; font-weight: 800; color: #111; text-align: left; white-space: nowrap; }
+.auto-btn-row { width: 100%; display: flex; gap: 5px; }
 
 /* =========================================================
    (5) 차트 페이지 스타일 (모바일 폭 맞춤, 타이틀 한 줄 유지, 최저/최고 줄바꿈)
