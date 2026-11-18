@@ -71,43 +71,43 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
 /* =========================================================
-   (3) 농장현황 페이지 스타일 (세로 통합 스크롤 구조)
+   (3) 농장현황 페이지 스타일 (세로 통합 스크롤 구조 - 글씨 130% 확대)
    ========================================================= */
 .status-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left; padding-bottom: 15px; }
-.status-top-bar { background: #dff0d8; border: 3px solid #b5d6ad; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-.status-weather-box { display: flex; align-items: center; gap: 6px; }
-.status-weather-icon { font-size: 24px; }
-.status-weather-text { text-align: left; display: flex; flex-direction: column; gap: 1px; }
-.status-rain-status { font-size: 16px; font-weight: 800; }
-.status-rain-amount { font-size: 12px; font-weight: bold; color: #333; }
-.status-summary-temps { display: flex; align-items: center; gap: 8px; }
-.summary-temp-item { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 800; color: #333; margin-left: 0 !important; }
+.status-top-bar { background: #dff0d8; border: 3px solid #b5d6ad; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.status-weather-box { display: flex; align-items: center; gap: 8px; }
+.status-weather-icon { font-size: 30px; }
+.status-weather-text { text-align: left; display: flex; flex-direction: column; gap: 2px; }
+.status-rain-status { font-size: 21px; font-weight: 800; }
+.status-rain-amount { font-size: 16px; font-weight: bold; color: #333; }
+.status-summary-temps { display: flex; align-items: center; gap: 10px; }
+.summary-temp-item { display: flex; align-items: center; gap: 5px; font-size: 21px; font-weight: 800; color: #333; margin-left: 0 !important; }
 
 /* OUTDOOR FARM 밑에 HOUSE 세로 배치 */
 .status-body-grid { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .status-column { width: 100%; display: flex; flex-direction: column; }
 .zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 3px solid #b5d6ad; width: 100%; }
-.zone-header { background: #f0ad4e; color: #fff; font-size: 17px; font-weight: bold; padding: 7px 4px; text-align: center; letter-spacing: 0.5px; border-bottom: 3px solid #b5d6ad; }
+.zone-header { background: #f0ad4e; color: #fff; font-size: 22px; font-weight: bold; padding: 9px 6px; text-align: center; letter-spacing: 0.5px; border-bottom: 3px solid #b5d6ad; }
 .zone-header.house-title { background: #46b8da; }
-.sensor-table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
-.sensor-table th, .sensor-table td { padding: 7px 6px; border-bottom: 1px solid #e5e5e5; text-align: center; vertical-align: middle; }
+.sensor-table { width: 100%; border-collapse: collapse; font-size: 18px; table-layout: fixed; }
+.sensor-table th, .sensor-table td { padding: 9px 8px; border-bottom: 1px solid #e5e5e5; text-align: center; vertical-align: middle; }
 .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
 
-.lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
-.val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
-.lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
-.val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
-.lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
-.val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
-.lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
-.val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
-.lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
-.val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
+.lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 15%; border-right: 1px solid #e5e5e5; font-size: 19px; }
+.val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: 18px; }
+.lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 15%; border-right: 1px solid #e5e5e5; font-size: 19px; }
+.val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: 18px; }
+.lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 15%; border-right: 1px solid #e5e5e5; font-size: 19px; }
+.val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: 18px; }
+.lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 15%; border-right: 1px solid #e5e5e5; font-size: 19px; }
+.val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: 18px; }
+.lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 15%; border-right: 1px solid #e5e5e5; font-size: 19px; }
+.val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: 18px; }
 
-.lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
-.lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
-.lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
-.lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
+.lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 22%; font-size: 17px; }
+.lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 22%; font-size: 17px; }
+.lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 22%; font-size: 17px; }
+.lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 22%; font-size: 17px; }
 
 /* =========================================================
    (4) 농장관리 페이지 스타일 (묶음 1: 1중/2중 2등분 | 묶음 2: 좌 삽목(좌/우) 50% : 우 설비제어 50%)
