@@ -10,7 +10,7 @@ function renderChartPageHTML() {
 
     container.innerHTML = `
         <div class="chart-wrapper">
-            <!-- 좌측 30% 설정 패널 -->
+            <!-- 상단 설정 패널 -->
             <div class="chart-controls-area">
                 <!-- (1) 데이터 선택 -->
                 <div class="chart-control-group">
@@ -61,11 +61,11 @@ function renderChartPageHTML() {
                     <div class="chart-group-title">3. 기간 설정</div>
                     <div class="chart-date-row">
                         <div class="chart-date-item">
-                            <span>언제부터</span>
+                            <span>시작일</span>
                             <input type="date" id="chart-start-date" class="chart-date-input" value="${formatDate(weekAgo)}">
                         </div>
                         <div class="chart-date-item">
-                            <span>언제까지</span>
+                            <span>종료일</span>
                             <input type="date" id="chart-end-date" class="chart-date-input" value="${formatDate(today)}">
                         </div>
                     </div>
@@ -75,16 +75,17 @@ function renderChartPageHTML() {
                 <button class="btn-draw-chart" onclick="fetchAndDrawChart()">📊 차트 그리기</button>
             </div>
 
-            <!-- 우측 70% 차트 출력 영역 -->
+            <!-- 하단 차트 출력 영역 -->
             <div class="chart-display-area">
                 <div class="chart-display-header">
-                    <div>
-                        <div class="chart-display-title" id="chart-header-title">OUT1 - 온도 추이</div>
+                    <div class="chart-title-box">
+                        <div class="chart-display-title" id="chart-header-title">OUT1-온도('C)</div>
                         <div class="chart-display-subtitle" id="chart-header-period">${formatDate(weekAgo)} ~ ${formatDate(today)}</div>
                     </div>
-                    <!-- 최고/최저값 표기 영역 -->
-                    <div id="chart-stats-box" style="font-size: 12px; font-weight: bold; color: #333; background: #f0f4f1; padding: 4px 10px; border-radius: 4px; border: 1px solid #d2e2d5;">
-                        최저: - | 최고: -
+                    <!-- 최고/최저값 표기 영역 (각각 다른 줄로 표기, 박스 폭 축소) -->
+                    <div id="chart-stats-box" class="chart-stats-box">
+                        <div>최저: -</div>
+                        <div>최고: -</div>
                     </div>
                 </div>
                 <div class="chart-canvas-container">
@@ -142,7 +143,7 @@ async function fetchAndDrawChart() {
     }
 
     const metricMeta = {
-        temp: { label: '온도', unit: '°C', color: '#d9534f', bg: 'rgba(217, 83, 79, 0.2)' },
+        temp: { label: '온도', unit: "'C", color: '#d9534f', bg: 'rgba(217, 83, 79, 0.2)' },
         hum:  { label: '습도', unit: '%',  color: '#337ab7', bg: 'rgba(51, 122, 183, 0.2)' },
         sun:  { label: '태양광', unit: 'lx', color: '#f0ad4e', bg: 'rgba(240, 173, 78, 0.25)' },
         rain: { label: '강수량', unit: 'mm', color: '#5bc0de', bg: 'rgba(91, 192, 222, 0.4)' },
@@ -150,7 +151,7 @@ async function fetchAndDrawChart() {
     };
     const meta = metricMeta[metric];
 
-    document.getElementById('chart-header-title').innerText = `${zone} - ${meta.label} (${meta.unit})`;
+    document.getElementById('chart-header-title').innerText = `${zone}-${meta.label}(${meta.unit})`;
     document.getElementById('chart-header-period').innerText = `${startDate} ~ ${endDate}`;
 
     let labels = [];
@@ -181,28 +182,30 @@ async function fetchAndDrawChart() {
             farmChartInstance = null;
         }
 
-        document.getElementById('chart-stats-box').innerText = '데이터 조회 실패 (Worker/DB 확인 필요)';
+        document.getElementById('chart-stats-box').innerHTML = '<div>데이터 조회 실패</div>';
         document.getElementById('chart-header-period').innerText = err.message;
-        
         return;
     }
 
-    // 최고/최저값 표기 (강수량은 최저 삭제, 최고만 날짜 표기)
+    // 최저, 최고 정보는 각각 다른 줄로 표기
     if (values.length > 0) {
         const minVal = Math.min(...values);
         const maxVal = Math.max(...values);
         const minIdx = values.indexOf(minVal);
         const maxIdx = values.indexOf(maxVal);
-        const minTime = labels[minIdx];
-        const maxTime = labels[maxIdx];
+        const minTime = labels[minIdx].replace(/^\d{4}년/, '');
+        const maxTime = labels[maxIdx].replace(/^\d{4}년/, '');
 
         if (metric === 'rain') {
-            document.getElementById('chart-stats-box').innerText = `최고강수량 : ${maxVal} ${meta.unit} (${maxTime})`;
+            document.getElementById('chart-stats-box').innerHTML = `<div>최고강수: ${maxVal}${meta.unit} (${maxTime})</div>`;
         } else {
-            document.getElementById('chart-stats-box').innerText = `최저 : ${minVal} ${meta.unit} (${minTime})  |  최고 : ${maxVal} ${meta.unit} (${maxTime})`;
+            document.getElementById('chart-stats-box').innerHTML = `
+                <div>최저: ${minVal}${meta.unit} (${minTime})</div>
+                <div>최고: ${maxVal}${meta.unit} (${maxTime})</div>
+            `;
         }
     } else {
-        document.getElementById('chart-stats-box').innerText = `최저: - | 최고: -`;
+        document.getElementById('chart-stats-box').innerHTML = `<div>최저: -</div><div>최고: -</div>`;
     }
 
     renderChartCanvas(labels, values, zone, meta, metric);
@@ -238,7 +241,7 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { display: true, position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
+                legend: { display: true, position: 'top', labels: { font: { size: 11, weight: 'bold' } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -251,22 +254,17 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                 x: { 
                     grid: { display: false }, 
                     ticks: { 
-                        font: { size: 11 }, 
+                        font: { size: 10 }, 
                         maxRotation: 0,
                         autoSkip: false,
                         callback: function(val, index) {
                             const labelStr = this.getLabelForValue(index);
-                            
-                            if (metric === 'rain') {
-                                return labelStr;
-                            }
-
+                            if (metric === 'rain') return labelStr;
                             if (!labelStr) return '';
 
                             if (!this._targetDateIndices || this._lastLabels !== labels) {
                                 this._lastLabels = labels;
                                 this._targetDateIndices = new Map();
-                                
                                 labels.forEach((lbl, idx) => {
                                     if (lbl) {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
@@ -280,7 +278,6 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                                         }
                                     }
                                 });
-
                                 labels.forEach((lbl, idx) => {
                                     if (lbl) {
                                         const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
@@ -295,18 +292,14 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                             }
 
                             for (let [dateStr, targetIdx] of this._targetDateIndices.entries()) {
-                                if (index === targetIdx) {
-                                    return dateStr;
-                                }
+                                if (index === targetIdx) return dateStr;
                             }
-
                             return '';
                         }
                     } 
                 },
                 y: {
                     beginAtZero: true,
-                    // 🌟 Y축 상한선을 안전하게 계산하여 범례와 수치 텍스트가 겹치지 않도록 공간 확보
                     suggestedMax: function(context) {
                         const chart = context.chart;
                         const dataset = chart.data.datasets[0];
@@ -315,8 +308,8 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                         return maxVal > 0 ? maxVal * 1.35 : 10;
                     },
                     ticks: {
-                        font: { size: 12 },
-                        callback: function(value) { return value + ' ' + meta.unit; }
+                        font: { size: 10 },
+                        callback: function(value) { return value + meta.unit; }
                     }
                 }
             }
@@ -333,10 +326,10 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                         if (value !== undefined && value !== null && value > 0) {
                             ctx.save();
                             ctx.fillStyle = '#222';
-                            ctx.font = 'bold 11px sans-serif';
+                            ctx.font = 'bold 10px sans-serif';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'bottom';
-                            ctx.fillText(value + ' mm', bar.x, bar.y - 4);
+                            ctx.fillText(value + 'mm', bar.x, bar.y - 4);
                             ctx.restore();
                         }
                     });

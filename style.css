@@ -1,339 +1,185 @@
-- { box-sizing: border-box; }
-body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 5px; overflow-x: hidden; }
+* { box-sizing: border-box; }
+body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 0; overflow-x: hidden; }
 
 /* 1. 로그인 전 박스 */
-.login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 100%; max-width: 340px; text-align: center; }
+.login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 92%; max-width: 340px; text-align: center; margin: auto; }
 .login-box img { width: 100%; max-width: 220px; height: auto; margin-bottom: 2px; }
-.login-box h2 { font-size: 25px; color: #333; margin: 0 0 20px 0; }
+.login-box h2 { font-size: 24px; color: #333; margin: 0 0 20px 0; }
 input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
 .btn-login { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 5px; }
 .btn-login:hover { background: #1b5e20; }
 
-/* 2. 로그인 후 대시보드 화면 (모바일 전체 화면 채우기 최적화) */
-#main-content { display: none; width: 100%; max-width: 1000px; height: 98vh; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); flex-direction: column; }
+/* 2. 로그인 후 대시보드 화면 (모바일 세로형 최적화 컨테이너) */
+#main-content { display: none; width: 100%; max-width: 480px; min-height: 100vh; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.18); flex-direction: column; margin: 0 auto; }
 
-/* 상단 헤더 고정 (Sticky Header) */
-.top-header { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
-.header-logo { height: 40px; width: auto; }
-.header-center { text-align: center; }
-.header-title { font-size: 16px; font-weight: bold; color: #333; margin: 0; }
-.header-clock { font-size: 17px; font-weight: 800; color: #000; margin-top: 2px; }
+/* 상단 헤더 고정 (모든 페이지 통일) */
+.top-header { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; width: 100%; background: #ffffff; border-bottom: 1px solid #c8e6c9; flex-shrink: 0; }
+
+/* 상단 1행: 괴산농장 | 현재시간(크고 굵게) | MQTT 접속여부 */
+.header-top-row { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 8px 10px; background: #ffffff; flex-wrap: nowrap; }
+.header-farm-name { font-size: 16px; font-weight: 800; color: #1b5e20; white-space: nowrap; }
+.header-divider { color: #bbb; font-weight: bold; font-size: 14px; }
+.header-clock { font-size: 19px; font-weight: 900; color: #000000; letter-spacing: -0.5px; white-space: nowrap; }
 
 /* MQTT 연결 상태 인디케이터 */
-.mqtt-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: bold; background: #f5f5f5; padding: 2px 6px; border-radius: 10px; margin-top: 2px; }
-.mqtt-dot { width: 7px; height: 7px; border-radius: 50%; background: #d32f2f; display: inline-block; }
+.mqtt-status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; background: #f1f8e9; padding: 3px 7px; border-radius: 12px; border: 1px solid #c5e1a5; white-space: nowrap; color: #333; }
+.mqtt-dot { width: 7px; height: 7px; border-radius: 50%; background: #d32f2f; display: inline-block; flex-shrink: 0; }
 .mqtt-dot.connected { background: #2e7d32; }
 
-/* 상단 우측 미니 아이콘 바 */
-.top-nav-icons { display: flex; gap: 6px; align-items: center; }
-.top-nav-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; transition: transform 0.2s; }
-.top-nav-btn:hover:not(:disabled) { transform: scale(1.1); }
-.top-nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
-.top-nav-btn img { width: 30px; height: 30px; object-fit: contain; }
-.btn-logout-icon { color: #d32f2f; margin-left: 3px; background: none; border: none; cursor: pointer; display: flex; align-items: center; }
+/* 상단 2행: 엷은 녹색띠 배경 + 작은 아이콘 전부 중간 정렬 */
+.top-nav-bar { width: 100%; background-color: #e8f5e9; padding: 6px 8px; display: flex; justify-content: center; align-items: center; border-top: 1px solid #dcedc8; }
+.top-nav-icons { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: nowrap; }
+.top-nav-btn { background: none; border: none; cursor: pointer; padding: 3px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; border-radius: 6px; }
+.top-nav-btn:hover:not(:disabled) { transform: scale(1.1); background: rgba(46, 125, 50, 0.1); }
+.top-nav-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+.top-nav-btn img { width: 26px; height: 26px; object-fit: contain; }
+.btn-logout-icon { color: #d32f2f; margin-left: 2px; background: none; border: none; cursor: pointer; display: flex; align-items: center; padding: 3px; }
 
-/* 메인 녹색 배경 영역 */
-.main-hero { background-color: #2D6A3F; padding: 10px; text-align: center; color: white; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-#content-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-
-/* 하단 6개 메뉴 아이콘 그리드 */
-.menu-grid { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 10px; margin-top: 20px; }
-.menu-card { background: white; width: 95px; height: 95px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
-.menu-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
-.menu-icon-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; }
-.menu-label { font-size: 13px; font-weight: bold; color: #333; }
-
-/* 공통 구분선 및 로고 */
-.hero-logo { width: 100%; max-width: 380px; height: auto; margin-bottom: 20px; } 
-.hero-divider { height: 5px; background-color: rgba(255, 255, 255, 0.8); width: 95%; margin: 0 auto 20px auto; }
-.hero-date-clock { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
+/* 메인 배경 영역 */
+.main-hero { background-color: #2D6A3F; padding: 12px 10px; text-align: center; color: white; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; width: 100%; }
+#content-area { width: 100%; flex-grow: 1; display: flex; flex-direction: column; align-items: center; }
 
 /* =========================================================
-   [기상예보 페이지 스타일]
+   (1) HOME 페이지 스타일 (로고/시간 약 90%, 아이콘 약 80% 축소 및 4개/3개 2줄 가운데 정렬)
    ========================================================= */
-.weather-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; padding-top: 5px; }
-.weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 8px; font-size: 22px; font-weight: bold; letter-spacing: -0.5px; flex-shrink: 0; text-align: center; }
-.weather-container { background: rgba(255, 255, 255, 0.1); border-radius: 10px; width: 100%; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); margin-bottom: 5px; }
-.weather-table-scroll { width: 100%; overflow-y: auto; flex-grow: 1; padding-bottom: 10px; }
-.weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 14px; min-width: 500px; table-layout: fixed; }
-.weather-table th, .weather-table td { padding: 8px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; width: 16.66%; }
-.weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-.weather-badge { background: #ffffff; color: #2D6A3F; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; }
+.home-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 5px; }
+.hero-logo { width: 85%; max-width: 310px; height: auto; margin-bottom: 16px; } 
+.hero-divider { height: 4px; background-color: rgba(255, 255, 255, 0.8); width: 92%; margin: 0 auto 16px auto; border-radius: 2px; }
+.hero-date-clock { font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 20px; }
+
+.menu-grid { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.menu-row { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; }
+.menu-card { background: white; width: 76px; height: 78px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.18); padding: 4px; }
+.menu-card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.25); }
+.menu-icon-img { width: 46px; height: 46px; object-fit: contain; margin-bottom: 3px; }
+.menu-label { font-size: 11px; font-weight: 800; color: #222; white-space: nowrap; }
+
+/* =========================================================
+   (2) 기상예보 페이지 스타일
+   ========================================================= */
+.weather-wrapper { width: 100%; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 4px; }
+.weather-sticky-title { background-color: #2D6A3F; width: 100%; padding-bottom: 8px; font-size: 18px; font-weight: bold; letter-spacing: -0.5px; text-align: center; }
+.weather-container { background: rgba(255, 255, 255, 0.12); border-radius: 10px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.weather-table-scroll { width: 100%; overflow-x: auto; max-height: 75vh; overflow-y: auto; }
+.weather-table { width: 100%; border-collapse: collapse; color: #fff; font-size: 12px; table-layout: fixed; }
+.weather-table th, .weather-table td { padding: 7px 3px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+.weather-table th { background: #1e4b2c; font-weight: bold; position: sticky; top: 0; z-index: 10; }
+.weather-badge { background: #ffffff; color: #2D6A3F; padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; }
 .night-row { background-color: rgba(0, 0, 0, 0.35); }
 
 /* =========================================================
-   [농장현황 페이지 스타일]
+   (3) 농장현황 페이지 스타일 (세로 통합 스크롤 구조)
    ========================================================= */
-.status-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; text-align: left; }
-.status-top-bar { background: #dff0d8; border: 4px solid #b5d6ad; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-shrink: 0; }
-.status-weather-box { display: flex; align-items: center; gap: 8px; }
-.status-weather-icon { font-size: 32px; }
-.status-weather-text { text-align: left; display: flex; align-items: baseline; gap: 8px; }
-.status-rain-status { font-size: 26px; font-weight: 800; }
-.status-rain-amount { font-size: 16px; font-weight: bold; color: #333; }
-.status-summary-temps { display: flex; align-items: center; gap: 15px; }
-.summary-temp-item { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: bold; color: #333; }
-.status-body-grid { display: flex; gap: 10px; width: 100%; flex-grow: 1; margin-top: 10px; overflow: hidden; }
-.status-column { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-.zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 4px solid #b5d6ad; height: 100%; }
-.zone-header { background: #f0ad4e; color: #fff; font-size: 20px; font-weight: bold; padding: 8px 4px; text-align: center; letter-spacing: 0.5px; border-bottom: 4px solid #b5d6ad; flex-shrink: 0; }
+.status-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left; padding-bottom: 15px; }
+.status-top-bar { background: #dff0d8; border: 3px solid #b5d6ad; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.status-weather-box { display: flex; align-items: center; gap: 6px; }
+.status-weather-icon { font-size: 24px; }
+.status-weather-text { text-align: left; display: flex; flex-direction: column; gap: 1px; }
+.status-rain-status { font-size: 16px; font-weight: 800; }
+.status-rain-amount { font-size: 12px; font-weight: bold; color: #333; }
+.status-summary-temps { display: flex; align-items: center; gap: 8px; }
+.summary-temp-item { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 800; color: #333; margin-left: 0 !important; }
+
+/* OUTDOOR FARM 밑에 HOUSE 세로 배치 */
+.status-body-grid { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.status-column { width: 100%; display: flex; flex-direction: column; }
+.zone-card { background: #ffffff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 3px solid #b5d6ad; width: 100%; }
+.zone-header { background: #f0ad4e; color: #fff; font-size: 17px; font-weight: bold; padding: 7px 4px; text-align: center; letter-spacing: 0.5px; border-bottom: 3px solid #b5d6ad; }
 .zone-header.house-title { background: #46b8da; }
-.sensor-table { width: 100%; border-collapse: collapse; font-size: clamp(13px, 1.8vw, 19px); table-layout: fixed; height: 100%; flex-grow: 1; }
-.sensor-table th, .sensor-table td { padding: 4px 6px; border-bottom: 2px solid #e5e5e5; text-align: center; vertical-align: middle; }
+.sensor-table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+.sensor-table th, .sensor-table td { padding: 7px 6px; border-bottom: 1px solid #e5e5e5; text-align: center; vertical-align: middle; }
 .sensor-table tr:last-child th, .sensor-table tr:last-child td { border-bottom: none; }
 
-.lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
-.val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
-.lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
-.val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
-.lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
-.val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
-.lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
-.val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
-.lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 15%; text-align: center; border-right: 2px solid #e5e5e5; font-size: clamp(14px, 2vw, 20px); }
-.val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 12px !important; font-size: clamp(13px, 1.8vw, 19px); }
+.lbl-farma { background: #fae19d; color: #664d03; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
+.val-farma { background: #fae19d; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
+.lbl-farmb { background: #f9d682; color: #5c4301; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
+.val-farmb { background: #f9d682; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
+.lbl-h1 { background: #bce8f1; color: #204d74; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
+.val-h1 { background: #bce8f1; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
+.lbl-h2 { background: #9acfea; color: #1d435f; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
+.val-h2 { background: #9acfea; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
+.lbl-h3 { background: #68b3c8; color: #fff; font-weight: bold; width: 14%; border-right: 1px solid #e5e5e5; font-size: 15px; }
+.val-h3 { background: #68b3c8; color: #000; font-weight: bold; text-align: left !important; padding-left: 10px !important; font-size: 14px; }
 
-.lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
-.lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
-.lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
-.lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 20%; text-align: center; font-size: clamp(12px, 1.6vw, 16px); }
+.lbl-sun { background: #f0ad4e; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
+.lbl-temp { background: #d9534f; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
+.lbl-hum { background: #5bc0de; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
+.lbl-soil { background: #8d5524; color: #fff; font-weight: bold; width: 22%; font-size: 13px; }
 
 /* =========================================================
-   [농장관리 페이지 스타일]
+   (4) 농장관리 페이지 스타일 (묶음 1 / 묶음 2 세로 스크롤 구조)
    ========================================================= */
-.manage-wrapper { width: 100%; height: 100%; display: flex; gap: 12px; color: #111; overflow: hidden; box-sizing: border-box; }
+.manage-wrapper { width: 100%; display: flex; flex-direction: column; gap: 14px; color: #111; padding-bottom: 15px; }
+.manage-group-box { background: rgba(255, 255, 255, 0.16); border: 2px solid rgba(255, 255, 255, 0.35); border-radius: 10px; padding: 10px 8px; display: flex; flex-direction: column; gap: 8px; }
+.manage-group-title { font-size: 15px; font-weight: 800; color: #ffffff; text-align: left; padding-left: 4px; }
+.manage-group-row { display: flex; gap: 6px; width: 100%; }
+.manage-group-sub { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-/* (1) 좌측 6개 창 영역을 넓히고 (기존 6.3 -> 7.2), 우측 탭을 약 70% 수준으로 축소 (기존 3.7 -> 2.8) */
-.manage-windows-area { flex: 7.2; display: flex; justify-content: space-between; gap: 12px; height: 100%; min-width: 0; }
-
-/* (2) 쌍 내부의 간격을 현재의 두 배로 늘림 (gap: 4px -> 8px) */
-.win-pair-group { display: flex; gap: 8px; flex: 1; background: rgba(0, 0, 0, 0.04); padding: 6px; border-radius: 6px; min-width: 0; }
-
-.win-col { background: #e6f0ed; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; height: 100%; flex: 1; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; }
-
-/* (3) 타이틀 글씨 크기 130% 확대 */
-.win-title { font-size: clamp(17px, 2.1vw, 22px); font-weight: 800; color: #111; letter-spacing: -0.5px; white-space: nowrap; }
-
-/* (3) 이미지 크기 130% 확대 */
-.win-status-img { width: clamp(58px, 7.2vw, 88px); height: clamp(58px, 7.2vw, 88px); object-fit: contain; }
-
-.win-checks { display: flex; flex-direction: column; gap: 2px; width: 100%; align-items: center; }
-
-/* (4) 체크 레이블 및 글씨 크기 140% 확대 */
-.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 5px; width: 85px; font-size: clamp(14px, 1.7vw, 18px); font-weight: 700; color: #222; cursor: pointer; user-select: none; }
-.win-check-box { width: 21px; height: 21px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.win-pair-group { display: flex; gap: 5px; flex: 1; background: rgba(0, 0, 0, 0.08); padding: 5px; border-radius: 6px; min-width: 0; }
+.win-col { background: #e6f0ed; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 3px; flex: 1; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.12); gap: 5px; }
+.win-title { font-size: 14px; font-weight: 800; color: #111; white-space: nowrap; }
+.win-status-img { width: 42px; height: 42px; object-fit: contain; }
+.win-checks { display: flex; flex-direction: column; gap: 3px; width: 100%; align-items: center; }
+.win-check-label { display: flex; align-items: center; justify-content: flex-start; gap: 4px; width: 64px; font-size: 12px; font-weight: 700; color: #222; cursor: pointer; user-select: none; }
+.win-check-box { width: 16px; height: 16px; border: 2px solid #5c6670; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .win-check-box.checked { background: #ff4b72; border-color: #ff4b72; }
-.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 14px; font-weight: bold; line-height: 1; }
+.win-check-box.checked::after { content: '✔'; color: #fff; font-size: 11px; font-weight: bold; line-height: 1; }
 
 .win-btns { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-.win-btn { width: 100%; padding: clamp(6px, 1.1vh, 11px) 1px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(12px, 1.5vw, 16px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
-.win-btn.active { background: #e60012; }
-.win-percent { font-size: clamp(12px, 1.4vw, 15px); font-weight: 800; color: #111; margin-top: 1px; }
+.win-btn { width: 100%; padding: 6px 2px; border: none; border-radius: 4px; background: #c7c7c7; color: #fff; font-size: 12px; font-weight: bold; cursor: pointer; }
+.win-percent { font-size: 12px; font-weight: 800; color: #111; }
 
-.manage-devices-area { flex: 2.8; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
-.dev-box { background: #bdd6cf; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26.5%; }
-.dev-divider { height: 3px; background: #1b4d3e; width: 100%; border-radius: 2px; }
-.dev-title { font-size: clamp(15px, 1.9vw, 20px); font-weight: 800; color: #111; width: 28%; text-align: center; white-space: nowrap; }
-.dev-controls { width: 72%; display: flex; flex-direction: column; gap: 7px; }
-.dev-select { width: 100%; padding: clamp(4px, 0.8vh, 8px) 6px; border: 1px solid #b5c7c2; border-radius: 3px; background: #e9f2ef; color: #111; font-size: clamp(13px, 1.6vw, 17px); font-weight: bold; text-align: center; text-align-last: center; cursor: pointer; outline: none; }
-.dev-btn-row { display: flex; gap: 8px; width: 100%; }
-.dev-btn { flex: 1; padding: clamp(6px, 1.1vh, 11px) 4px; border: none; border-radius: 3px; background: #c7c7c7; color: #fff; font-size: clamp(13px, 1.6vw, 17px); font-weight: bold; cursor: pointer; transition: background 0.15s; }
-.dev-btn.active { background: #e60012; }
+.manage-devices-area { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.dev-box { background: #bdd6cf; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dev-title { font-size: 15px; font-weight: 800; color: #111; width: 26%; text-align: center; white-space: nowrap; }
+.dev-controls { width: 74%; display: flex; align-items: center; gap: 6px; }
+.dev-select { width: 38%; padding: 6px 4px; border: 1px solid #9eb5ae; border-radius: 4px; background: #e9f2ef; color: #111; font-size: 13px; font-weight: bold; text-align: center; cursor: pointer; }
+.dev-btn-row { display: flex; gap: 6px; width: 62%; }
+.dev-btn { flex: 1; padding: 7px 4px; border: none; border-radius: 4px; background: #c7c7c7; color: #fff; font-size: 13px; font-weight: bold; cursor: pointer; }
 
-/* (5) 자동화 부분도 환기팬/유동팬과 같이 배경 박스를 넣고 색톤을 다르게 구분 (#a3c1ad 등 고급스러운 민트/그린 톤) */
-.auto-box { background: #a3c1ad; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 14%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.auto-title { font-size: clamp(16px, 2vw, 20px); font-weight: 800; color: #111; width: 28%; text-align: center; white-space: nowrap; }
-.auto-btn-row { width: 72%; display: flex; gap: 8px; }
+.auto-box { background: #a3c1ad; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.auto-title { font-size: 15px; font-weight: 800; color: #111; width: 26%; text-align: center; white-space: nowrap; }
+.auto-btn-row { width: 74%; display: flex; gap: 6px; }
 
 /* =========================================================
-   [차트 페이지 스타일 (좌측 30% 컨트롤 : 우측 70% 차트)]
+   (5) 차트 페이지 스타일 (모바일 폭 맞춤, 타이틀 한 줄 유지, 최저/최고 줄바꿈)
    ========================================================= */
-.chart-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    gap: 12px;
-    color: #222;
-    overflow: hidden;
-    box-sizing: border-box;
-    text-align: left;
-}
+.chart-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; color: #222; text-align: left; padding-bottom: 15px; }
+.chart-controls-area { width: 100%; background: #ffffff; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+.chart-control-group { display: flex; flex-direction: column; gap: 5px; }
+.chart-group-title { font-size: 13px; font-weight: 800; color: #2D6A3F; border-bottom: 1px solid #e0e0e0; padding-bottom: 3px; }
+.chart-radio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.chart-radio-label { display: flex; align-items: center; gap: 4px; background: #f4f7f5; padding: 6px; border-radius: 5px; font-size: 12px; font-weight: bold; color: #333; cursor: pointer; border: 1px solid #d5e0d9; }
+.chart-radio-label input[type="radio"] { width: auto; margin: 0; accent-color: #2D6A3F; }
+.chart-radio-label.disabled { opacity: 0.4; background: #eeeeee; cursor: not-allowed; text-decoration: line-through; }
 
-/* 좌측 30% 설정 패널 */
-.chart-controls-area {
-    flex: 3;
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    overflow-y: auto;
-    min-width: 220px;
-}
+.chart-date-row { display: flex; flex-direction: row; gap: 8px; width: 100%; }
+.chart-date-item { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 11px; font-weight: bold; color: #444; }
+.chart-date-input { width: 100%; padding: 5px 6px; margin: 0; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; color: #222; background: #f9f9f9; }
+.btn-draw-chart { width: 100%; padding: 10px; background: #2D6A3F; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
-.chart-control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.chart-group-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #2D6A3F;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 4px;
-    margin-bottom: 2px;
-}
-
-/* 라디오 버튼 그리드 */
-.chart-radio-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-}
-
-.chart-radio-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #f4f7f5;
-    padding: 7px 8px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #333;
-    cursor: pointer;
-    border: 1px solid #d5e0d9;
-    transition: all 0.15s;
-}
-
-.chart-radio-label:hover:not(.disabled) {
-    background: #e2ede6;
-}
-
-.chart-radio-label input[type="radio"] {
-    width: auto;
-    margin: 0;
-    cursor: pointer;
-    accent-color: #2D6A3F;
-}
-
-/* 비활성화된 항목 스타일 */
-.chart-radio-label.disabled {
-    opacity: 0.4;
-    background: #eeeeee;
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-/* 날짜 설정 영역 */
-.chart-date-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.chart-date-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #444;
-}
-
-.chart-date-input {
-    width: 72%;
-    padding: 6px 8px;
-    margin: 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 12px;
-    font-family: inherit;
-    color: #222;
-    background: #f9f9f9;
-}
-
-/* 차트 그리기 버튼 */
-.btn-draw-chart {
-    width: 100%;
-    padding: 12px;
-    background: #2D6A3F;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 4px;
-}
-
-.btn-draw-chart:hover {
-    background: #1e4b2c;
-}
-
-/* 우측 70% 차트 출력 영역 */
-.chart-display-area {
-    flex: 7;
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    position: relative;
-}
-
-.chart-display-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
-    flex-shrink: 0;
-}
-
-.chart-display-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #222;
-}
-
-.chart-display-subtitle {
-    font-size: 12px;
-    color: #666;
-    font-weight: bold;
-}
-
-.chart-canvas-container {
-    flex-grow: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
+.chart-display-area { width: 100%; background: #ffffff; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+.chart-display-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+.chart-title-box { flex-shrink: 0; }
+.chart-display-title { font-size: 14px; font-weight: 800; color: #222; white-space: nowrap; }
+.chart-display-subtitle { font-size: 11px; color: #666; font-weight: bold; margin-top: 2px; }
+.chart-stats-box { font-size: 11px; font-weight: bold; color: #333; background: #f0f4f1; padding: 4px 7px; border-radius: 4px; border: 1px solid #d2e2d5; text-align: right; line-height: 1.35; max-width: 56%; }
+.chart-canvas-container { position: relative; width: 100%; height: 260px; }
 
 /* =========================================================
-   [모바일 반응형 미디어 쿼리 최적화 (하단 추가)]
+   (6) AUTO 페이지 스타일 (세로 스택 카드 구조)
    ========================================================= */
-@media screen and (max-width: 768px) {
-  body { padding: 2px; }
-  #main-content { height: 100vh; border-radius: 0; }
-  .top-header { padding: 6px 10px; }
-  
-  /* 농장관리 페이지 모바일 유연성 확보 */
-  .manage-wrapper { flex-direction: column; overflow-y: auto; }
-  .manage-windows-area { flex: none; flex-direction: column; height: auto; }
-  .manage-devices-area { flex: none; height: auto; gap: 8px; }
-  
-  /* 차트 페이지 모바일 레이아웃 전환 */
-  .chart-wrapper { flex-direction: column; overflow-y: auto; }
-  .chart-controls-area, .chart-display-area { flex: none; width: 100%; height: auto; min-height: 300px; }
-}
+.auto-config-wrapper { width: 100%; padding: 4px 0 15px 0; text-align: left; }
+.auto-vertical-stack { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.auto-category-card { background: #ffffff; border: 2px solid #5a8262; border-radius: 8px; padding: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
+.auto-cat-header { display: flex; align-items: center; font-size: 16px; font-weight: bold; color: #000; margin-bottom: 10px; cursor: pointer; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+.auto-select { width: 70px; text-align: center; padding: 4px; background: #dcdcdc; border: 1px solid #bbb; border-radius: 4px; font-weight: bold; color: #000; }
+
+/* =========================================================
+   (7) 판넬 로그 페이지 스타일 (상단 스크롤 텍스트 박스 + 하단 가로 3버튼)
+   ========================================================= */
+.panel-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; padding-bottom: 15px; }
+.panel-log-box { width: 100%; background: #ffffff; border: 2px solid #5a8262; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; }
+.panel-log-scroll { width: 100%; height: 340px; max-height: 55vh; background: #f9f9f9; border: 1px solid #ccc; border-radius: 6px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #333; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.panel-btn-row { display: flex; flex-direction: row; gap: 8px; width: 100%; }
+.panel-btn { flex: 1; height: 42px; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }

@@ -4,33 +4,29 @@ function renderPanelPageHTML() {
     const container = document.getElementById('content-area');
 
     container.innerHTML = `
-        <div class="panel-wrapper" style="width: 100%; height: 100%; padding: 10px; box-sizing: border-box; font-family: sans-serif; display: flex; gap: 12px; overflow: hidden; position: relative;">
+        <div class="panel-wrapper">
             
-            <!-- [좌측 영역] LOG DATA 출력 화면 (스크롤 기능 포함) -->
-            <div style="flex: 1; background: #ffffff; border: 2px solid #5a8262; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
-                <div style="font-size: 15px; font-weight: bold; color: #000; margin-bottom: 8px; flex-shrink: 0;">LOG DATA</div>
+            <!-- [상단 영역] LOG DATA 출력 화면 (스크롤 기능 포함) -->
+            <div class="panel-log-box">
+                <div style="font-size: 15px; font-weight: bold; color: #000; margin-bottom: 8px; flex-shrink: 0; text-align: left;">LOG DATA</div>
                 
                 <!-- 로그 내용이 출력되는 스크롤 박스 -->
-                <div id="log-scroll-container" style="flex-grow: 1; background: #f9f9f9; border: 1px solid #ccc; border-radius: 6px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 13px; color: #333; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+                <div id="log-scroll-container" class="panel-log-scroll">
                     <div style="color: #666;">[시스템] 판넬연결 및 로그 모니터링 시스템이 대기 중입니다.</div>
                 </div>
             </div>
 
-            <!-- [우측 하단 영역] 버튼 3개 ([LOG 다운], [LOG 삭제], [농장연결]) -->
-            <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 8px; height: 100%; width: 140px; flex-shrink: 0;">
-                <!-- 1. LOG 다운 (진한 초록색) -->
-                <button onclick="handleLogDownload()" style="width: 100%; height: 38px; background: #448654; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 다운</button>
-                <!-- 2. LOG 삭제 (진한 자주/보라색) -->
-                <button onclick="handleLogDelete()" style="width: 100%; height: 38px; background: #803f5c; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">LOG 삭제</button>
-                <!-- 3. 농장연결 (진한 벽돌/빨간색) -->
-                <button onclick="handleFarmConnect()" style="width: 100%; height: 38px; background: #b33939; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.15s;">농장연결</button>
+            <!-- [하단 영역] 버튼 3개 가로 방향으로 옆으로 나란히 배치 -->
+            <div class="panel-btn-row">
+                <button onclick="handleLogDownload()" class="panel-btn" style="background: #448654;">LOG 다운</button>
+                <button onclick="handleLogDelete()" class="panel-btn" style="background: #803f5c;">LOG 삭제</button>
+                <button onclick="handleFarmConnect()" class="panel-btn" style="background: #b33939;">농장연결</button>
             </div>
 
         </div>
     `;
 }
 
-// 📌 텍스트 박스에 안내 메시지 추가 함수
 function appendLogMessage(message, color = "#333") {
     const logContainer = document.getElementById('log-scroll-container');
     if (!logContainer) return;
@@ -48,32 +44,22 @@ function appendLogMessage(message, color = "#333") {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
-// 1. [LOG 다운] 버튼 클릭 시 -> 토픽 "saiifarm24/smart_R", 페이로드 "saiiLOG,request" 직접 발행
 function handleLogDownload() {
     const topic = "saiifarm24/smart_R";
     const payload = "saiiLOG,request";
 
-    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.connected) {
         try {
-            const message = new Paho.MQTT.Message(payload);
-            message.destinationName = topic;
-            message.qos = 2;
-            message.retained = false;
-            mqttClient.send(message);
-            
+            mqttClient.publish(topic, payload, { qos: 2, retain: false });
             appendLogMessage(`💾 송신완료 [${topic}] : ${payload}`, "#2980b9");
-            console.log(`📤 MQTT 송신 성공 [${topic}]:`, payload);
         } catch (e) {
             appendLogMessage("❌ MQTT 송신 중 예외 발생", "#c0392b");
-            console.error("MQTT 송신 오류:", e);
         }
     } else {
         appendLogMessage("⚠️ MQTT가 연결되어 있지 않습니다.", "#c0392b");
-        console.warn("MQTT가 연결되어 있지 않습니다.");
     }
 }
 
-// 2. [LOG 삭제] 버튼 클릭 시 -> 좌측 텍스트 박스의 내용을 전부 지움
 function handleLogDelete() {
     const logContainer = document.getElementById('log-scroll-container');
     if (logContainer) {
@@ -81,40 +67,28 @@ function handleLogDelete() {
     }
 }
 
-// 3. [농장연결] 버튼 클릭 시 -> 토픽 "saiifarm24/smart_R", 페이로드 "SMLOVE,AUTONOW00" 직접 발행
 function handleFarmConnect() {
     const topic = "saiifarm24/smart_R";
     const payload = "SMLOVE,AUTONOW00";
 
-    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.isConnected && mqttClient.isConnected()) {
+    if (typeof mqttClient !== 'undefined' && mqttClient && mqttClient.connected) {
         try {
-            const message = new Paho.MQTT.Message(payload);
-            message.destinationName = topic;
-            message.qos = 2;
-            message.retained = false;
-            mqttClient.send(message);
-            
+            mqttClient.publish(topic, payload, { qos: 2, retain: false });
             appendLogMessage(`🔗 송신완료 [${topic}] : ${payload}`, "#d35400");
-            console.log(`📤 MQTT 송신 성공 [${topic}]:`, payload);
         } catch (e) {
             appendLogMessage("❌ MQTT 송신 중 예외 발생", "#c0392b");
-            console.error("MQTT 송신 오류:", e);
         }
     } else {
         appendLogMessage("⚠️ MQTT가 연결되어 있지 않습니다.", "#c0392b");
-        console.warn("MQTT가 연결되어 있지 않습니다.");
     }
 }
 
-// 4. [MQTT: saiifarm24/smart_LOG 수신 핸들러] core.js에서 호출됨
 function handleSmartLogMessage(payload) {
     const logContainer = document.getElementById('log-scroll-container');
     if (!logContainer) return;
 
-    // (1) 먼저 텍스트 박스의 내용을 전부 지움
     logContainer.innerHTML = '';
 
-    // (2) 데이터값을 텍스트 박스에 그대로 써줌
     const lines = payload.split('\n');
     lines.forEach(line => {
         const item = document.createElement('div');

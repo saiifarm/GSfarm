@@ -13,8 +13,6 @@
 </head>
 <body>
 
-
-
     <!-- [1. 로그인 화면] -->
     <div id="login-section" class="login-box">
         <img src="logo.png" alt="사이팜 로고">
@@ -29,24 +27,29 @@
     <!-- [2. 로그인 성공 시 메인 컨트롤러 화면] -->
     <div id="main-content" style="display: none;">
         <header class="top-header">
-            <img src="saiifarm-logo1-01.png" alt="saiifarm" class="header-logo">
-            <div class="header-center">
-                <div class="header-title">괴산농장 Main Controller V2.0</div>
-                <div class="header-clock" id="top-time">00시 00분 00초</div>
+            <!-- 1행: 괴산농장 | 현재시간 | MQTT 접속여부 -->
+            <div class="header-top-row">
+                <span class="header-farm-name">괴산농장</span>
+                <span class="header-divider">|</span>
+                <span class="header-clock" id="top-time">00시 00분 00초</span>
+                <span class="header-divider">|</span>
                 <div class="mqtt-status-badge">
                     <span id="mqtt-dot" class="mqtt-dot"></span>
                     <span id="mqtt-status-text">MQTT 연결 중...</span>
                 </div>
             </div>
-            <div class="top-nav-icons">
-                <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
-                <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
-                <button class="top-nav-btn" id="nav-btn-농장현황" onclick="openMenu('농장현황')" title="농장현황"><img src="icon3-now.png" alt="농장현황"></button>
-                <button class="top-nav-btn" id="nav-btn-농장관리" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
-                <button class="top-nav-btn" id="nav-btn-차트" onclick="openMenu('차트')" title="차트"><img src="icon-chart.png" alt="차트"></button>
-                <button class="top-nav-btn" id="nav-btn-자동설정" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
-                <button class="top-nav-btn" id="nav-btn-판넬연결" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
-                <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="18"></i></button>
+            <!-- 2행: 엷은 녹색띠 배경 + 작은 아이콘 전부 중간 정렬 -->
+            <div class="top-nav-bar">
+                <div class="top-nav-icons">
+                    <button class="top-nav-btn" id="nav-btn-HOME" onclick="openMenu('HOME')" title="HOME"><img src="icon1-home.png" alt="HOME"></button>
+                    <button class="top-nav-btn" id="nav-btn-기상예보" onclick="openMenu('기상예보')" title="기상예보"><img src="icon2-wt.png" alt="기상예보"></button>
+                    <button class="top-nav-btn" id="nav-btn-농장현황" onclick="openMenu('농장현황')" title="농장현황"><img src="icon3-now.png" alt="농장현황"></button>
+                    <button class="top-nav-btn" id="nav-btn-농장관리" onclick="openMenu('농장관리')" title="농장관리"><img src="icon4-man.png" alt="농장관리"></button>
+                    <button class="top-nav-btn" id="nav-btn-차트" onclick="openMenu('차트')" title="차트"><img src="icon-chart.png" alt="차트"></button>
+                    <button class="top-nav-btn" id="nav-btn-자동설정" onclick="openMenu('자동설정')" title="자동설정"><img src="icon-set.png" alt="자동설정"></button>
+                    <button class="top-nav-btn" id="nav-btn-판넬연결" onclick="openMenu('판넬연결')" title="판넬연결"><img src="icon5-auto.png" alt="판넬연결"></button>
+                    <button class="btn-logout-icon" onclick="logout()" title="로그아웃"><i data-lucide="log-out" size="18"></i></button>
+                </div>
             </div>
         </header>
 
