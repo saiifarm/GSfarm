@@ -51,7 +51,7 @@ function initMQTT() {
     }
 
     const isSecure = window.location.protocol === 'https:';
-    const mqttHost = "wss://broker.hivemq.com";
+    const mqttHost = "broker.hivemq.com";
     const mqttPort = isSecure ? 8884 : 8000;
     const mqttPath = "/mqtt";
 
