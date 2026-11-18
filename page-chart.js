@@ -256,45 +256,22 @@ function renderChartCanvas(labels, values, zone, meta, metric) {
                     ticks: { 
                         font: { size: 10 }, 
                         maxRotation: 0,
-                        autoSkip: false,
+                        autoSkip: true,         // (2) 글씨 겹침 방지를 위해 자동 생략 활성화
+                        maxTicksLimit: 8,       // (2) 화면에 표시될 최대 라벨 개수를 제한하여 여유 확보
                         callback: function(val, index) {
-                            const labelStr = this.getLabelForValue(index);
-                            if (metric === 'rain') return labelStr;
+                            const labelStr = this.getLabelForValue(val);
                             if (!labelStr) return '';
 
-                            if (!this._targetDateIndices || this._lastLabels !== labels) {
-                                this._lastLabels = labels;
-                                this._targetDateIndices = new Map();
-                                labels.forEach((lbl, idx) => {
-                                    if (lbl) {
-                                        const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                        if (match) {
-                                            const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
-                                            if (!this._targetDateIndices.has(dateKey)) {
-                                                if (lbl.includes('00시') || lbl.includes('00:00') || idx === 0) {
-                                                    this._targetDateIndices.set(dateKey, idx);
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-                                labels.forEach((lbl, idx) => {
-                                    if (lbl) {
-                                        const match = lbl.match(/(\d{4})년(\d{2})월(\d{2})일/);
-                                        if (match) {
-                                            const dateKey = `${match[1].slice(2)}.${match[2]}.${match[3]}`;
-                                            if (!this._targetDateIndices.has(dateKey)) {
-                                                this._targetDateIndices.set(dateKey, idx);
-                                            }
-                                        }
-                                    }
-                                });
+                            // (1) "2025년11월13일" 등의 형태를 연도 없이 "11.13" 형태로 변환
+                            let cleaned = labelStr.replace(/20\d{2}년?\s*/g, ''); 
+                            let parts = cleaned.match(/\d+/g); 
+                            
+                            if (parts && parts.length >= 2) {
+                                let month = parts[0].padStart(2, '0');
+                                let day = parts[1].padStart(2, '0');
+                                return `${month}.${day}`;
                             }
-
-                            for (let [dateStr, targetIdx] of this._targetDateIndices.entries()) {
-                                if (index === targetIdx) return dateStr;
-                            }
-                            return '';
+                            return cleaned;
                         }
                     } 
                 },
