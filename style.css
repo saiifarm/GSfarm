@@ -1,4 +1,4 @@
-* { box-sizing: border-box; }
+- { box-sizing: border-box; }
 body { font-family: 'Noto Sans KR', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e0e0e0; margin: 0; padding: 5px; overflow-x: hidden; }
 
 /* 1. 로그인 전 박스 */
@@ -144,9 +144,6 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .auto-box { background: #a3c1ad; border-radius: 3px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 14%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .auto-title { font-size: clamp(16px, 2vw, 20px); font-weight: 800; color: #111; width: 28%; text-align: center; white-space: nowrap; }
 .auto-btn-row { width: 72%; display: flex; gap: 8px; }
-
-
-/* 세로 모드 안내 팝업 레이어 */
 
 /* =========================================================
    [차트 페이지 스타일 (좌측 30% 컨트롤 : 우측 70% 차트)]
@@ -321,4 +318,22 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
     width: 100%;
     height: 100%;
     min-height: 0;
+}
+
+/* =========================================================
+   [모바일 반응형 미디어 쿼리 최적화 (하단 추가)]
+   ========================================================= */
+@media screen and (max-width: 768px) {
+  body { padding: 2px; }
+  #main-content { height: 100vh; border-radius: 0; }
+  .top-header { padding: 6px 10px; }
+  
+  /* 농장관리 페이지 모바일 유연성 확보 */
+  .manage-wrapper { flex-direction: column; overflow-y: auto; }
+  .manage-windows-area { flex: none; flex-direction: column; height: auto; }
+  .manage-devices-area { flex: none; height: auto; gap: 8px; }
+  
+  /* 차트 페이지 모바일 레이아웃 전환 */
+  .chart-wrapper { flex-direction: column; overflow-y: auto; }
+  .chart-controls-area, .chart-display-area { flex: none; width: 100%; height: auto; min-height: 300px; }
 }
