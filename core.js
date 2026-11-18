@@ -1,4 +1,4 @@
-// [코어 제어 스크립트 - 로그인, MQTT 클라이언트 직접 연결 및 상태 관리, 메뉴 라우팅, 시계]
+// [코어 제어 스크립트 - 로그인, MQTT 클라이언트 직접 연결 및 상태 관리, 메뉴 라우팅, 시계, 모바일 리사이즈 대응]
 const WORKER_URL = 'https://sf-gs-weather.definezero.workers.dev';
 let currentMenu = 'HOME';
 
@@ -121,12 +121,10 @@ function initMQTT() {
                 };
             } else if (topic === "saiifarm24/smart_LOG") {
                 if (typeof handleSmartLogMessage === 'function') {
-                handleSmartLogMessage(payload);
+                    handleSmartLogMessage(payload);
                 }
                 return;
             }
-
-            
 
             if (currentMenu === '농장현황' && typeof updateStatusDOM === 'function') {
                 updateStatusDOM();
@@ -249,6 +247,26 @@ function openMenu(menuName) {
     }
 
     updateNavigationState(menuName);
+}
+
+// 🌟 모바일 화면 크기 변화(회전 및 리사이즈) 대응 핸들러 추가
+window.addEventListener('resize', function() {
+    // 차트 또는 레이아웃 재조정이 필요한 경우 현재 메뉴 리프레시 수행 방어
+    if (currentMenu && typeof window['render' + getMenuFunctionSuffix(currentMenu) + 'HTML'] === 'function') {
+        // 불필요한 전체 렌더링 루프 방지를 위한 디바운스 처리
+        clearTimeout(window._resizeTimer);
+        window._resizeTimer = setTimeout(function() {
+            // 필요 시 차트 인스턴스 리사이즈 트리거
+            if (window.myChart && typeof window.myChart.resize === 'function') {
+                window.myChart.resize();
+            }
+        }, 200);
+    }
+});
+
+function getMenuFunctionSuffix(menuName) {
+    const map = { 'HOME': 'Home', '기상예보': 'Weather', '농장현황': 'Status', '농장관리': 'Manage', '차트': 'Chart', '자동설정': 'Auto', '판넬연결': 'Panel' };
+    return map[menuName] || 'Home';
 }
 
 (function startClock() {
