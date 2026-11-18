@@ -57,28 +57,28 @@ function renderAutoPageHTML() {
                             <select id="ht-ext-temp" class="auto-select">
                                 ${generateCustomOptions([10, 15, 20, 25, 30], cfg.htExtTemp)}
                             </select>
-                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">°C</span>
                         </div>
                         <span style="font-size: 20px; color: #000; font-weight: bold;">기준온도(내부)</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="ht-int-temp" class="auto-select">
                                 ${generateCustomOptions([15, 20, 25, 27, 30, 35], cfg.htIntTemp)}
                             </select>
-                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">°C</span>
                         </div>
                         <span style="font-size: 20px; color: #000; font-weight: bold;">온도폭</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="ht-temp-range" class="auto-select">
                                 ${generateCustomOptions([3, 5], cfg.htTempRange)}
                             </select>
-                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">°C</span>
                         </div>
                         <span style="font-size: 20px; color: #000; font-weight: bold;">팬온도(내부)</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
                             <select id="fan-target-temp" class="auto-select">
                                 ${generateCustomOptions([20, 25, 30, 35], cfg.fanTargetTemp)}
                             </select>
-                            <span style="font-size: 20px; font-weight: bold; color: #000;">'C</span>
+                            <span style="font-size: 20px; font-weight: bold; color: #000;">°C</span>
                         </div>
                         <span style="font-size: 20px; color: #000; font-weight: bold;">팬 가동시간</span>
                         <div style="display: flex; align-items: center; gap: 5px;">
