@@ -27,11 +27,29 @@ function updateMqttStatusUI(isConnected, text) {
     }
 }
 
-// 🌟 예전 방식처럼 MQTT 브로커와 직접 웹소켓으로 연결하여 센서 데이터를 수신하도록 복원
+// 🌟 다중 접속 충돌 방지: 세션별 고유 Client ID 생성 및 연결 관리
 function initMQTT() {
+    // 이미 연결되어 있는 경우 중복 연결 방지
     if (mqttClient && mqttClient.isConnected && mqttClient.isConnected()) return;
 
-    const clientId = "saiifarm_web_" + Math.random().toString(16).substring(2, 9);
+    // 이전 연결 객체가 남아있다면 안전하게 종료
+    if (mqttClient) {
+        try {
+            mqttClient.disconnect();
+        } catch (e) {
+            console.error("이전 MQTT 세션 종료 오류:", e);
+        }
+        mqttClient = null;
+    }
+
+    // 브라우저 세션 스토리지에서 고유 Client ID 유지 (새로고침 시 유지, 다른 기기/탭에서는 고유하게 분리)
+    let clientId = sessionStorage.getItem('saiifarm_client_id');
+    if (!clientId) {
+        const deviceType = window.innerWidth < 768 ? "mobile" : "pc";
+        clientId = "saiifarm_" + deviceType + "_" + Math.random().toString(16).substring(2, 9) + "_" + Date.now();
+        sessionStorage.setItem('saiifarm_client_id', clientId);
+    }
+
     const isSecure = window.location.protocol === 'https:';
     const mqttHost = "broker.mqtt-dashboard.com";
     const mqttPort = isSecure ? 8884 : 8000;
@@ -208,6 +226,10 @@ function showMain() {
 
 function logout() {
     sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('saiifarm_client_id'); // 로그아웃 시 클라이언트 ID 정리
+    if (mqttClient) {
+        try { mqttClient.disconnect(); } catch(e) {}
+    }
     location.reload();
 }
 
@@ -251,12 +273,9 @@ function openMenu(menuName) {
 
 // 🌟 모바일 화면 크기 변화(회전 및 리사이즈) 대응 핸들러 추가
 window.addEventListener('resize', function() {
-    // 차트 또는 레이아웃 재조정이 필요한 경우 현재 메뉴 리프레시 수행 방어
     if (currentMenu && typeof window['render' + getMenuFunctionSuffix(currentMenu) + 'HTML'] === 'function') {
-        // 불필요한 전체 렌더링 루프 방지를 위한 디바운스 처리
         clearTimeout(window._resizeTimer);
         window._resizeTimer = setTimeout(function() {
-            // 필요 시 차트 인스턴스 리사이즈 트리거
             if (window.myChart && typeof window.myChart.resize === 'function') {
                 window.myChart.resize();
             }
