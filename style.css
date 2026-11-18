@@ -51,7 +51,7 @@ input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; borde
 .menu-card { background: white; width: 76px; height: 78px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.18); padding: 4px; }
 .menu-card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.25); }
 .menu-icon-img { width: 46px; height: 46px; object-fit: contain; margin-bottom: 3px; }
-.menu-label { font-size: 11px; font-weight: 800; color: #222; white-space: nowrap; }
+.menu-label { font-size: 14.5px; font-weight: 800; color: #222; white-space: nowrap; }
 
 /* =========================================================
    (2) 기상예보 페이지 스타일
